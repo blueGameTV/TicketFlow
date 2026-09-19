@@ -17,7 +17,9 @@ function result(string $prefix, string $message): void
     echo $prefix . ' ' . $message . PHP_EOL;
 }
 
-result('[INFO]', 'TicketFlow - diagnostic v0.9.0-rc1');
+$versionFile = $root . '/VERSION';
+$version = is_file($versionFile) ? trim((string) file_get_contents($versionFile)) : 'inconnue';
+result('[INFO]', 'TicketFlow - diagnostic v' . $version);
 
 if (PHP_VERSION_ID < 80100) {
     $errors[] = 'PHP 8.1 minimum est requis. Version détectée : ' . PHP_VERSION;
