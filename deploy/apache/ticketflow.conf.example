@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerName ticketflow.local
+    DocumentRoot /var/www/ticketflow/public
+
+    <Directory /var/www/ticketflow/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/ticketflow-error.log
+    CustomLog ${APACHE_LOG_DIR}/ticketflow-access.log combined
+</VirtualHost>
