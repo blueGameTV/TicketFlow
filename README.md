@@ -46,16 +46,16 @@ Environnement recommandé :
 - MySQL 8+ ou MariaDB compatible ;
 - extensions PHP : `pdo`, `pdo_mysql`, `mbstring`, `fileinfo`, `zip`.
 
-Pour Debian :
+Pour Debian, préparez d'abord le système avec :
 
 ```bash
-sudo apt update
-sudo apt install apache2 mariadb-server php php-mysql php-mbstring php-zip
+apt update
+apt install apache2 mariadb-server php php-mysql php-mbstring php-zip curl sudo
 ```
 
 ## Installation rapide
 
-Sur un serveur Debian/Ubuntu neuf, une seule commande prépare automatiquement Apache, PHP, MariaDB, TicketFlow, la base, les permissions et le cron :
+Ensuite, lancez l'installation automatique de TicketFlow :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
