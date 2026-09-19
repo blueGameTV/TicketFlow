@@ -1,3 +1,16 @@
+## v1.0.0 — Stable
+
+- première version stable de TicketFlow ;
+- validation complète de la checklist Release Candidate ;
+- installation automatique Debian/Ubuntu avec `install.sh` ;
+- assistant web sécurisé pour créer le premier Administrateur ;
+- configuration automatique d'Apache, MariaDB, PHP et du cron ;
+- recherche globale, filtres avancés, vues enregistrées et actions multiples ;
+- workflows Administrateur, IT, Manager et Collaborateur validés ;
+- SLA, notifications, exports, statistiques, audit, e-mails et automatisations ;
+- durcissement des sessions, contrôles d'accès et protections CSRF ;
+- documentation GitHub et procédures d'installation finalisées.
+
 ## v0.9.0-rc1 — Release Candidate
 
 - gel des grosses fonctionnalités avant la v1.0 ;
