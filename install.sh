@@ -96,6 +96,64 @@ chown root:www-data "$APP_DIR/config/config.php"
 chmod 640 "$APP_DIR/config/config.php"
 ok "Configuration locale créée."
 
+say "Configuration PHP"
+PHP_VERSION_SHORT="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+PHP_TICKETFLOW_INI_CONTENT=
+cat > "/etc/apache2/sites-available/$APACHE_SITE" <<APACHE
+<VirtualHost *:80>
+    ServerName ${SERVER_IP}
+    DocumentRoot ${APP_DIR}/public
+
+    <Directory ${APP_DIR}/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/ticketflow-error.log
+    CustomLog \${APACHE_LOG_DIR}/ticketflow-access.log combined
+</VirtualHost>
+APACHE
+
+cat > /etc/apache2/conf-available/ticketflow-servername.conf <<APACHEGLOBAL
+ServerName ${SERVER_IP}
+APACHEGLOBAL
+
+a2enmod rewrite headers >/dev/null
+a2enconf ticketflow-servername >/dev/null 2>&1 || true
+a2dissite 000-default >/dev/null 2>&1 || true
+a2ensite "$APACHE_SITE" >/dev/null
+rm -f /var/www/html/index.html
+apache2ctl configtest
+systemctl restart apache2
+ok "Apache pointe maintenant vers TicketFlow et le site Debian par défaut est désactivé."
+
+say "Activation des tâches automatiques"
+cat > /etc/cron.d/ticketflow <<CRON
+*/5 * * * * www-data /usr/bin/php ${APP_DIR}/scripts/cron/run.php >> ${APP_DIR}/storage/logs/cron.log 2>&1
+CRON
+chmod 644 /etc/cron.d/ticketflow
+ok "Cron TicketFlow activé toutes les 5 minutes."
+
+say "Vérification finale"
+php "$APP_DIR/scripts/healthcheck.php" || true
+
+printf '\n\033[1;32m============================================================\033[0m\n'
+printf '\033[1;32m TicketFlow est installé.\033[0m\n'
+printf '\033[1;32m============================================================\033[0m\n\n'
+printf 'Ouvrez cette adresse dans votre navigateur pour créer le premier administrateur :\n\n'
+printf '  \033[1;36m%s/setup.php?token=%s\033[0m\n\n' "$BASE_URL" "$SETUP_TOKEN"
+printf 'Après la création du compte, l\x27assistant sera automatiquement verrouillé.\n'
+upload_max_filesize = 10M\npost_max_size = 64M\nmax_file_uploads = 10\nmemory_limit = 256M\n'
+for PHP_SAPI_DIR in apache2 cli; do
+  PHP_CONF_DIR="/etc/php/${PHP_VERSION_SHORT}/${PHP_SAPI_DIR}/conf.d"
+  if [[ -d "$PHP_CONF_DIR" ]]; then
+    printf '%s' "$PHP_TICKETFLOW_INI_CONTENT" > "$PHP_CONF_DIR/99-ticketflow.ini"
+  fi
+done
+ok "Limites PHP configurées pour les pièces jointes TicketFlow."
+
 say "Configuration d'Apache"
 cat > "/etc/apache2/sites-available/$APACHE_SITE" <<APACHE
 <VirtualHost *:80>
