@@ -167,3 +167,13 @@
 - Dashboard métier centralisé dans `templates/dashboard.php`.
 - Nouvelle couche CSS v0.13 séparée dans `public/assets/css/v013.css`.
 - Nouveau contrôleur d'interface `public/assets/js/ui.js`.
+
+## v0.9.1-rc2
+
+- ajout de `install.sh` pour installation Debian/Ubuntu en une commande ;
+- installation automatique Apache, PHP, MariaDB et extensions ;
+- création automatique de la base et de l'utilisateur MySQL ;
+- génération sécurisée de `config/config.php` ;
+- configuration automatique du VirtualHost Apache et du cron ;
+- ajout de `public/setup.php` pour créer le premier Administrateur dans le navigateur ;
+- jeton temporaire et verrouillage de l'assistant après installation.

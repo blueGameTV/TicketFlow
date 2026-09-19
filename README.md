@@ -2,7 +2,7 @@
 
 TicketFlow est une application web interne de gestion de tickets IT développée en **PHP + MySQL/MariaDB** pour un environnement Apache.
 
-Version actuelle : **v0.9.0-rc1** — Release Candidate, tests de pré-production et validation avant v1.0.
+Version actuelle : **v0.9.1-rc2** — Release Candidate avec installation automatisée.
 
 ## Validation Release Candidate
 
@@ -55,72 +55,15 @@ sudo apt install apache2 mariadb-server php php-mysql php-mbstring php-zip
 
 ## Installation rapide
 
-```bash
-cd /var/www
-sudo git clone <URL_DU_DEPOT> ticketflow
-cd ticketflow
-sudo cp config/config.example.php config/config.php
-sudo nano config/config.php
-```
-
-Créer ensuite la base :
+Sur un serveur Debian/Ubuntu neuf, une seule commande prépare automatiquement Apache, PHP, MariaDB, TicketFlow, la base, les permissions et le cron :
 
 ```bash
-sudo mysql
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
 
-```sql
-CREATE DATABASE ticketflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'ticketflow_user'@'localhost' IDENTIFIED BY 'CHANGE_ME';
-GRANT ALL PRIVILEGES ON ticketflow.* TO 'ticketflow_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
+À la fin, l’installateur affiche un lien sécurisé à ouvrir dans le navigateur. L’assistant web permet de créer le premier compte **Administrateur**, puis se verrouille automatiquement.
 
-Importer le schéma :
-
-```bash
-mysql -u ticketflow_user -p ticketflow < database/schema.sql
-```
-
-Préparer les permissions :
-
-```bash
-sudo chown -R www-data:www-data storage
-sudo chmod -R 770 storage
-sudo chown root:www-data config/config.php
-sudo chmod 640 config/config.php
-```
-
-Configurer Apache avec `public/` comme DocumentRoot. Un exemple est fourni dans :
-
-```text
-deploy/apache/ticketflow.conf.example
-```
-
-Puis :
-
-```bash
-sudo a2ensite ticketflow.conf
-sudo a2enmod rewrite headers
-sudo systemctl reload apache2
-```
-
-Créer le premier compte Administrateur :
-
-```bash
-php scripts/create_admin.php
-```
-
-Et vérifier l'installation :
-
-```bash
-php scripts/healthcheck.php
-php scripts/security_audit.php
-php scripts/release_check.php
-```
-
-Le guide complet se trouve dans [`docs/installation.md`](docs/installation.md).
+Pour une installation manuelle ou un environnement personnalisé, consultez [`docs/installation.md`](docs/installation.md).
 
 ## Configuration
 
