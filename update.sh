@@ -28,10 +28,32 @@ say "Préparation de la mise à jour"
 printf 'Version installée : %s\n' "$OLD_VERSION"
 printf 'Branche cible      : %s\n' "$BRANCH"
 
+# Les anciennes installations v1.0.0 pouvaient rendre exécutables les fichiers
+# storage/**/.gitkeep via "chmod -R 770". Git considère alors ces changements
+# de mode comme des modifications locales. Ces fichiers sont uniquement des
+# placeholders de répertoires runtime : on peut les restaurer sans toucher aux
+# données réelles (logs, uploads, cache ou sessions).
+SAFE_RUNTIME_PLACEHOLDERS=(
+  "storage/cache/.gitkeep"
+  "storage/logs/.gitkeep"
+  "storage/sessions/.gitkeep"
+  "storage/uploads/.gitkeep"
+  "storage/uploads/avatars/.gitkeep"
+)
+
+for placeholder in "${SAFE_RUNTIME_PLACEHOLDERS[@]}"; do
+  if git -C "$APP_DIR" ls-files --error-unmatch "$placeholder" >/dev/null 2>&1; then
+    if ! git -C "$APP_DIR" diff --quiet -- "$placeholder" || ! git -C "$APP_DIR" diff --cached --quiet -- "$placeholder"; then
+      warn "Réparation automatique du placeholder runtime : $placeholder"
+      git -C "$APP_DIR" checkout -- "$placeholder"
+    fi
+  fi
+done
+
 TRACKED_CHANGES="$(git -C "$APP_DIR" status --porcelain --untracked-files=no)"
 if [[ -n "$TRACKED_CHANGES" ]]; then
   printf '%s\n' "$TRACKED_CHANGES"
-  fail "Des fichiers suivis ont été modifiés localement. La mise à jour est arrêtée pour éviter d'écraser vos changements."
+  fail "Des fichiers applicatifs suivis ont été modifiés localement. La mise à jour est arrêtée pour éviter d'écraser vos personnalisations."
 fi
 
 mkdir -p "$BACKUP_DIR"
@@ -89,7 +111,10 @@ fi
 say "Permissions"
 mkdir -p "$APP_DIR/storage/logs" "$APP_DIR/storage/uploads" "$APP_DIR/storage/cache" "$APP_DIR/storage/sessions"
 chown -R www-data:www-data "$APP_DIR/storage"
-chmod -R u+rwX,g+rwX,o-rwx "$APP_DIR/storage"
+# Répertoires exécutables/traversables, fichiers non exécutables.
+# Cela évite de recréer le problème Git des anciens .gitkeep en mode 770.
+find "$APP_DIR/storage" -type d -exec chmod 770 {} +
+find "$APP_DIR/storage" -type f -exec chmod 660 {} +
 chown root:www-data "$APP_DIR/config/config.php"
 chmod 640 "$APP_DIR/config/config.php"
 ok "Permissions vérifiées."
