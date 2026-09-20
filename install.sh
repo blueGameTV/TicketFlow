@@ -92,7 +92,8 @@ PHP
 mkdir -p "$APP_DIR/storage/logs" "$APP_DIR/storage/uploads" "$APP_DIR/storage/cache" "$APP_DIR/storage/sessions"
 printf '%s\n' "$SETUP_TOKEN" > "$APP_DIR/storage/install-token"
 chown -R www-data:www-data "$APP_DIR/storage"
-chmod -R 770 "$APP_DIR/storage"
+find "$APP_DIR/storage" -type d -exec chmod 770 {} +
+find "$APP_DIR/storage" -type f -exec chmod 660 {} +
 chown root:www-data "$APP_DIR/config/config.php"
 chmod 640 "$APP_DIR/config/config.php"
 ok "Configuration locale créée."
@@ -121,8 +122,8 @@ cat > "/etc/apache2/sites-available/$APACHE_SITE" <<APACHE
         DirectoryIndex index.php
     </Directory>
 
-    ErrorLog \${APACHE_LOG_DIR}/ticketflow-error.log
-    CustomLog \${APACHE_LOG_DIR}/ticketflow-access.log combined
+    ErrorLog /var/log/apache2/ticketflow-error.log
+    CustomLog /var/log/apache2/ticketflow-access.log combined
 </VirtualHost>
 APACHE
 
