@@ -6,6 +6,7 @@ REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
+INSTALLER_BUILD="1.1.0-r3"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -15,6 +16,7 @@ fail(){ printf '\033[1;31m[ERREUR]\033[0m %s\n' "$*" >&2; exit 1; }
 command -v apt-get >/dev/null 2>&1 || fail "Cette installation automatique cible Debian/Ubuntu (apt)."
 
 say "Installation des prérequis"
+printf 'Installateur      : %s\n' "$INSTALLER_BUILD"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y apache2 mariadb-server git curl openssl \
