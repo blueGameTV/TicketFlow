@@ -4,15 +4,12 @@ return [
         'name' => 'TicketFlow',
         'base_url' => 'http://localhost',
         'environment' => 'development',
+        'timezone' => 'Europe/Paris',
     ],
-
     'mail' => [
-        // disabled | log | smtp
-        // "log" écrit les e-mails dans storage/logs/mail.log pour les tests.
         'transport' => 'log',
         'host' => '127.0.0.1',
         'port' => 1025,
-        // none | tls | ssl
         'encryption' => 'none',
         'username' => '',
         'password' => '',
@@ -21,7 +18,6 @@ return [
         'timeout' => 15,
     ],
     'uploads' => [
-        // 10 Mo par fichier, 5 fichiers maximum par envoi.
         'max_file_size' => 10 * 1024 * 1024,
         'max_files_per_upload' => 5,
     ],
