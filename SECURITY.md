@@ -151,12 +151,12 @@ Le répertoire `storage/` doit être accessible au serveur Web sans être publiq
 L'installateur officiel peut être lancé pour une **nouvelle installation** avec :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install-v1.1.0.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
 
 Ce script n'est pas la procédure de mise à jour d'une installation existante. Pour passer de v1.0.0 à v1.1.0, utilisez la procédure documentée dans `docs/upgrade.md` et exécutez `php scripts/upgrade_v110.php` après sauvegarde.
 
-Avant de l'utiliser sur un serveur sensible, il est recommandé de consulter le script `install-v1.1.0.sh` présent dans le dépôt et de vérifier que la branche ou le tag utilisé correspond bien à la version souhaitée.
+Avant de l'utiliser sur un serveur sensible, il est recommandé de consulter le script `install.sh` présent dans le dépôt et de vérifier que la branche ou le tag utilisé correspond bien à la version souhaitée.
 
 ## Mises à jour de sécurité
 
