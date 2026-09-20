@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "[INFO] Préparation locale TicketFlow v0.9.0-rc1"
+echo "[INFO] Préparation locale TicketFlow v1.1.0"
 
 if [[ ! -f config/config.php ]]; then
   cp config/config.example.php config/config.php
@@ -19,7 +19,6 @@ mkdir -p storage/logs storage/uploads
 : > storage/uploads/.gitkeep
 
 echo "[OK] Dossiers storage présents"
-
 echo
 printf '%s\n' "Étapes suivantes :"
 printf '%s\n' "  1. modifier config/config.php"
