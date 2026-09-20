@@ -4,6 +4,14 @@
 
 # TicketFlow v1.1.0 Stable
 
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-3156d9?style=for-the-badge">
+  <img alt="Status" src="https://img.shields.io/badge/status-stable-16a34a?style=for-the-badge">
+  <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white">
+  <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128?style=for-the-badge&logo=apache&logoColor=white">
+  <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-10.5%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white">
+</p>
+
 TicketFlow est une plateforme interne de ticketing IT développée en PHP avec Apache et MariaDB/MySQL. Elle couvre le cycle de vie d'un ticket entre Collaborateur, Manager, IT et Administrateur.
 
 ## Nouveautés v1.1.0
@@ -41,11 +49,13 @@ apt update
 apt install apache2 mariadb-server php php-mysql php-mbstring php-zip curl sudo
 ```
 
-Puis lancer l'installateur :
+Puis lancer l'installateur **uniquement pour une nouvelle installation** :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
+
+> **Important :** `install.sh` est destiné aux installations neuves. Ne l'utilisez pas pour mettre à niveau une installation TicketFlow v1.0.0 existante vers v1.1.0.
 
 L'installateur configure Apache, MariaDB, PHP, les permissions, le cron, la base TicketFlow et l'assistant de création du premier Administrateur.
 
@@ -59,9 +69,11 @@ Après création du premier Administrateur, l'assistant est verrouillé.
 
 ## Mise à jour de v1.0.0 vers v1.1.0
 
+**N'utilisez pas `install.sh` pour effectuer cette mise à jour.**
+
 Avant toute mise à jour, sauvegardez la base de données, `config/config.php` et `storage/uploads/`.
 
-Après avoir remplacé les fichiers applicatifs par la v1.1.0, exécutez :
+Après avoir récupéré/remplacé les fichiers applicatifs par la v1.1.0 en conservant votre configuration locale et vos données, exécutez :
 
 ```bash
 cd /var/www/ticketflow
