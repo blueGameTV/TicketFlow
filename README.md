@@ -78,7 +78,7 @@ apt install apache2 mariadb-server php php-mysql php-mbstring php-zip curl sudo
 > Cette commande est destinée à une **nouvelle installation**.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install-v1.1.0.sh | sudo bash
 ```
 
 L'installateur prend automatiquement en charge :
