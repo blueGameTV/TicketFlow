@@ -8,10 +8,19 @@ La sécurité reste une responsabilité partagée entre l'application, le systè
 
 | Version | Support sécurité |
 | --- | --- |
-| **1.1.x** | ✅ Supportée |\n| 1.0.x | ⚠️ Mise à jour vers 1.1.x recommandée |
+| **1.1.x** | ✅ Supportée — version stable recommandée |
+| 1.0.x | ⚠️ Ancienne version — support limité, mise à jour vers 1.1.x recommandée |
 | 0.x / Release Candidates | ❌ Non supportées pour la production |
 
 Les correctifs de sécurité sont destinés en priorité à la dernière version stable publiée.
+
+## À propos de TicketFlow v1.0.x
+
+La branche **1.0.x** reste une version stable historique, mais elle n'est plus la version recommandée pour un nouveau déploiement.
+
+Par rapport à **v1.1.x**, elle ne bénéficie pas des correctifs, ajustements de maintenance, améliorations d'interface et évolutions ajoutés après sa publication. Cela ne signifie pas qu'une vulnérabilité connue existe systématiquement dans v1.0.x, mais son niveau de maintenance est inférieur à celui de la branche stable actuelle.
+
+Pour réduire l'exposition aux problèmes déjà corrigés ou aux écarts de comportement entre versions, il est recommandé de migrer les installations **v1.0.x vers la dernière v1.1.x** après sauvegarde et validation de la procédure de mise à jour.
 
 ## Signaler une vulnérabilité
 
@@ -139,11 +148,13 @@ Le répertoire `storage/` doit être accessible au serveur Web sans être publiq
 
 ## Installation
 
-L'installateur officiel peut être lancé avec :
+L'installateur officiel peut être lancé pour une **nouvelle installation** avec :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
+
+Ce script n'est pas la procédure de mise à jour d'une installation existante. Pour passer de v1.0.0 à v1.1.0, utilisez la procédure documentée dans `docs/upgrade.md` et exécutez `php scripts/upgrade_v110.php` après sauvegarde.
 
 Avant de l'utiliser sur un serveur sensible, il est recommandé de consulter le script `install.sh` présent dans le dépôt et de vérifier que la branche ou le tag utilisé correspond bien à la version souhaitée.
 
