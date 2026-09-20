@@ -1,6 +1,6 @@
 # Mise à jour de TicketFlow
 
-TicketFlow peut être mis à jour **sans réinitialiser l'installation**. Les comptes, tickets, groupes, paramètres, pièces jointes et données MariaDB/MySQL sont conservés.
+TicketFlow peut être mis à jour **sans réinitialiser ni réinstaller le serveur**. Apache, PHP et MariaDB restent en place ; les comptes, tickets, groupes, paramètres, pièces jointes et données MariaDB/MySQL sont conservés.
 
 ## Méthode recommandée : mise à jour automatique
 
@@ -13,7 +13,8 @@ curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.s
 Le script `update.sh` effectue automatiquement :
 
 - vérification de l'installation Git existante ;
-- contrôle des modifications locales avant toute écriture ;
+- réparation automatique des anciens changements de permissions sur les fichiers `storage/**/.gitkeep` ;
+- contrôle des vraies modifications applicatives locales avant toute écriture ;
 - sauvegarde de `config/config.php` ;
 - sauvegarde complète de la base MariaDB/MySQL ;
 - sauvegarde de `storage/uploads/` ;
