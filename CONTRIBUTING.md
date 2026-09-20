@@ -2,7 +2,7 @@
 
 Merci de contribuer à **TicketFlow**.
 
-Ce document décrit la méthode recommandée pour proposer une correction, une amélioration ou de la documentation sur la branche stable **v1.0.x**.
+Ce document décrit la méthode recommandée pour proposer une correction, une amélioration ou de la documentation sur la branche stable **v1.1.x**.
 
 ## Avant de commencer
 
