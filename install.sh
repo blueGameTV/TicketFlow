@@ -121,8 +121,8 @@ cat > "/etc/apache2/sites-available/$APACHE_SITE" <<APACHE
         DirectoryIndex index.php
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/ticketflow-error.log
-    CustomLog ${APACHE_LOG_DIR}/ticketflow-access.log combined
+    ErrorLog \${APACHE_LOG_DIR}/ticketflow-error.log
+    CustomLog \${APACHE_LOG_DIR}/ticketflow-access.log combined
 </VirtualHost>
 APACHE
 
