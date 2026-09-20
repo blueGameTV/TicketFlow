@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
-  <title id="title">TicketFlow v1.0.0</title>
-  <desc id="desc">Bannière TicketFlow avec le flux de gestion des tickets entre Collaborateur, IT, Manager et Administrateur.</desc>
+  <title id="title">TicketFlow v1.1.0</title>
+  <desc id="desc">Bannière TicketFlow avec le flux de gestion des tickets et les fonctions d'alertes et de maintenance.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#172554"/>
@@ -54,5 +54,5 @@
   </g>
 
   <rect x="1110" y="70" width="200" height="64" rx="18" fill="#ffffff" opacity=".14"/>
-  <text x="1210" y="111" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">v1.0.0 Stable</text>
+  <text x="1210" y="111" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">v1.1.0 Stable</text>
 </svg>
