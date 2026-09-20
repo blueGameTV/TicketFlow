@@ -7,7 +7,7 @@ Ce guide décrit une installation neuve sur Debian avec Apache, PHP et MariaDB/M
 Sur une Debian/Ubuntu neuve, utilisez l'installateur officiel TicketFlow v1.1.0 :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install-v1.1.0.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
 
 Cette commande installe et configure automatiquement les dépendances, Apache, MariaDB, PHP, TicketFlow, les permissions et le cron. Les étapes ci-dessous restent utiles pour une installation manuelle.
