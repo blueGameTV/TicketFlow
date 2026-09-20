@@ -1,3 +1,18 @@
+# Changelog
+
+## v1.1.0 — Alertes, maintenance et nouveautés
+
+- ajout des alertes de service globales en temps réel ;
+- détail complet des alertes accessible au clic ;
+- nouvelle page À propos & Nouveautés et journal consulté par utilisateur ;
+- ajout du mode maintenance avec redirection automatique et fin automatique ;
+- accès Administrateur maintenu et accès IT configurable pendant la maintenance ;
+- ajout des maintenances planifiées avec bannière d'information ;
+- nouvelle extraction Excel des alertes et maintenances ;
+- harmonisation des menus déroulants, champs fichiers et filtres ;
+- migration `v110_service_alerts_maintenance.sql` et script `upgrade_v110.php` ;
+- documentation et contrôles de release mis à jour.
+
 ## v1.0.0 — Stable
 
 - première version stable de TicketFlow ;
