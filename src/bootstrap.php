@@ -19,6 +19,9 @@ use App\Services\NotificationPreferenceService;
 use App\Services\MailQueueService;
 use App\Services\AutomationService;
 use App\Services\SavedTicketViewService;
+use App\Services\ServiceAlertService;
+use App\Services\MaintenanceService;
+use App\Services\ReleaseNoteService;
 
 require_once __DIR__ . '/Database/Database.php';
 require_once __DIR__ . '/Security/Csrf.php';
@@ -38,6 +41,9 @@ require_once __DIR__ . '/Services/SmtpMailer.php';
 require_once __DIR__ . '/Services/MailQueueService.php';
 require_once __DIR__ . '/Services/AutomationService.php';
 require_once __DIR__ . '/Services/SavedTicketViewService.php';
+require_once __DIR__ . '/Services/ServiceAlertService.php';
+require_once __DIR__ . '/Services/MaintenanceService.php';
+require_once __DIR__ . '/Services/ReleaseNoteService.php';
 
 $configFile = __DIR__ . '/../config/config.php';
 if (!file_exists($configFile)) {
@@ -46,6 +52,15 @@ if (!file_exists($configFile)) {
 }
 
 $config = require $configFile;
+
+// TicketFlow v1.1.0 : toutes les dates fonctionnelles sont interprétées dans
+// le fuseau configuré par l'application. Les anciennes installations n'ayant
+// pas encore cette clé utilisent Europe/Paris par défaut.
+$appTimezone = (string) ($config['app']['timezone'] ?? 'Europe/Paris');
+if (!in_array($appTimezone, timezone_identifiers_list(), true)) {
+    $appTimezone = 'Europe/Paris';
+}
+date_default_timezone_set($appTimezone);
 
 Runtime::configure($config);
 SecurityHeaders::apply();
@@ -79,6 +94,20 @@ $mailConfig = $config['mail'] ?? [];
 $mailConfig['base_url'] = (string) ($config['app']['base_url'] ?? '');
 $mailQueueService = new MailQueueService($pdo, $appSettingService, $notificationPreferenceService, $mailConfig);
 $notificationService = new NotificationService($pdo, $mailQueueService);
+$serviceAlertService = new ServiceAlertService($pdo);
+$maintenanceService = new MaintenanceService($pdo, $appSettingService);
+$releaseNoteService = new ReleaseNoteService($pdo, dirname(__DIR__));
+
+$currentScript = basename((string)($_SERVER['PHP_SELF'] ?? ''));
+$maintenanceExempt = ['maintenance.php', 'login.php', 'logout.php', 'setup.php', 'live-system-state.php'];
+if (!in_array($currentScript, $maintenanceExempt, true) && $maintenanceService->accessBlocked()) {
+    $currentRole = $auth->check() ? $auth->role() : null;
+    if (!$maintenanceService->roleAllowed($currentRole)) {
+        header('Location: maintenance.php');
+        exit;
+    }
+}
+
 if (!isset($_SESSION['notification_cleanup_at']) || (time() - (int) $_SESSION['notification_cleanup_at']) >= 3600) {
     $notificationService->purgeReadOlderThanDays(1);
     $_SESSION['notification_cleanup_at'] = time();
