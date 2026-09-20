@@ -1,38 +1,38 @@
-# Mise à niveau de TicketFlow
+# Mise à jour de TicketFlow
 
-## Sauvegarde obligatoire
+## Sauvegarde préalable
 
-Avant chaque mise à niveau :
+Avant toute mise à jour, sauvegardez au minimum :
 
-```bash
-mysqldump -u ticketflow_user -p ticketflow > ticketflow-$(date +%F-%H%M).sql
-cp config/config.php config/config.php.backup
+```text
+config/config.php
+storage/uploads/
+base de données MariaDB/MySQL
 ```
 
-Sauvegardez aussi `storage/uploads/` si le serveur contient des pièces jointes ou avatars.
+## Mise à jour v1.0.0 vers v1.1.0
 
-## Procédure générale
+1. Placez les fichiers de TicketFlow v1.1.0 dans `/var/www/ticketflow` en conservant `config/config.php` et les données runtime.
+2. Lancez la migration :
 
-1. mettre le site en maintenance si nécessaire ;
-2. sauvegarder la base et `config/config.php` ;
-3. remplacer les fichiers applicatifs ;
-4. conserver le vrai `config/config.php` ;
-5. exécuter uniquement les migrations non encore appliquées ;
-6. remettre les permissions de `storage/` ;
-7. lancer les diagnostics.
+```bash
+cd /var/www/ticketflow
+php scripts/upgrade_v110.php
+```
+
+3. Vérifiez l'installation :
 
 ```bash
 php scripts/healthcheck.php
 php scripts/security_audit.php
+php scripts/route_check.php
 php scripts/release_check.php
 ```
 
-## Migrations historiques
+4. Rechargez Apache :
 
-Les installations neuves utilisent directement `database/schema.sql`.
+```bash
+sudo systemctl reload apache2
+```
 
-Pour les anciennes installations, les migrations sont dans `database/migrations/` et doivent être appliquées dans l'ordre correspondant aux versions déjà installées.
-
-## v0.16 -> v0.17
-
-Aucune migration SQL n'est nécessaire.
+La migration v1.1.0 est conçue pour être relançable : les tables utilisent `IF NOT EXISTS` et les paramètres applicatifs ne sont pas écrasés lorsqu'ils existent déjà.
