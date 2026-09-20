@@ -2,6 +2,11 @@
 $currentPage = basename((string) ($_SERVER['PHP_SELF'] ?? ''));
 $role = (string) ($user['role'] ?? '');
 $headerUnreadNotifications = isset($notificationService) ? $notificationService->unreadCount((int) ($user['id'] ?? 0)) : 0;
+$headerServiceAlerts = isset($serviceAlertService) ? $serviceAlertService->active() : [];
+$headerUpcomingMaintenance = isset($maintenanceService) ? $maintenanceService->upcoming(24) : [];
+$headerCurrentVersion = isset($releaseNoteService) ? $releaseNoteService->currentVersion() : '1.1.0';
+$headerHasSeenRelease = isset($releaseNoteService) && !empty($user['id']) ? $releaseNoteService->hasSeen((int)$user['id']) : true;
+$headerActiveServiceAlertCount = count($headerServiceAlerts);
 
 $prefStmt = $pdo->prepare('SELECT theme, density, sidebar_mode FROM user_preferences WHERE user_id = :uid');
 $prefStmt->execute(['uid' => $user['id']]);
@@ -24,8 +29,9 @@ $isActive = static function (array $pages) use ($currentPage): string {
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> - <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=0.15.2.1">
-    <link rel="stylesheet" href="assets/css/v013.css?v=0.15.2.1">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.1.0">
+    <link rel="stylesheet" href="assets/css/v013.css?v=1.1.0">
+    <link rel="stylesheet" href="assets/css/v110.css?v=1.1.0">
 </head>
 <body class="app-body role-<?= htmlspecialchars(strtolower(str_replace(['é','è','ê','à','ù','ç',' '], ['e','e','e','a','u','c','-'], $role))) ?> sidebar-<?= htmlspecialchars((string) $uiPreferences['sidebar_mode']) ?>">
 <div class="app-shell">
@@ -44,6 +50,7 @@ $isActive = static function (array $pages) use ($currentPage): string {
                 <a class="nav-item<?= $isActive(['admin-groups.php','admin-group-form.php']) ?>" href="admin-groups.php"><i class="fa-solid fa-people-group"></i><span>Groupes</span></a>
                 <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket-simple"></i><span>Tickets</span></a>
                 <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span>Archives</span></a>
+                <a class="nav-item<?= $isActive(['admin-maintenance.php']) ?>" href="admin-maintenance.php"><i class="fa-solid fa-screwdriver-wrench"></i><span>Maintenance</span></a>
                 <a class="nav-item<?= $isActive(['admin-statistics.php']) ?>" href="admin-statistics.php"><i class="fa-solid fa-chart-line"></i><span>Statistiques</span></a>
                 <a class="nav-item<?= $isActive(['admin-exports.php']) ?>" href="admin-exports.php"><i class="fa-solid fa-file-export"></i><span>Extractions</span></a>
                 <a class="nav-item<?= $isActive(['admin-audit.php']) ?>" href="admin-audit.php"><i class="fa-solid fa-shield-halved"></i><span>Audit</span></a>
@@ -67,6 +74,7 @@ $isActive = static function (array $pages) use ($currentPage): string {
         </nav>
 
         <div class="sidebar-footer">
+            <a class="nav-item<?= $isActive(['about.php']) ?>" href="about.php"><i class="fa-solid fa-circle-info"></i><span>À propos</span><?php if (!$headerHasSeenRelease): ?><span class="v110-new-dot" title="Nouveautés disponibles"></span><?php endif; ?></a>
             <a class="nav-item<?= $isActive(['settings.php','change-password.php']) ?>" href="settings.php"><i class="fa-solid fa-gear"></i><span>Paramètres</span></a>
             <div class="sidebar-profile">
                 <div class="avatar avatar-sm">
@@ -96,8 +104,50 @@ $isActive = static function (array $pages) use ($currentPage): string {
             </div>
 
             <div class="topbar-actions-v013">
+                <?php if (in_array($role, ['Administrateur','IT'], true)): ?><a class="icon-button v110-service-alert-button<?= $headerActiveServiceAlertCount > 0 ? ' has-active-alerts' : '' ?>" href="admin-service-alerts.php" aria-label="Alertes de service" title="Alertes de service"><i class="fa-solid fa-triangle-exclamation"></i><?php if ($headerActiveServiceAlertCount > 0): ?><span class="v110-service-alert-count"><?= $headerActiveServiceAlertCount > 99 ? '99+' : (int)$headerActiveServiceAlertCount ?></span><?php endif; ?></a><?php endif; ?>
                 <a class="icon-button notification-button" href="notifications.php" aria-label="Notifications"><i class="fa-regular fa-bell"></i><?php if ($headerUnreadNotifications > 0): ?><span id="live-notification-count" class="notification-count"><?= $headerUnreadNotifications > 99 ? '99+' : (int) $headerUnreadNotifications ?></span><?php else: ?><span id="live-notification-count" class="notification-count is-hidden">0</span><?php endif; ?></a>
             </div>
         </header>
+
+        <div id="global-service-banners" class="v110-global-banners" aria-live="polite">
+            <?php foreach ($headerServiceAlerts as $globalAlert): ?>
+                <button type="button" class="v110-service-banner v110-service-banner-button severity-<?= htmlspecialchars((string)$globalAlert['severity']) ?>"
+                        data-system-detail
+                        data-detail-kind="Alerte de service"
+                        data-detail-title="<?= htmlspecialchars((string)$globalAlert['title']) ?>"
+                        data-detail-service="<?= htmlspecialchars((string)$globalAlert['service_name']) ?>"
+                        data-detail-message="<?= htmlspecialchars((string)$globalAlert['message']) ?>"
+                        data-detail-meta="<?= htmlspecialchars($serviceAlertService->severityLabel((string)$globalAlert['severity'])) ?> · Début <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$globalAlert['starts_at']))) ?>">
+                    <div class="v110-service-banner-icon"><i class="fa-solid <?= $globalAlert['severity'] === 'critical' ? 'fa-triangle-exclamation' : 'fa-circle-info' ?>"></i></div>
+                    <div class="v110-service-banner-copy"><span><?= htmlspecialchars((string)$globalAlert['service_name']) ?></span><strong><?= htmlspecialchars((string)$globalAlert['title']) ?></strong></div>
+                    <span class="v110-service-banner-meta"><?= htmlspecialchars($serviceAlertService->severityLabel((string)$globalAlert['severity'])) ?> <i class="fa-solid fa-chevron-right"></i></span>
+                </button>
+            <?php endforeach; ?>
+            <?php foreach ($headerUpcomingMaintenance as $maintenanceWindow): ?>
+                <button type="button" class="v110-service-banner v110-service-banner-button severity-maintenance"
+                        data-system-detail
+                        data-detail-kind="Maintenance planifiée"
+                        data-detail-title="<?= htmlspecialchars((string)$maintenanceWindow['title']) ?>"
+                        data-detail-service="TicketFlow"
+                        data-detail-message="<?= htmlspecialchars((string)$maintenanceWindow['message']) ?>"
+                        data-detail-meta="<?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$maintenanceWindow['starts_at']))) ?> → <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$maintenanceWindow['ends_at']))) ?>">
+                    <div class="v110-service-banner-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <div class="v110-service-banner-copy"><span>Maintenance planifiée</span><strong><?= htmlspecialchars((string)$maintenanceWindow['title']) ?></strong></div>
+                    <span class="v110-service-banner-meta"><?= htmlspecialchars(date('d/m H:i', strtotime((string)$maintenanceWindow['starts_at']))) ?> <i class="fa-solid fa-chevron-right"></i></span>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="v110-system-modal" id="v110-system-modal" hidden>
+            <button class="v110-system-modal-backdrop" type="button" data-system-modal-close aria-label="Fermer"></button>
+            <section class="v110-system-modal-card" role="dialog" aria-modal="true" aria-labelledby="v110-system-modal-title">
+                <button class="v110-system-modal-close" type="button" data-system-modal-close aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+                <span class="v110-system-modal-kind" id="v110-system-modal-kind">Alerte de service</span>
+                <h2 id="v110-system-modal-title"></h2>
+                <div class="v110-system-modal-service" id="v110-system-modal-service"></div>
+                <p id="v110-system-modal-message"></p>
+                <div class="v110-system-modal-meta" id="v110-system-modal-meta"></div>
+            </section>
+        </div>
 
         <main class="dashboard-container app-content">
