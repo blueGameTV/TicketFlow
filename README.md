@@ -105,7 +105,7 @@ Après validation, TicketFlow crée `storage/installed.lock`, supprime le jeton 
 
 ## Mise à jour d'une installation existante
 
-Depuis la v1.1.0, TicketFlow propose un script de mise à jour qui **conserve la configuration, la base de données et les pièces jointes**.
+Depuis la v1.1.0, TicketFlow propose un script de mise à jour **sur place** : il ne réinstalle pas Apache, PHP ou MariaDB et **conserve la configuration, la base de données, les comptes, les tickets et les pièces jointes**.
 
 Pour mettre à jour une installation existante :
 
@@ -116,7 +116,8 @@ curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.s
 Le script :
 
 - vérifie que l'installation actuelle est bien un dépôt Git TicketFlow ;
-- refuse la mise à jour si des fichiers suivis ont été modifiés localement ;
+- corrige automatiquement les anciens changements de mode sur les fichiers `storage/**/.gitkeep` produits par la v1.0.0 ;
+- refuse uniquement la mise à jour si de vrais fichiers applicatifs suivis ont été modifiés localement ;
 - sauvegarde automatiquement `config/config.php` ;
 - sauvegarde la base MariaDB/MySQL ;
 - sauvegarde `storage/uploads/` ;
