@@ -1,6 +1,6 @@
 # Politique de sécurité de TicketFlow
 
-TicketFlow **v1.0.0** est la première version stable du projet.
+TicketFlow **v1.1.0** est la version stable actuelle du projet.
 
 La sécurité reste une responsabilité partagée entre l'application, le système Debian/Ubuntu, Apache, PHP, MariaDB/MySQL et l'administrateur du serveur.
 
@@ -8,7 +8,7 @@ La sécurité reste une responsabilité partagée entre l'application, le systè
 
 | Version | Support sécurité |
 | --- | --- |
-| **1.0.x** | ✅ Supportée |
+| **1.1.x** | ✅ Supportée |\n| 1.0.x | ⚠️ Mise à jour vers 1.1.x recommandée |
 | 0.x / Release Candidates | ❌ Non supportées pour la production |
 
 Les correctifs de sécurité sont destinés en priorité à la dernière version stable publiée.
