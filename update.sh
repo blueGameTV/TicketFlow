@@ -25,8 +25,14 @@ TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP-v$OLD_VERSION"
 
 say "Préparation de la mise à jour"
+printf 'Updater            : 1.1.0-r2\n'
 printf 'Version installée : %s\n' "$OLD_VERSION"
 printf 'Branche cible      : %s\n' "$BRANCH"
+
+# Les installations v1.0.0 ont pu changer uniquement le bit exécutable des
+# fichiers .gitkeep de storage. TicketFlow ne versionne pas les permissions
+# runtime : on désactive donc la détection du file mode dans ce dépôt.
+git -C "$APP_DIR" config core.fileMode false
 
 # Les anciennes installations v1.0.0 pouvaient rendre exécutables les fichiers
 # storage/**/.gitkeep via "chmod -R 770". Git considère alors ces changements
