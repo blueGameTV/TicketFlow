@@ -120,6 +120,7 @@ if (!$errors && is_file($configFile)) {
             'ticket_types', 'ticket_categories', 'priorities', 'sla_policies', 'audit_logs', 'login_attempts', 'user_sessions', 'user_preferences', 'password_reset_tokens', 'ticket_statuses',
             'tickets', 'ticket_messages', 'ticket_history', 'manager_approvals', 'ticket_attachments', 'notifications',
             'app_settings', 'notification_preferences', 'email_queue', 'automation_events', 'saved_ticket_views',
+            'service_alerts', 'maintenance_windows', 'user_release_views',
         ];
 
         $tableStmt = $pdo->query('SHOW TABLES');
