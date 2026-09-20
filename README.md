@@ -2,125 +2,334 @@
   <img src="docs/images/ticketflow-banner.svg" alt="TicketFlow v1.1.0" width="100%">
 </p>
 
-# TicketFlow v1.1.0 Stable
-
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-3156d9?style=for-the-badge">
-  <img alt="Status" src="https://img.shields.io/badge/status-stable-16a34a?style=for-the-badge">
-  <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4?style=for-the-badge&logo=php&logoColor=white">
-  <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128?style=for-the-badge&logo=apache&logoColor=white">
-  <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-10.5%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white">
+  <strong>TicketFlow v1.1.0 — Stable</strong><br>
+  Plateforme web interne de gestion des tickets IT en PHP, Apache et MariaDB/MySQL.
 </p>
 
-TicketFlow est une plateforme interne de ticketing IT développée en PHP avec Apache et MariaDB/MySQL. Elle couvre le cycle de vie d'un ticket entre Collaborateur, Manager, IT et Administrateur.
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.1.0-3156d9">
+  <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4">
+  <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
+  <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
+  <img alt="Status" src="https://img.shields.io/badge/status-stable-16a34a">
+</p>
+
+---
+
+## À propos
+
+**TicketFlow** est une application web interne conçue pour centraliser les demandes et incidents IT d'une entreprise.  
+Elle propose quatre rôles distincts : **Administrateur**, **IT**, **Manager** et **Collaborateur**, avec des droits et workflows adaptés à chacun.
+
+La version **v1.1.0 Stable** ajoute les alertes de service globales, la maintenance immédiate et planifiée, la page **À propos & Nouveautés**, le journal des nouveautés, une nouvelle extraction Excel et plusieurs améliorations d'interface.
 
 ## Nouveautés v1.1.0
 
-- alertes de service globales en temps réel ;
+- alertes de service globales visibles en temps réel ;
 - détail complet d'une alerte au clic ;
-- page **À propos & Nouveautés** avec version installée et historique ;
+- titre des alertes limité à 80 caractères et message à 2000 caractères ;
+- page **À propos & Nouveautés** ;
 - journal des nouveautés mémorisé par utilisateur ;
-- mode maintenance TicketFlow avec redirection automatique ;
-- fin automatique de maintenance ;
-- maintien de l'accès Administrateur et accès IT configurable ;
+- mode maintenance TicketFlow ;
+- redirection automatique des Collaborateurs et Managers pendant une maintenance bloquante ;
+- accès Administrateur conservé et accès IT configurable ;
+- arrêt automatique du mode maintenance à la fin prévue ;
 - maintenances planifiées avec bandeau d'information ;
 - nouvelle extraction Excel des alertes et maintenances ;
-- composants de formulaire et menus déroulants harmonisés.
+- menus déroulants, recherche, champs fichiers et formulaires harmonisés.
 
-## Fonctions principales
+## Fonctionnalités principales
 
-- création, suivi et traitement des tickets ;
-- rôles Administrateur, IT, Manager et Collaborateur ;
-- validation Manager ;
-- messages et pièces jointes ;
-- SLA et notifications ;
+- gestion complète des tickets : incidents, requêtes, changements et accès ;
+- rôles **Administrateur / IT / Manager / Collaborateur** ;
+- assignation et suivi des tickets par les équipes IT ;
+- validation Manager lorsqu'une demande le nécessite ;
+- conversation dans le ticket sans rechargement complet ;
+- pièces jointes sécurisées ;
+- notifications internes ;
+- SLA et alertes ;
 - recherche globale et filtres avancés ;
-- vues enregistrées et actions multiples ;
-- statistiques, audit et exports Excel ;
-- file d'e-mails et automatisations ;
-- alertes de service et maintenance applicative.
+- vues enregistrées ;
+- actions multiples sur les tickets ;
+- exports utilisateurs, tickets et opérations ;
+- statistiques et journal d'audit ;
+- gestion des groupes et responsables ;
+- paramètres utilisateur et avatars ;
+- file e-mail, rappels et automatisations ;
+- alertes de service globales ;
+- mode maintenance et maintenances planifiées ;
+- scripts de diagnostic, sécurité, migration et mise à jour ;
+- installation automatisée sur Debian/Ubuntu.
 
-## Installation Debian / Ubuntu
+## Installation sur Debian
 
-Préparer le serveur :
+### 1. Préparer le serveur
+
+Sur une Debian propre :
 
 ```bash
 apt update
 apt install apache2 mariadb-server php php-mysql php-mbstring php-zip curl sudo
 ```
 
-Puis lancer l'installateur **uniquement pour une nouvelle installation** :
+### 2. Installer TicketFlow automatiquement
+
+> Cette commande est destinée à une **nouvelle installation**.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
 
-> **Important :** `install.sh` est destiné aux installations neuves. Ne l'utilisez pas pour mettre à niveau une installation TicketFlow v1.0.0 existante vers v1.1.0.
+L'installateur prend automatiquement en charge :
 
-L'installateur configure Apache, MariaDB, PHP, les permissions, le cron, la base TicketFlow et l'assistant de création du premier Administrateur.
+- les dépendances nécessaires ;
+- Apache et son VirtualHost ;
+- MariaDB et la base `ticketflow` ;
+- l'utilisateur SQL applicatif ;
+- la génération de `config/config.php` ;
+- les permissions de `storage/` ;
+- les limites PHP pour les pièces jointes ;
+- le cron TicketFlow ;
+- la désactivation du site Apache Debian par défaut.
 
-À la fin, ouvrez l'URL affichée :
+À la fin, une URL sécurisée est affichée :
 
 ```text
 http://IP_DU_SERVEUR/setup.php?token=...
 ```
 
-Après création du premier Administrateur, l'assistant est verrouillé.
+Ouvrez-la dans votre navigateur pour créer le **premier compte Administrateur**.
 
-## Mise à jour de v1.0.0 vers v1.1.0
+Après validation, TicketFlow crée `storage/installed.lock`, supprime le jeton d'installation et verrouille automatiquement l'assistant.
 
-**N'utilisez pas `install.sh` pour effectuer cette mise à jour.**
+## Mise à jour d'une installation existante
 
-Avant toute mise à jour, sauvegardez la base de données, `config/config.php` et `storage/uploads/`.
+Depuis la v1.1.0, TicketFlow propose un script de mise à jour qui **conserve la configuration, la base de données et les pièces jointes**.
 
-Après avoir récupéré/remplacé les fichiers applicatifs par la v1.1.0 en conservant votre configuration locale et vos données, exécutez :
+Pour mettre à jour une installation existante :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
+```
+
+Le script :
+
+- vérifie que l'installation actuelle est bien un dépôt Git TicketFlow ;
+- refuse la mise à jour si des fichiers suivis ont été modifiés localement ;
+- sauvegarde automatiquement `config/config.php` ;
+- sauvegarde la base MariaDB/MySQL ;
+- sauvegarde `storage/uploads/` ;
+- récupère la dernière version stable depuis `main` ;
+- exécute automatiquement les migrations nécessaires ;
+- conserve les comptes, tickets, groupes, paramètres, pièces jointes et données existantes ;
+- lance les contrôles de santé et de routes ;
+- recharge Apache.
+
+Les sauvegardes sont placées par défaut dans :
+
+```text
+/var/backups/ticketflow/
+```
+
+### Mise à jour manuelle v1.0.0 → v1.1.0
+
+Si vous préférez effectuer la mise à jour manuellement :
 
 ```bash
 cd /var/www/ticketflow
 php scripts/upgrade_v110.php
 php scripts/healthcheck.php
-```
-
-Puis rechargez Apache si nécessaire :
-
-```bash
-sudo systemctl reload apache2
-```
-
-La migration crée les tables nécessaires aux alertes, aux maintenances et au journal des nouveautés.
-
-## Rôles
-
-| Rôle | Fonctions principales |
-| --- | --- |
-| Administrateur | Utilisateurs, groupes, tickets, exports, statistiques, audit, configuration, alertes et maintenance |
-| IT | Traitement des tickets, communication, escalade Manager, suivi équipe et alertes de service |
-| Manager | Création de tickets et validations demandées par l'IT |
-| Collaborateur | Création, suivi et confirmation de résolution |
-
-## Vérifications
-
-```bash
-php scripts/healthcheck.php
 php scripts/security_audit.php
 php scripts/route_check.php
 php scripts/release_check.php
+sudo systemctl reload apache2
+```
+
+Consultez également [docs/upgrade.md](docs/upgrade.md).
+
+## Connexion
+
+Après installation :
+
+```text
+http://IP_DU_SERVEUR/login.php
+```
+
+Connectez-vous avec le compte Administrateur créé lors de l'assistant initial.
+
+## Rôles
+
+| Rôle | Fonction principale |
+| --- | --- |
+| **Administrateur** | Gestion des utilisateurs, groupes, configuration, statistiques, audit, alertes, maintenance et supervision globale |
+| **IT** | Traitement, assignation, échanges, validation Manager, résolution des tickets et alertes de service |
+| **Manager** | Création de tickets personnels et validation des demandes qui lui sont soumises |
+| **Collaborateur** | Création, suivi et confirmation de résolution de ses propres tickets |
+
+## Workflow simplifié
+
+```text
+Collaborateur
+     │
+     ▼
+Création du ticket
+     │
+     ▼
+Équipe IT ───────────────► Manager
+     │                     │
+     │                     └─ Validation si nécessaire
+     │
+     ▼
+Proposition de résolution
+     │
+     ▼
+Confirmation du demandeur
+     │
+     ▼
+Ticket résolu / archivé
+```
+
+## Vérification de l'installation
+
+Depuis le serveur :
+
+```bash
+cd /var/www/ticketflow
+
+php scripts/healthcheck.php
+php scripts/security_audit.php
+php scripts/release_check.php
+php scripts/route_check.php
+php scripts/rc_preflight.php
+```
+
+Le diagnostic principal doit afficher :
+
+```text
+TicketFlow - diagnostic v1.1.0
+```
+
+## Configuration
+
+Le fichier local utilisé par TicketFlow est :
+
+```text
+config/config.php
+```
+
+Il ne doit **jamais** être envoyé sur GitHub.
+
+Le modèle public est :
+
+```text
+config/config.example.php
+```
+
+Il contient notamment la configuration :
+
+- de l'application ;
+- du fuseau horaire ;
+- de MariaDB/MySQL ;
+- du transport e-mail ;
+- des pièces jointes.
+
+## E-mails
+
+TicketFlow prend en charge :
+
+- `disabled` : e-mails désactivés ;
+- `log` : simulation dans `storage/logs/mail.log` ;
+- `smtp` : envoi via un serveur SMTP configuré.
+
+Le mode `log` est recommandé pour les environnements de test.
+
+## Tâches automatiques
+
+Le cron principal est exécuté toutes les cinq minutes :
+
+```cron
+*/5 * * * * www-data /usr/bin/php /var/www/ticketflow/scripts/cron/run.php >> /var/www/ticketflow/storage/logs/cron.log 2>&1
+```
+
+Il gère notamment les SLA, rappels, automatisations, nettoyage et file e-mail.
+
+## Structure du projet
+
+```text
+.github/        modèles GitHub
+config/         configuration et modèle public
+database/       schéma SQL et migrations
+deploy/         configuration de déploiement
+docs/           documentation
+public/         DocumentRoot Apache et interface web
+scripts/        installation, migrations, cron, diagnostics et maintenance
+src/            logique applicative et services
+storage/        logs, uploads et données runtime
+templates/      composants d'interface partagés
+update.sh       mise à jour sécurisée d'une installation existante
 ```
 
 ## Sécurité
 
-Ne committez jamais `config/config.php`, des mots de passe, des jetons, des dumps de production ou de vraies pièces jointes. Consultez [SECURITY.md](SECURITY.md).
+TicketFlow inclut notamment :
+
+- `password_hash()` / `password_verify()` ;
+- protection CSRF ;
+- contrôle des rôles côté serveur ;
+- vérification des droits d'accès aux tickets ;
+- pièces jointes stockées hors du dossier public ;
+- sessions PHP durcies ;
+- limitation des tentatives de connexion ;
+- journal d'audit ;
+- en-têtes HTTP de sécurité ;
+- verrouillage automatique de l'assistant d'installation ;
+- sauvegarde automatique avant mise à jour avec `update.sh`.
+
+La branche **v1.1.x** est la branche stable recommandée. Les installations **v1.0.x** doivent être mises à jour vers la dernière v1.1.x afin de bénéficier des correctifs et améliorations les plus récents.
+
+Consultez [SECURITY.md](SECURITY.md) pour les informations de sécurité.
+
+## Sauvegarde
+
+Avant une opération importante, vous pouvez toujours effectuer une sauvegarde manuelle :
+
+```bash
+mysqldump -u ticketflow_user -p ticketflow > ticketflow-backup.sql
+cp config/config.php config/config.php.backup
+```
+
+Les pièces jointes présentes dans `storage/uploads/` doivent également être incluses dans votre stratégie de sauvegarde.
+
+Le script `update.sh` crée automatiquement une sauvegarde avant chaque mise à jour.
 
 ## Documentation
 
 - [Installation](docs/installation.md)
-- [Mise à jour](docs/upgrade.md)
+- [Déploiement Apache](docs/deployment-apache.md)
+- [Mise à niveau](docs/upgrade.md)
 - [Rôles et permissions](docs/roles-permissions.md)
-- [Workflow ticket](docs/ticket-workflow.md)
+- [Workflow des tickets](docs/ticket-workflow.md)
+- [E-mails et automatisations](docs/v014-mail-automation.md)
+- [SLA](docs/sla.md)
 - [Exports](docs/exports.md)
+- [Notifications](docs/notifications.md)
+- [Statistiques](docs/statistics.md)
+- [Architecture](docs/architecture.md)
 - [Notes de version v1.1.0](docs/release-notes-v110.md)
-- [Contribuer](CONTRIBUTING.md)
+
+## Contribution
+
+Les règles de contribution sont disponibles dans [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Version
 
-Version actuelle : **1.1.0 Stable**
+**TicketFlow v1.1.0 Stable**
+
+Version stable incluant les alertes de service globales, le mode maintenance, les maintenances planifiées, le journal des nouveautés et la nouvelle extraction opérationnelle.
+
+---
+
+<p align="center">
+  <strong>TicketFlow</strong> — Gestion des tickets IT simple, structurée et centralisée.
+</p>
