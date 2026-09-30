@@ -7,7 +7,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $auth->requireRole('Collaborateur', 'Manager');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
-$pageTitle = 'Créer un ticket';
+$pageTitle = t('ticket_create.title');
 
 $types = $pdo->query('SELECT id, code, name FROM ticket_types ORDER BY id')->fetchAll();
 $categories = $pdo->query('SELECT id, name FROM ticket_categories WHERE active = 1 ORDER BY name')->fetchAll();
@@ -87,9 +87,9 @@ require __DIR__ . '/../templates/shared/header.php';
 ?>
 <section class="page-heading page-heading-enhanced ticket-create-heading-v0135">
     <div>
-        <span class="badge"><i class="fa-solid fa-plus"></i> Nouvelle demande</span>
-        <h1>Créer un ticket</h1>
-        <p>Donnez à l’équipe IT les informations essentielles pour accélérer le diagnostic et la prise en charge.</p>
+        <span class="badge"><i class="fa-solid fa-plus"></i> <?= htmlspecialchars(t('ticket_create.badge')) ?></span>
+        <h1><?= htmlspecialchars(t('ticket_create.title')) ?></h1>
+        <p><?= htmlspecialchars(t('ticket_create.subtitle')) ?></p>
     </div>
     <a class="btn secondary" href="my-tickets.php"><i class="fa-solid fa-arrow-left"></i> Mes tickets</a>
 </section>
@@ -102,23 +102,23 @@ require __DIR__ . '/../templates/shared/header.php';
     <section class="panel form-panel ticket-create-card-v0135">
         <div class="form-section-heading">
             <span class="form-section-icon"><i class="fa-solid fa-ticket"></i></span>
-            <div><h2>Votre demande</h2><p>Les champs marqués d’un * sont obligatoires.</p></div>
+            <div><h2><?= htmlspecialchars(t('ticket_create.request')) ?></h2><p><?= htmlspecialchars(t('ticket_create.required')) ?></p></div>
         </div>
         <form method="post" class="form-grid ticket-create-form-v0135" id="ticket-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
             <div class="field">
-                <label for="type_id"><i class="fa-solid fa-layer-group"></i> Type de demande *</label>
+                <label for="type_id"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars(t('ticket_create.type')) ?></label>
                 <select id="type_id" name="type_id" required>
-                    <option value="">Choisir…</option>
+                    <option value=""><?= htmlspecialchars(t('ticket_create.choose')) ?></option>
                     <?php foreach ($types as $type): ?><option value="<?= (int) $type['id'] ?>" <?= (int) $form['type_id'] === (int) $type['id'] ? 'selected' : '' ?>><?= htmlspecialchars($type['code'] . ' — ' . $type['name']) ?></option><?php endforeach; ?>
                 </select>
             </div>
             <div class="field">
                 <label for="category_id"><i class="fa-solid fa-tags"></i> Catégorie</label>
-                <select id="category_id" name="category_id"><option value="">Non définie</option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (int) ($form['category_id'] ?? 0) === (int) $category['id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['name']) ?></option><?php endforeach; ?></select>
+                <select id="category_id" name="category_id"><option value=""><?= htmlspecialchars(t('ticket_create.undefined')) ?></option><?php foreach ($categories as $category): ?><option value="<?= (int) $category['id'] ?>" <?= (int) ($form['category_id'] ?? 0) === (int) $category['id'] ? 'selected' : '' ?>><?= htmlspecialchars($category['name']) ?></option><?php endforeach; ?></select>
             </div>
             <div class="field span-2 ticket-priority-field">
-                <label><i class="fa-solid fa-gauge-high"></i> Importance *</label>
+                <label><i class="fa-solid fa-gauge-high"></i> <?= htmlspecialchars(t('ticket_create.priority')) ?></label>
                 <div class="priority-choice-grid priority-choice-grid-v0135">
                     <?php foreach ($priorities as $priority): ?>
                         <label class="priority-choice priority-level-<?= (int) $priority['level'] ?>">
@@ -128,21 +128,21 @@ require __DIR__ . '/../templates/shared/header.php';
                         </label>
                     <?php endforeach; ?>
                 </div>
-                <small class="field-hint"><i class="fa-solid fa-circle-info"></i> L’équipe IT pourra ajuster la priorité après analyse.</small>
+                <small class="field-hint"><i class="fa-solid fa-circle-info"></i> L’équipe Support IT pourra ajuster la priorité après analyse.</small>
             </div>
             <div class="field span-2">
-                <label for="title"><i class="fa-solid fa-heading"></i> Titre *</label>
+                <label for="title"><i class="fa-solid fa-heading"></i> <?= htmlspecialchars(t('ticket_create.title_label')) ?></label>
                 <input id="title" name="title" minlength="5" maxlength="80" required value="<?= htmlspecialchars((string) $form['title']) ?>" placeholder="Ex. Outlook ne démarre plus">
                 <div class="field-counter"><span>Décrivez le problème en quelques mots.</span><strong><span id="title-count"><?= mb_strlen((string) $form['title']) ?></span> / 80</strong></div>
             </div>
             <div class="field span-2">
-                <label for="description"><i class="fa-solid fa-align-left"></i> Description *</label>
+                <label for="description"><i class="fa-solid fa-align-left"></i> <?= htmlspecialchars(t('ticket_create.description')) ?></label>
                 <textarea id="description" name="description" minlength="10" maxlength="2000" required rows="9" placeholder="Expliquez le problème, depuis quand il est présent et les tests déjà effectués…"><?= htmlspecialchars((string) $form['description']) ?></textarea>
                 <div class="field-counter"><span>Plus la description est précise, plus le diagnostic sera rapide.</span><strong><span id="description-count"><?= mb_strlen((string) $form['description']) ?></span> / 2000</strong></div>
             </div>
             <div class="form-actions span-2 ticket-create-actions-v0135">
-                <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-xmark"></i> Annuler</a>
-                <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Créer le ticket</button>
+                <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-xmark"></i> <?= htmlspecialchars(t('ticket_create.cancel')) ?></a>
+                <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> <?= htmlspecialchars(t('ticket_create.submit')) ?></button>
             </div>
         </form>
     </section>

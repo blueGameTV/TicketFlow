@@ -6,6 +6,7 @@ use App\Database\Database;
 use App\Security\Auth;
 use App\Security\SecurityHeaders;
 use App\Support\Runtime;
+use App\Support\Translator;
 use App\Security\Csrf;
 use App\Services\TicketService;
 use App\Services\AttachmentService;
@@ -22,12 +23,14 @@ use App\Services\SavedTicketViewService;
 use App\Services\ServiceAlertService;
 use App\Services\MaintenanceService;
 use App\Services\ReleaseNoteService;
+use App\Services\UserImportService;
 
 require_once __DIR__ . '/Database/Database.php';
 require_once __DIR__ . '/Security/Csrf.php';
 require_once __DIR__ . '/Security/Auth.php';
 require_once __DIR__ . '/Security/SecurityHeaders.php';
 require_once __DIR__ . '/Support/Runtime.php';
+require_once __DIR__ . '/Support/Translator.php';
 require_once __DIR__ . '/Services/TicketService.php';
 require_once __DIR__ . '/Services/AttachmentService.php';
 require_once __DIR__ . '/Services/ExcelExportService.php';
@@ -44,6 +47,7 @@ require_once __DIR__ . '/Services/SavedTicketViewService.php';
 require_once __DIR__ . '/Services/ServiceAlertService.php';
 require_once __DIR__ . '/Services/MaintenanceService.php';
 require_once __DIR__ . '/Services/ReleaseNoteService.php';
+require_once __DIR__ . '/Services/UserImportService.php';
 
 $configFile = __DIR__ . '/../config/config.php';
 if (!file_exists($configFile)) {
@@ -97,6 +101,23 @@ $notificationService = new NotificationService($pdo, $mailQueueService);
 $serviceAlertService = new ServiceAlertService($pdo);
 $maintenanceService = new MaintenanceService($pdo, $appSettingService);
 $releaseNoteService = new ReleaseNoteService($pdo, dirname(__DIR__));
+$userImportService = new UserImportService($pdo, $auditService);
+
+$defaultLanguage = $appSettingService->get('default_language', 'fr');
+$currentLanguage = in_array($defaultLanguage, ['fr','en'], true) ? $defaultLanguage : 'fr';
+if ($auth->check()) {
+    try {
+        $langStmt = $pdo->prepare('SELECT language FROM user_preferences WHERE user_id = :uid');
+        $langStmt->execute(['uid' => (int)$auth->user()['id']]);
+        $savedLanguage = (string)($langStmt->fetchColumn() ?: '');
+        if (in_array($savedLanguage, ['fr','en'], true)) $currentLanguage = $savedLanguage;
+    } catch (Throwable) {}
+}
+$translator = new Translator($currentLanguage, __DIR__ . '/../lang');
+if (!function_exists('t')) {
+    function t(string $key, array $params = []): string { global $translator; return $translator->get($key, $params); }
+}
+
 
 $currentScript = basename((string)($_SERVER['PHP_SELF'] ?? ''));
 $maintenanceExempt = ['maintenance.php', 'login.php', 'logout.php', 'setup.php', 'live-system-state.php'];

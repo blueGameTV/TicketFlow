@@ -90,14 +90,7 @@ try {
 
     $log = sprintf("[%s] admin_id=%d export=users from=%s to=%s rows=%d\n", date('c'), (int) $user['id'], $start->format('Y-m-d'), $end->format('Y-m-d'), count($rows));
     @file_put_contents(__DIR__ . '/../storage/logs/exports.log', $log, FILE_APPEND | LOCK_EX);
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Content-Length: ' . filesize($file));
-    header('Cache-Control: no-store, no-cache, must-revalidate');
-    readfile($file);
-    @unlink($file);
-    exit;
+    $excelExportService->sendDownload($file, $filename);
 } catch (Throwable $e) {
     $_SESSION['flash_error'] = $e->getMessage();
     header('Location: admin-exports.php');

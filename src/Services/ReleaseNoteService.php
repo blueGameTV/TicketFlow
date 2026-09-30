@@ -40,6 +40,19 @@ final class ReleaseNoteService
     {
         return [
             [
+                'version' => '1.2.0',
+                'date' => 'Stable',
+                'title' => 'Thèmes, import, validation Manager et langues',
+                'items' => [
+                    'Thème clair, sombre ou système mémorisé par utilisateur.',
+                    'Interface Français / English avec langue enregistrée par compte.',
+                    'Validation Manager à deux niveaux : N+1 puis Manager sélectionné.',
+                    'Import utilisateurs CSV / Excel avec prévisualisation et contrôles.',
+                    'Changement forcé du mot de passe et assistant d’installation modernisés.',
+                    'Calendriers, conversations, pièces jointes et alertes de service améliorés.'
+                ],
+            ],
+            [
                 'version' => '1.1.0',
                 'date' => 'Stable',
                 'title' => 'Alertes, maintenance et nouveautés',

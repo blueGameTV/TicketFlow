@@ -57,10 +57,12 @@ $notificationService->markTicketRead((int) $ticket['id'], (int) $user['id']);
 $currentManagerApproval = null;
 if ($user['role'] === 'Manager') {
     $preloadManagerApprovalStmt = $pdo->prepare(
-        "SELECT id, status, comment, requested_at, responded_at
-         FROM manager_approvals
-         WHERE ticket_id = :ticket_id AND manager_id = :manager_id
-         ORDER BY requested_at DESC, id DESC
+        "SELECT ma.id, ma.status, ma.comment, ma.requested_at, ma.responded_at, ma.stage, ma.target_manager_id,
+                CONCAT(target.firstname, ' ', target.lastname) AS target_manager_name
+         FROM manager_approvals ma
+         LEFT JOIN users target ON target.id = ma.target_manager_id
+         WHERE ma.ticket_id = :ticket_id AND ma.manager_id = :manager_id
+         ORDER BY ma.requested_at DESC, ma.id DESC
          LIMIT 1"
     );
     $preloadManagerApprovalStmt->execute([
@@ -108,8 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ticketService->transfer((int) $ticket['id'], (int) ($_POST['it_id'] ?? 0), $user);
                 $_SESSION['flash_success'] = 'Ticket transféré.';
             } elseif ($action === 'manager_request') {
-                $ticketService->requestManagerApproval((int) $ticket['id'], $user);
-                $_SESSION['flash_success'] = 'La demande de validation a été envoyée au Manager.';
+                $ticketService->requestManagerApproval(
+                    (int) $ticket['id'],
+                    (int) ($_POST['target_manager_id'] ?? 0),
+                    $user
+                );
+                $_SESSION['flash_success'] = 'La validation a été envoyée au Manager N+1. Après son accord, elle sera transmise au Manager sélectionné.';
             } elseif ($action === 'manager_response') {
                 $ticketService->respondManagerApproval(
                     (int) ($_POST['approval_id'] ?? 0),
@@ -126,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['flash_success'] = 'Merci. Le ticket est maintenant marqué comme résolu.';
             } elseif ($action === 'reject_resolution') {
                 $ticketService->rejectResolution((int) $ticket['id'], (string) ($_POST['comment'] ?? ''), $user);
-                $_SESSION['flash_success'] = 'Le ticket a été rouvert et renvoyé à IT.';
+                $_SESSION['flash_success'] = 'Le ticket a été rouvert et renvoyé au Support IT.';
             } elseif ($action === 'attachment_upload') {
                 $count = $attachmentService->uploadMany($ticket, $user, $_FILES['attachments'] ?? []);
                 $_SESSION['flash_success'] = $count > 1
@@ -192,10 +198,13 @@ $formatAttachmentSize = static function (int $bytes): string {
 
 $approvalStmt = $pdo->prepare(
     'SELECT ma.id, ma.status, ma.comment, ma.requested_at, ma.responded_at,
+            ma.stage, ma.target_manager_id, ma.parent_approval_id,
             CONCAT(m.firstname, " ", m.lastname) AS manager_name,
+            CONCAT(target.firstname, " ", target.lastname) AS target_manager_name,
             CONCAT(rb.firstname, " ", rb.lastname) AS requested_by_name
      FROM manager_approvals ma
      INNER JOIN users m ON m.id = ma.manager_id
+     LEFT JOIN users target ON target.id = ma.target_manager_id
      INNER JOIN users rb ON rb.id = ma.requested_by
      WHERE ma.ticket_id = :ticket_id
      ORDER BY ma.requested_at DESC, ma.id DESC'
@@ -221,6 +230,7 @@ $canAttachments = !$isTerminalTicket && ($isRequester || $isSupportUser || $isAp
 $priorities = [];
 $allowedStatuses = [];
 $transferIts = [];
+$availableManagers = [];
 if (in_array($user['role'], ['IT', 'Administrateur'], true)) {
     $priorities = $pdo->query('SELECT id, name, level FROM priorities ORDER BY level')->fetchAll();
     $statusCodes = $user['role'] === 'Administrateur'
@@ -248,6 +258,20 @@ if (in_array($user['role'], ['IT', 'Administrateur'], true)) {
         );
     }
     $transferIts = $itStmt->fetchAll();
+
+    $managerStmt = $pdo->prepare(
+        "SELECT u.id, u.firstname, u.lastname,
+                GROUP_CONCAT(DISTINCT gc.name ORDER BY gc.name SEPARATOR ', ') AS managed_groups
+         FROM users u
+         INNER JOIN roles r ON r.id = u.role_id
+         LEFT JOIN groups_company gc ON gc.manager_id = u.id AND gc.active = 1
+         WHERE r.name = 'Manager' AND u.active = 1
+           AND u.id <> :n1_manager_id
+         GROUP BY u.id, u.firstname, u.lastname
+         ORDER BY u.lastname, u.firstname"
+    );
+    $managerStmt->execute(['n1_manager_id' => (int) ($ticket['requester_manager_id'] ?? 0)]);
+    $availableManagers = $managerStmt->fetchAll();
 }
 
 $approvalLabels = [
@@ -298,7 +322,7 @@ if (!$isFragmentRequest) {
     <?php elseif (in_array($user['role'], ['Collaborateur', 'Manager'], true)): ?>
         <a class="btn secondary" href="my-tickets.php">← Mes tickets</a>
     <?php elseif ($user['role'] === 'IT'): ?>
-        <a class="btn secondary" href="it-tickets.php?scope=mine">← Tickets IT</a>
+        <a class="btn secondary" href="it-tickets.php?scope=mine">← Tickets Support IT</a>
     <?php else: ?>
         <a class="btn secondary" href="dashboard.php">← Dashboard</a>
     <?php endif; ?>
@@ -310,7 +334,7 @@ if (!$isFragmentRequest) {
 <div class="ticket-layout ticket-layout-wide">
     <div>
         <section class="panel ticket-description ticket-description-enhanced">
-            <div class="ticket-section-title"><h2>Description</h2><span id="live-ticket-status" class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><?= htmlspecialchars($ticket['status_name']) ?></span></div>
+            <div class="ticket-section-title"><h2>Description</h2><span id="live-ticket-status" class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></span></div>
             <div class="description-text"><?= nl2br(htmlspecialchars($ticket['description'])) ?></div>
         </section>
 
@@ -348,9 +372,18 @@ if (!$isFragmentRequest) {
                 <div class="ticket-section-title"><h2>Validations Manager</h2><span class="muted"><?= count($managerApprovals) ?> demande<?= count($managerApprovals) > 1 ? 's' : '' ?></span></div>
                 <div class="approval-list">
                     <?php foreach ($managerApprovals as $approval): $label = $approvalLabels[$approval['status']] ?? [$approval['status'], '']; ?>
-                        <article class="approval-card">
+                        <article class="approval-card v120-approval-stage-card">
                             <div class="approval-card-head">
-                                <div><strong><?= htmlspecialchars($approval['manager_name']) ?></strong><small>Demandée par <?= htmlspecialchars($approval['requested_by_name']) ?> le <?= htmlspecialchars(date('d/m/Y H:i', strtotime($approval['requested_at']))) ?></small></div>
+                                <div>
+                                    <span class="v120-approval-stage <?= $approval['stage'] === 'target' ? 'is-final' : 'is-n1' ?>">
+                                        <?= $approval['stage'] === 'target' ? 'Étape 2 · Manager sélectionné' : 'Étape 1 · Manager N+1' ?>
+                                    </span>
+                                    <strong><?= htmlspecialchars($approval['manager_name']) ?></strong>
+                                    <small>Demandée par <?= htmlspecialchars($approval['requested_by_name']) ?> le <?= htmlspecialchars(date('d/m/Y H:i', strtotime($approval['requested_at']))) ?></small>
+                                    <?php if ($approval['stage'] === 'n1' && $approval['target_manager_name']): ?>
+                                        <small>Après accord : transmission à <?= htmlspecialchars($approval['target_manager_name']) ?></small>
+                                    <?php endif; ?>
+                                </div>
                                 <span class="approval-status approval-<?= htmlspecialchars($label[1]) ?>"><?= htmlspecialchars($label[0]) ?></span>
                             </div>
                             <?php if ($approval['comment']): ?><p><?= nl2br(htmlspecialchars($approval['comment'])) ?></p><?php endif; ?>
@@ -372,7 +405,7 @@ if (!$isFragmentRequest) {
                         <div class="chat-message-avatar-v0136" aria-hidden="true"><i class="fa-solid <?= $isOwnMessage ? 'fa-user' : ($message['author_role'] === 'Manager' ? 'fa-user-tie' : (in_array($message['author_role'], ['IT', 'Administrateur'], true) ? 'fa-headset' : 'fa-user')) ?>"></i></div>
                         <div class="chat-message-bubble-v0136">
                             <div class="chat-message-meta-v0136">
-                                <div><strong><?= htmlspecialchars($message['author_name']) ?></strong><span><?= htmlspecialchars($message['author_role']) ?></span><?php if ($message['internal']): ?> <span class="internal-badge">Interne IT</span><?php endif; ?></div>
+                                <div><strong><?= htmlspecialchars($message['author_name']) ?></strong><span><?= htmlspecialchars($message['author_role'] === 'IT' ? 'Support IT' : $message['author_role']) ?></span><?php if ($message['internal']): ?> <span class="internal-badge">Interne Support IT</span><?php endif; ?></div>
                                 <time><?= htmlspecialchars(date('d/m/Y H:i', strtotime($message['created_at']))) ?></time>
                             </div>
                             <div class="chat-message-text-v0136"><?= nl2br(htmlspecialchars($message['message'])) ?></div>
@@ -405,7 +438,7 @@ if (!$isFragmentRequest) {
             <?php endif; ?>
         </section>
 
-        <?php if (!$isApprovalManagerContext): ?>
+        <?php if (!$isApprovalManagerContext && in_array($user['role'], ['Administrateur','IT'], true)): ?>
         <section class="panel attachment-panel">
             <div class="ticket-section-title">
                 <h2>Pièces jointes</h2>
@@ -472,14 +505,14 @@ if (!$isFragmentRequest) {
             <dl class="ticket-info-list">
                 <div><dt>Type</dt><dd><?= htmlspecialchars($ticket['type_name']) ?></dd></div>
                 <div><dt>Catégorie</dt><dd><?= htmlspecialchars($ticket['category_name'] ?? 'Non définie') ?></dd></div>
-                <div><dt>Importance</dt><dd><span id="live-ticket-priority" class="priority-pill priority-level-<?= (int) $ticket['priority_level'] ?>"><?= htmlspecialchars($ticket['priority_name']) ?></span></dd></div>
-                <div><dt>Statut</dt><dd id="live-ticket-status-text"><?= htmlspecialchars($ticket['status_name']) ?></dd></div>
+                <div><dt>Importance</dt><dd><span id="live-ticket-priority" class="priority-pill priority-level-<?= (int) $ticket['priority_level'] ?>"><?= htmlspecialchars(t('priority.'.strtolower($ticket['priority_name']))) ?></span></dd></div>
+                <div><dt>Statut</dt><dd id="live-ticket-status-text"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></dd></div>
                 <div><dt>Demandeur</dt><dd><?= htmlspecialchars($ticket['requester_name']) ?><small><?= htmlspecialchars($ticket['requester_email']) ?></small></dd></div>
                 <?php if (in_array($user['role'], ['Administrateur', 'IT'], true)): ?>
                     <div><dt>Groupe</dt><dd><?= htmlspecialchars($ticket['requester_group_name'] ?: 'Non défini') ?></dd></div>
                     <div><dt>Manager</dt><dd><?= htmlspecialchars($ticket['requester_manager_name'] ?: 'Non défini') ?></dd></div>
                 <?php endif; ?>
-                <div><dt>IT assigné</dt><dd id="live-ticket-assignee"><?= htmlspecialchars($ticket['assigned_it_name'] ?: 'Non assigné') ?></dd></div>
+                <div><dt>Support IT assigné</dt><dd id="live-ticket-assignee"><?= htmlspecialchars($ticket['assigned_it_name'] ?: 'Non assigné') ?></dd></div>
                 <?php if ($user['role'] === 'Administrateur'): ?>
                     <div><dt>Prise en charge SLA</dt><dd>
                         <?php if ($responseMet === true): ?><span class="sla-pill sla-ok">Respecté</span>
@@ -500,10 +533,43 @@ if (!$isFragmentRequest) {
             </dl>
         </section>
 
+        <?php if (!$isApprovalManagerContext && in_array($user['role'], ['Collaborateur','Manager'], true)): ?>
+            <section class="panel attachment-panel attachment-panel-sidebar-v1206">
+                <div class="ticket-section-title">
+                    <h2><i class="fa-solid fa-paperclip"></i> Pièces jointes</h2>
+                    <span class="muted"><?= count($attachments) ?> fichier<?= count($attachments) > 1 ? 's' : '' ?></span>
+                </div>
+                <?php if ($attachments): ?>
+                    <div class="attachment-list">
+                        <?php foreach ($attachments as $attachment): ?>
+                            <a class="attachment-item" href="attachment-download.php?id=<?= (int) $attachment['id'] ?>">
+                                <span class="attachment-icon">↧</span>
+                                <span class="attachment-details"><strong><?= htmlspecialchars($attachment['original_name']) ?></strong><small><?= htmlspecialchars($formatAttachmentSize((int) $attachment['size_bytes'])) ?> · ajouté par <?= htmlspecialchars($attachment['uploader_name']) ?></small></span>
+                                <span class="attachment-download"><i class="fa-solid fa-download"></i></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?><p class="empty-state">Aucune pièce jointe pour ce ticket.</p><?php endif; ?>
+                <?php if ($canAttachments): ?>
+                    <form class="attachment-upload-form ticket-attachment-composer" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
+                        <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
+                        <input type="hidden" name="action" value="attachment_upload">
+                        <div class="field"><label for="attachments-sidebar">Ajouter des fichiers</label><input id="attachments-sidebar" class="file-input" type="file" name="attachments[]" multiple required accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.csv"><small class="field-hint"><?= (int) $uploadMaxFiles ?> fichiers maximum · <?= htmlspecialchars($formatAttachmentSize($uploadMaxBytes)) ?> par fichier.</small></div>
+                        <button class="btn secondary full" type="submit"><i class="fa-solid fa-paperclip"></i> Ajouter</button>
+                    </form>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+
         <?php if ($user['role'] === 'Manager' && $currentManagerApproval && $currentManagerApproval['status'] === 'pending'): ?>
             <section class="panel manager-decision-panel manager-decision-panel-enhanced">
-                <h2>Validation demandée</h2>
-                <p class="muted">IT attend votre décision avant de poursuivre cette demande.</p>
+                <h2><?= $currentManagerApproval['stage'] === 'target' ? 'Validation finale demandée' : 'Validation N+1 demandée' ?></h2>
+                <?php if ($currentManagerApproval['stage'] === 'n1'): ?>
+                    <p class="muted">Vous êtes le Manager N+1 du demandeur. Votre accord est nécessaire avant transmission à <?= htmlspecialchars($currentManagerApproval['target_manager_name'] ?? 'le Manager sélectionné') ?>.</p>
+                <?php else: ?>
+                    <p class="muted">Le Manager N+1 a déjà donné son accord. Vous êtes le Manager sélectionné pour prendre la décision finale.</p>
+                <?php endif; ?>
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
@@ -521,7 +587,7 @@ if (!$isFragmentRequest) {
 
         <?php if (in_array($user['role'], ['IT', 'Administrateur'], true) && !($user['role'] === 'IT' && in_array($ticket['status_code'], ['resolved','closed','cancelled'], true))): ?>
             <section class="panel it-actions-panel it-actions-panel-enhanced">
-                <h2>Actions IT</h2>
+                <h2>Actions Support IT</h2>
 
                 <?php if ($user['role'] === 'IT' && $ticket['assigned_it_id'] === null): ?>
                     <form method="post">
@@ -540,10 +606,10 @@ if (!$isFragmentRequest) {
                     <div class="inline-control"><select name="status_code">
                         <?php $manualCodes = array_column($allowedStatuses, 'code'); ?>
                         <?php if (!in_array($ticket['status_code'], $manualCodes, true)): ?>
-                            <option value="" selected disabled><?= htmlspecialchars($ticket['status_name']) ?> (automatique)</option>
+                            <option value="" selected disabled><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?> (automatique)</option>
                         <?php endif; ?>
                         <?php foreach ($allowedStatuses as $item): ?>
-                            <option value="<?= htmlspecialchars($item['code']) ?>" <?= $ticket['status_code'] === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option>
+                            <option value="<?= htmlspecialchars($item['code']) ?>" <?= $ticket['status_code'] === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars(t('status.'.(string)$item['code'])) ?></option>
                         <?php endforeach; ?>
                     </select><button class="btn secondary small" type="submit">Modifier</button></div>
                 </form>
@@ -553,7 +619,7 @@ if (!$isFragmentRequest) {
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                     <input type="hidden" name="action" value="priority">
                     <label>Importance</label>
-                    <div class="inline-control"><select name="priority_id"><?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>" <?= (int) $ticket['priority_id'] === (int) $item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Modifier</button></div>
+                    <div class="inline-control"><select name="priority_id"><?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>" <?= (int) $ticket['priority_id'] === (int) $item['id'] ? 'selected' : '' ?>><?= htmlspecialchars(t('priority.'.strtolower((string)$item['name']))) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Modifier</button></div>
                 </form>
 
                 <?php if ($transferIts): ?>
@@ -562,7 +628,7 @@ if (!$isFragmentRequest) {
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="transfer">
                         <label>Transférer à</label>
-                        <div class="inline-control"><select name="it_id" required><option value="">Choisir un IT</option><?php foreach ($transferIts as $it): ?><option value="<?= (int) $it['id'] ?>" <?= (int) $ticket['assigned_it_id'] === (int) $it['id'] ? 'selected' : '' ?>><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Transférer</button></div>
+                        <div class="inline-control"><select name="it_id" required><option value="">Choisir un technicien Support IT</option><?php foreach ($transferIts as $it): ?><option value="<?= (int) $it['id'] ?>" <?= (int) $ticket['assigned_it_id'] === (int) $it['id'] ? 'selected' : '' ?>><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Transférer</button></div>
                     </form>
                 <?php endif; ?>
 
@@ -571,13 +637,32 @@ if (!$isFragmentRequest) {
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="manager_request">
-                        <label>Validation Manager</label>
+                        <label>Validation Manager à deux niveaux</label>
                         <?php if (!$ticket['requester_manager_id']): ?>
-                            <p class="inline-warning">Aucun Manager n’est défini pour le groupe du demandeur.</p>
+                            <p class="inline-warning">Aucun Manager N+1 n’est défini pour le groupe du demandeur.</p>
                         <?php elseif ($pendingManagerApproval): ?>
                             <p class="inline-warning">Une validation est déjà en attente auprès de <?= htmlspecialchars($pendingManagerApproval['manager_name']) ?>.</p>
+                        <?php elseif (!$availableManagers): ?>
+                            <p class="inline-warning">Aucun autre Manager actif n’est disponible pour la validation finale.</p>
                         <?php else: ?>
-                            <button class="btn secondary full" type="submit">Demander la validation de <?= htmlspecialchars($ticket['requester_manager_name']) ?></button>
+                            <div class="v120-manager-chain-preview">
+                                <span><i class="fa-solid fa-user-tie"></i> Étape 1</span>
+                                <strong><?= htmlspecialchars($ticket['requester_manager_name']) ?></strong>
+                                <small>Manager N+1 du demandeur</small>
+                            </div>
+                            <div class="field">
+                                <label for="target_manager_id">Manager pour la validation finale *</label>
+                                <select id="target_manager_id" name="target_manager_id" required>
+                                    <option value="">Sélectionner un Manager</option>
+                                    <?php foreach ($availableManagers as $manager): ?>
+                                        <option value="<?= (int) $manager['id'] ?>">
+                                            <?= htmlspecialchars($manager['firstname'] . ' ' . $manager['lastname'] . ($manager['managed_groups'] ? ' — ' . $manager['managed_groups'] : '')) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <p class="v120-manager-chain-help"><i class="fa-solid fa-arrow-right"></i> Le Manager sélectionné ne recevra la demande qu’après validation du N+1.</p>
+                            <button class="btn secondary full" type="submit">Envoyer au N+1 puis au Manager sélectionné</button>
                         <?php endif; ?>
                     </form>
                 <?php endif; ?>

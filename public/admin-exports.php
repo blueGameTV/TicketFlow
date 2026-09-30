@@ -7,7 +7,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $auth->requireRole('Administrateur');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
-$pageTitle = 'Extractions Excel';
+$pageTitle = t('exports.title');
 
 $today = new DateTimeImmutable('today');
 $defaultFrom = $today->sub(new DateInterval('P30D'))->format('Y-m-d');
@@ -27,10 +27,10 @@ require __DIR__ . '/../templates/shared/header.php';
 ?>
 <section class="page-heading export-page-heading page-heading-enhanced">
     <div>
-        <span class="badge"><i class="fa-solid fa-file-excel"></i> Administration</span>
-        <h1>Extractions Excel</h1>
-        <p>Exportez les utilisateurs, les tickets et désormais les opérations de service sur une période de 6 mois maximum.</p>
-        <div class="alert warning export-limit-note export-limit-note-inline"><i class="fa-solid fa-circle-info"></i><div><strong>Limite :</strong> chaque extraction couvre au maximum 6 mois.</div></div>
+        <span class="badge"><i class="fa-solid fa-file-excel"></i> <?= htmlspecialchars(t('common.administration')) ?></span>
+        <h1><?= htmlspecialchars(t('exports.title')) ?></h1>
+        <p><?= htmlspecialchars(t('exports.subtitle')) ?></p>
+        <div class="alert warning export-limit-note export-limit-note-inline"><i class="fa-solid fa-circle-info"></i><div><strong><?= htmlspecialchars(t('exports.limit')) ?></strong> <?= htmlspecialchars(t('exports.limit_help')) ?></div></div>
     </div>
 </section>
 
@@ -38,43 +38,43 @@ require __DIR__ . '/../templates/shared/header.php';
 
 <section class="export-grid export-grid-v013 export-grid-v0133">
     <article class="panel export-card">
-        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-users"></i></span><h2>Extraction utilisateurs</h2></div><span class="file-badge">.xlsx</span></div>
-        <p>Comptes, rôles, groupes, Manager, date d'arrivée, état, dernière connexion et logins applicatifs.</p>
+        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-users"></i></span><h2><?= htmlspecialchars(t('exports.users')) ?></h2></div><span class="file-badge">.xlsx</span></div>
+        <p><?= htmlspecialchars(t('exports.users_help')) ?></p>
         <form method="post" action="export-users.php" class="form-grid export-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
-            <div class="field"><label for="users_from">Du *</label><input id="users_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
-            <div class="field"><label for="users_to">Au *</label><input id="users_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
-            <div class="field"><label for="users_role">Rôle</label><select id="users_role" name="role_id"><option value="0">Tous les rôles</option><?php foreach ($roles as $role): ?><option value="<?= (int)$role['id'] ?>"><?= htmlspecialchars($role['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label for="users_group">Groupe</label><select id="users_group" name="group_id"><option value="0">Tous les groupes</option><?php foreach ($groups as $group): ?><option value="<?= (int)$group['id'] ?>"><?= htmlspecialchars($group['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field span-2"><label for="users_state">État du compte</label><select id="users_state" name="state"><option value="all">Tous</option><option value="active">Actifs</option><option value="inactive">Désactivés</option></select></div>
-            <div class="form-actions span-2"><button class="btn primary" type="submit">Télécharger l'Excel utilisateurs</button></div>
+            <div class="field"><label for="users_from"><?= htmlspecialchars(t('common.from')) ?></label><input id="users_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
+            <div class="field"><label for="users_to"><?= htmlspecialchars(t('common.to')) ?></label><input id="users_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
+            <div class="field"><label for="users_role"><?= htmlspecialchars(t('exports.role')) ?></label><select id="users_role" name="role_id"><option value="0"><?= htmlspecialchars(t('exports.all_roles')) ?></option><?php foreach ($roles as $role): ?><option value="<?= (int)$role['id'] ?>"><?= htmlspecialchars(t('role.'.$role['name'])) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label for="users_group"><?= htmlspecialchars(t('exports.group')) ?></label><select id="users_group" name="group_id"><option value="0"><?= htmlspecialchars(t('exports.all_groups')) ?></option><?php foreach ($groups as $group): ?><option value="<?= (int)$group['id'] ?>"><?= htmlspecialchars($group['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field span-2"><label for="users_state"><?= htmlspecialchars(t('exports.account_state')) ?></label><select id="users_state" name="state"><option value="all"><?= htmlspecialchars(t('common.all')) ?></option><option value="active"><?= htmlspecialchars(t('exports.active')) ?></option><option value="inactive"><?= htmlspecialchars(t('exports.inactive')) ?></option></select></div>
+            <div class="form-actions span-2"><button class="btn primary" type="submit"><?= htmlspecialchars(t('exports.download_users')) ?></button></div>
         </form>
     </article>
 
     <article class="panel export-card">
-        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-ticket"></i></span><h2>Extraction tickets</h2></div><span class="file-badge">.xlsx</span></div>
-        <p>Tickets, demandeurs, groupes, IT assignés, importance, statuts et temps de résolution.</p>
+        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-ticket"></i></span><h2><?= htmlspecialchars(t('exports.tickets')) ?></h2></div><span class="file-badge">.xlsx</span></div>
+        <p><?= htmlspecialchars(t('exports.tickets_help')) ?></p>
         <form method="post" action="export-tickets.php" class="form-grid export-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
-            <div class="field"><label for="tickets_from">Du *</label><input id="tickets_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
-            <div class="field"><label for="tickets_to">Au *</label><input id="tickets_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
-            <div class="field"><label for="ticket_type">Type</label><select id="ticket_type" name="type_id"><option value="0">Tous les types</option><?php foreach ($types as $type): ?><option value="<?= (int)$type['id'] ?>"><?= htmlspecialchars($type['code'] . ' — ' . $type['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label for="ticket_status">Statut</label><select id="ticket_status" name="status_id"><option value="0">Tous les statuts</option><?php foreach ($statuses as $status): ?><option value="<?= (int)$status['id'] ?>"><?= htmlspecialchars($status['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label for="ticket_priority">Importance</label><select id="ticket_priority" name="priority_id"><option value="0">Toutes</option><?php foreach ($priorities as $priority): ?><option value="<?= (int)$priority['id'] ?>"><?= htmlspecialchars($priority['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label for="ticket_group">Groupe demandeur</label><select id="ticket_group" name="group_id"><option value="0">Tous les groupes</option><?php foreach ($groups as $group): ?><option value="<?= (int)$group['id'] ?>"><?= htmlspecialchars($group['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field span-2"><label for="ticket_it">IT assigné</label><select id="ticket_it" name="assigned_it_id"><option value="0">Tous les IT</option><option value="-1">Non attribués</option><?php foreach ($itUsers as $it): ?><option value="<?= (int)$it['id'] ?>"><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select></div>
-            <div class="form-actions span-2"><button class="btn primary" type="submit">Télécharger l'Excel tickets</button></div>
+            <div class="field"><label for="tickets_from"><?= htmlspecialchars(t('common.from')) ?></label><input id="tickets_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
+            <div class="field"><label for="tickets_to"><?= htmlspecialchars(t('common.to')) ?></label><input id="tickets_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
+            <div class="field"><label for="ticket_type"><?= htmlspecialchars(t('exports.type')) ?></label><select id="ticket_type" name="type_id"><option value="0"><?= htmlspecialchars(t('exports.all_types')) ?></option><?php foreach ($types as $type): ?><option value="<?= (int)$type['id'] ?>"><?= htmlspecialchars($type['code'] . ' — ' . $type['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label for="ticket_status"><?= htmlspecialchars(t('exports.status')) ?></label><select id="ticket_status" name="status_id"><option value="0"><?= htmlspecialchars(t('exports.all_statuses')) ?></option><?php foreach ($statuses as $status): ?><option value="<?= (int)$status['id'] ?>"><?= htmlspecialchars(t('status.'.$status['code'])) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label for="ticket_priority"><?= htmlspecialchars(t('exports.priority')) ?></label><select id="ticket_priority" name="priority_id"><option value="0"><?= htmlspecialchars(t('exports.all_priorities')) ?></option><?php foreach ($priorities as $priority): ?><option value="<?= (int)$priority['id'] ?>"><?= htmlspecialchars(t('priority.'.strtolower($priority['name']))) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label for="ticket_group"><?= htmlspecialchars(t('exports.requester_group')) ?></label><select id="ticket_group" name="group_id"><option value="0"><?= htmlspecialchars(t('exports.all_groups')) ?></option><?php foreach ($groups as $group): ?><option value="<?= (int)$group['id'] ?>"><?= htmlspecialchars($group['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field span-2"><label for="ticket_it"><?= htmlspecialchars(t('exports.assigned_it')) ?></label><select id="ticket_it" name="assigned_it_id"><option value="0"><?= htmlspecialchars(t('exports.all_it')) ?></option><option value="-1"><?= htmlspecialchars(t('exports.unassigned')) ?></option><?php foreach ($itUsers as $it): ?><option value="<?= (int)$it['id'] ?>"><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select></div>
+            <div class="form-actions span-2"><button class="btn primary" type="submit"><?= htmlspecialchars(t('exports.download_tickets')) ?></button></div>
         </form>
     </article>
 
     <article class="panel export-card v110-span-2">
-        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-chart-gantt"></i></span><h2>Rapport opérations & disponibilité</h2></div><span class="file-badge">Nouveau · .xlsx</span></div>
-        <p>Nouvelle extraction v1.1 : exportez dans un seul fichier l’historique des alertes de service et des maintenances planifiées.</p>
+        <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-chart-gantt"></i></span><h2><?= htmlspecialchars(t('exports.operations')) ?></h2></div><span class="file-badge"><?= htmlspecialchars(t('exports.new_xlsx')) ?></span></div>
+        <p><?= htmlspecialchars(t('exports.operations_help')) ?></p>
         <form method="post" action="export-operations.php" class="form-grid export-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
-            <div class="field"><label for="operations_from">Du *</label><input id="operations_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
-            <div class="field"><label for="operations_to">Au *</label><input id="operations_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
-            <div class="form-actions span-2"><button class="btn primary" type="submit"><i class="fa-solid fa-file-excel"></i> Télécharger le rapport opérations</button></div>
+            <div class="field"><label for="operations_from"><?= htmlspecialchars(t('common.from')) ?></label><input id="operations_from" type="date" name="from" value="<?= htmlspecialchars($defaultFrom) ?>" required></div>
+            <div class="field"><label for="operations_to"><?= htmlspecialchars(t('common.to')) ?></label><input id="operations_to" type="date" name="to" value="<?= htmlspecialchars($defaultTo) ?>" required></div>
+            <div class="form-actions span-2"><button class="btn primary" type="submit"><i class="fa-solid fa-file-excel"></i> <?= htmlspecialchars(t('exports.download_operations')) ?></button></div>
         </form>
     </article>
 </section>

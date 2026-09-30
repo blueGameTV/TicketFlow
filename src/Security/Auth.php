@@ -131,9 +131,13 @@ final class Auth
             header('Location: login.php');
             exit;
         }
-        if (!empty($_SESSION[self::SESSION_KEY]['must_change_password']) && basename((string) ($_SERVER['PHP_SELF'] ?? '')) !== 'change-password.php') {
-            header('Location: change-password.php?required=1');
-            exit;
+        if (!empty($_SESSION[self::SESSION_KEY]['must_change_password'])) {
+            $currentScript = basename((string) ($_SERVER['PHP_SELF'] ?? ''));
+            $allowedWhileForced = ['dashboard.php', 'logout.php', 'forced-password.php'];
+            if (!in_array($currentScript, $allowedWhileForced, true)) {
+                header('Location: dashboard.php?password_required=1');
+                exit;
+            }
         }
     }
 

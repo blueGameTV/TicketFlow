@@ -37,6 +37,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'La session du formulaire a expiré. Rechargez la page.';
     }
 
+    $formAction = (string)($_POST['action'] ?? 'save');
+    if (!$errors && $formAction === 'delete_user') {
+        if (!$isEdit || $id <= 0) {
+            $errors[] = 'Utilisateur introuvable.';
+        } elseif ($id === (int)$auth->id()) {
+            $errors[] = 'Vous ne pouvez pas supprimer votre propre compte Administrateur.';
+        } else {
+            $referenceQueries = [
+                'managed_groups' => 'SELECT COUNT(*) FROM groups_company WHERE manager_id = :id',
+                'tickets' => 'SELECT COUNT(*) FROM tickets WHERE requester_id = :id',
+                'messages' => 'SELECT COUNT(*) FROM ticket_messages WHERE author_id = :id',
+                'approvals' => 'SELECT COUNT(*) FROM manager_approvals WHERE manager_id = :id OR requested_by = :id OR target_manager_id = :id',
+                'attachments' => 'SELECT COUNT(*) FROM ticket_attachments WHERE uploaded_by = :id',
+                'alerts' => 'SELECT COUNT(*) FROM service_alerts WHERE created_by = :id',
+                'maintenance' => 'SELECT COUNT(*) FROM maintenance_windows WHERE created_by = :id',
+            ];
+            $references = 0;
+            foreach ($referenceQueries as $sql) {
+                $referenceStmt = $pdo->prepare($sql);
+                $referenceStmt->execute(['id' => $id]);
+                $references += (int)$referenceStmt->fetchColumn();
+            }
+            if ($references > 0) {
+                $errors[] = 'Ce compte possède un historique TicketFlow et ne peut pas être supprimé. Désactivez-le afin de conserver la traçabilité.';
+            } else {
+                $targetStmt = $pdo->prepare('SELECT firstname, lastname, username, profile_photo FROM users WHERE id=:id');
+                $targetStmt->execute(['id'=>$id]);
+                $target = $targetStmt->fetch();
+                if (!$target) {
+                    $errors[] = 'Utilisateur introuvable.';
+                } else {
+                    if (!empty($target['profile_photo'])) {
+                        $avatar = __DIR__ . '/../storage/uploads/avatars/' . basename((string)$target['profile_photo']);
+                        if (is_file($avatar)) @unlink($avatar);
+                    }
+                    $pdo->prepare('DELETE FROM users WHERE id=:id')->execute(['id'=>$id]);
+                    $auditService->log((int)$user['id'], 'user_deleted', 'user', $id, ['username'=>$target['username'], 'name'=>trim($target['firstname'].' '.$target['lastname'])]);
+                    $_SESSION['flash_success'] = 'Utilisateur supprimé avec succès.';
+                    header('Location: admin-users.php');
+                    exit;
+                }
+            }
+        }
+    }
+
+    if ($formAction !== 'delete_user') {
     $form['firstname'] = trim((string) ($_POST['firstname'] ?? ''));
     $form['lastname'] = trim((string) ($_POST['lastname'] ?? ''));
     $form['username'] = mb_strtolower(trim((string) ($_POST['username'] ?? '')));
@@ -119,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: admin-users.php');
         exit;
     }
+    }
 }
 
 require __DIR__ . '/../templates/shared/header.php';
@@ -145,7 +192,7 @@ require __DIR__ . '/../templates/shared/header.php';
     <section class="panel user-form-section">
         <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-sitemap"></i></span><div><h2>Organisation</h2><p>Rôle, groupe et informations d’arrivée dans l’entreprise.</p></div></div>
         <div class="form-grid user-form-grid">
-            <div class="field"><label for="role_id">Rôle *</label><select id="role_id" name="role_id" required><option value="">Choisir…</option><?php foreach($roles as $role):?><option value="<?=(int)$role['id']?>" <?=(int)$form['role_id']===(int)$role['id']?'selected':''?>><?=htmlspecialchars($role['name'])?></option><?php endforeach;?></select></div>
+            <div class="field"><label for="role_id">Rôle *</label><select id="role_id" name="role_id" required><option value="">Choisir…</option><?php foreach($roles as $role):?><option value="<?=(int)$role['id']?>" <?=(int)$form['role_id']===(int)$role['id']?'selected':''?>><?=htmlspecialchars($role['name'] === 'IT' ? 'Support IT' : $role['name'])?></option><?php endforeach;?></select></div>
             <div class="field"><label for="group_id">Groupe</label><select id="group_id" name="group_id"><option value="">Non attribué</option><?php foreach($groups as $group):?><option value="<?=(int)$group['id']?>" <?=(int)($form['group_id']??0)===(int)$group['id']?'selected':''?>><?=htmlspecialchars($group['name'])?><?=!$group['active']?' (désactivé)':''?></option><?php endforeach;?></select></div>
             <div class="field"><label for="arrival_date">Date d’arrivée</label><input id="arrival_date" name="arrival_date" type="date" value="<?=htmlspecialchars((string)($form['arrival_date']??''))?>"></div>
             <div class="field switch-field"><label class="switch-row"><input type="checkbox" name="active" value="1" <?=$form['active']?'checked':''?>><span class="switch-copy"><strong>Compte actif</strong><small>L’utilisateur peut se connecter à TicketFlow.</small></span></label></div>
@@ -163,4 +210,15 @@ require __DIR__ . '/../templates/shared/header.php';
 
     <div class="user-form-actions"><a class="btn ghost" href="admin-users.php">Annuler</a><button class="btn primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> <?= $isEdit ? 'Enregistrer les modifications' : 'Créer le compte' ?></button></div>
 </form>
+<?php if ($isEdit): ?>
+<section class="panel user-delete-zone-v1206">
+    <div class="user-delete-zone-copy-v1206"><span class="user-delete-zone-icon-v1206"><i class="fa-solid fa-user-xmark"></i></span><div><h2>Supprimer l’utilisateur</h2><p>La suppression est disponible uniquement si le compte ne possède aucun historique métier. Sinon, utilisez la désactivation pour préserver la traçabilité.</p></div></div>
+    <form method="post" onsubmit="return confirm('Supprimer définitivement cet utilisateur ? Cette action est irréversible.');">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
+        <input type="hidden" name="id" value="<?= $id ?>">
+        <input type="hidden" name="action" value="delete_user">
+        <button class="btn danger" type="submit"><i class="fa-solid fa-trash-can"></i> Supprimer l’utilisateur</button>
+    </form>
+</section>
+<?php endif; ?>
 <?php require __DIR__ . '/../templates/shared/footer.php'; ?>

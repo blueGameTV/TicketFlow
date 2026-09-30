@@ -15,17 +15,20 @@ if (!in_array($scope, ['pending', 'all'], true)) {
 }
 
 $sql = 'SELECT ma.id, ma.status, ma.comment, ma.requested_at, ma.responded_at,
+               ma.stage, ma.target_manager_id,
                t.ticket_number, t.title, t.created_at,
                ts.code AS ticket_status_code, ts.name AS ticket_status_name,
                p.name AS priority_name, p.level AS priority_level,
                CONCAT(requester.firstname, " ", requester.lastname) AS requester_name,
-               CONCAT(requested_by.firstname, " ", requested_by.lastname) AS requested_by_name
+               CONCAT(requested_by.firstname, " ", requested_by.lastname) AS requested_by_name,
+               CONCAT(target.firstname, " ", target.lastname) AS target_manager_name
         FROM manager_approvals ma
         INNER JOIN tickets t ON t.id = ma.ticket_id
         INNER JOIN ticket_statuses ts ON ts.id = t.status_id
         INNER JOIN priorities p ON p.id = t.priority_id
         INNER JOIN users requester ON requester.id = t.requester_id
         INNER JOIN users requested_by ON requested_by.id = ma.requested_by
+        LEFT JOIN users target ON target.id = ma.target_manager_id
         WHERE ma.manager_id = :manager_id AND t.deleted_at IS NULL';
 
 if ($scope === 'pending') {
@@ -54,7 +57,7 @@ require __DIR__ . '/../templates/shared/header.php';
     <div>
         <span class="badge"><i class="fa-solid fa-user-tie"></i> Manager</span>
         <h1>Validations</h1>
-        <p>Traitez les demandes envoyées par l’équipe IT depuis une file claire et priorisée.</p>
+        <p>Traitez les validations N+1 puis, lorsque vous êtes sélectionné, les validations finales transmises par le Support IT.</p>
     </div>
     <div class="queue-summary manager-validation-summary">
         <i class="fa-solid fa-list-check"></i>
@@ -80,16 +83,22 @@ require __DIR__ . '/../templates/shared/header.php';
             <article class="ticket-queue-item manager-validation-item priority-border-<?= (int) $approval['priority_level'] ?>">
                 <div class="queue-type-icon"><i class="fa-solid fa-user-check"></i></div>
                 <div class="queue-ticket-main">
-                    <div class="queue-ticket-topline"><strong><?= htmlspecialchars($approval['ticket_number']) ?></strong><span>Validation</span></div>
+                    <div class="queue-ticket-topline"><strong><?= htmlspecialchars($approval['ticket_number']) ?></strong><span><?= $approval['stage'] === 'target' ? 'Validation finale' : 'Validation N+1' ?></span></div>
                     <h3><?= htmlspecialchars($approval['title']) ?></h3>
                     <div class="queue-ticket-meta">
                         <span><i class="fa-regular fa-user"></i> <?= htmlspecialchars($approval['requester_name']) ?></span>
                         <span><i class="fa-solid fa-headset"></i> Demandée par <?= htmlspecialchars($approval['requested_by_name']) ?></span>
+                        <?php if ($approval['stage'] === 'n1' && $approval['target_manager_name']): ?>
+                            <span><i class="fa-solid fa-arrow-right"></i> Puis <?= htmlspecialchars($approval['target_manager_name']) ?></span>
+                        <?php elseif ($approval['stage'] === 'target'): ?>
+                            <span><i class="fa-solid fa-check-double"></i> N+1 déjà validé</span>
+                        <?php endif; ?>
                         <span><i class="fa-regular fa-clock"></i> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($approval['requested_at']))) ?></span>
                     </div>
                 </div>
                 <div class="queue-ticket-badges">
                     <span class="priority-pill priority-level-<?= (int) $approval['priority_level'] ?>"><i class="fa-solid fa-flag"></i> <?= htmlspecialchars($approval['priority_name']) ?></span>
+                    <span class="v120-approval-stage <?= $approval['stage'] === 'target' ? 'is-final' : 'is-n1' ?>"><?= $approval['stage'] === 'target' ? 'Étape 2' : 'Étape 1' ?></span>
                     <span class="approval-status approval-<?= htmlspecialchars($label[1]) ?>"><i class="fa-solid <?= $approval['status'] === 'pending' ? 'fa-hourglass-half' : ($approval['status'] === 'approved' ? 'fa-check' : ($approval['status'] === 'rejected' ? 'fa-xmark' : 'fa-circle-info')) ?>"></i> <?= htmlspecialchars($label[0]) ?></span>
                 </div>
                 <div class="queue-assignee manager-validation-decision">

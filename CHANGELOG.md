@@ -1,30 +1,174 @@
 # Changelog
 
+## v1.2.0 — Stable
+
+- thèmes clair, sombre et système par utilisateur ;
+- interface FR/EN avec anglais indiqué comme bêta ;
+- changement forcé du mot de passe et refonte de setup.php ;
+- validation Manager à deux niveaux : N+1 puis Manager sélectionné ;
+- import utilisateurs CSV/XLSX avec modèles, prévisualisation et contrôles ;
+- compatibilité Excel renforcée pour imports et extractions ;
+- calendriers personnalisés, conversations et pièces jointes améliorés ;
+- améliorations des alertes de service, notifications et pages d’administration ;
+- mise à jour automatique prise en charge depuis v1.0.0 et v1.1.0.
+
+## v1.2.0-dev.6.2 — Correctif priorité ticket
+
+- correction du sélecteur Importance dans la fiche ticket ;
+- suppression de l'erreur `Undefined array key "code"` ;
+- restauration des niveaux Faible / Normale / Haute / Critique ;
+- correction du libellé du sélecteur de statut qui utilisait par erreur les traductions de priorité.
+
+## v1.2.0-dev.6.2 — Correctif migration langue
+
+- correction de la migration `default_language` : `app_settings` utilise `setting_key` comme clé primaire et ne possède pas de colonne `id` ;
+- migration rendue entièrement idempotente ;
+- la colonne `user_preferences.language` peut déjà exister sans bloquer l'installation.
+
+## v1.2.0-dev.6.2 — Hotfix migration langue
+
+- corrige l'installation de la migration `language` avant le chargement du header ;
+- corrige le script d'application qui lançait incorrectement les scripts de migration ;
+- ajoute une protection de compatibilité dans le header pour éviter une erreur fatale si la colonne n'existe pas encore.
+
+## v1.2.0-dev.6.2 — Correctif lecture des fichiers Excel d’import
+
+- correction de la lecture des cellules `sharedStrings` produites par Microsoft Excel ;
+- compatibilité conservée avec les cellules `inlineStr` générées par TicketFlow ;
+- les en-têtes `prenom`, `nom`, `identifiant`, `email` et `role` sont désormais correctement reconnus après modification/enregistrement du modèle dans Excel.
+
+## v1.2.0-dev.6.2 — Correctif Excel / téléchargements
+
+- génération XLSX renforcée et vérifiée avant téléchargement ;
+- suppression des sorties parasites pouvant corrompre les fichiers Excel ;
+- en-têtes HTTP de téléchargement centralisés et compatibles avec Excel/Chrome ;
+- correctif appliqué à toutes les extractions XLSX et au modèle d’import utilisateurs ;
+- script de mise à jour corrigé pour déployer `ExcelExportService.php`, `export-users.php`, `export-tickets.php` et `export-operations.php`.
+
+## v1.2.0-dev.6.2 — Correctif import utilisateurs
+
+- correction du script de déploiement DEV : la page `public/admin-user-import.php` est désormais réellement copiée sur la VM ;
+- correction de l’erreur Apache 404 « Not Found » sur le bouton « Importer CSV / Excel » ;
+- aucun changement fonctionnel supplémentaire sur le moteur d’import.
+
+## v1.2.0-dev.6.2 — Import utilisateurs CSV / Excel
+
+- import massif de comptes depuis CSV ou XLSX ;
+- prévisualisation et validation avant création ;
+- rattachement automatique aux groupes et contrôle du Manager du groupe ;
+- prise en charge des rôles Administrateur, Support IT, Manager et Collaborateur ;
+- détection des doublons dans TicketFlow et dans le fichier ;
+- génération automatique d’un mot de passe sécurisé lorsqu’il n’est pas fourni ;
+- affichage unique des identifiants/mots de passe après import ;
+- modèles CSV et Excel téléchargeables ;
+- journalisation des comptes créés par import.
+
+## v1.2.0-dev.6.2 — Validation Manager à deux niveaux
+
+- le Support IT sélectionne maintenant un Manager précis pour la validation finale ;
+- la demande passe obligatoirement d’abord par le Manager N+1 du demandeur ;
+- le Manager final n’est notifié qu’après accord du N+1 ;
+- un refus ou une demande d’informations du N+1 arrête la chaîne avant la seconde étape ;
+- historique et file des validations indiquent clairement Étape 1 (N+1) et Étape 2 (Manager sélectionné) ;
+- migration de la table `manager_approvals` pour stocker l’étape, le Manager cible et le lien entre les deux validations.
+
+## v1.2.0-dev.6.2 — Mot de passe forcé & assistant d’installation
+
+- remplacement de la redirection de changement forcé par une popup bloquante sur le Dashboard ;
+- floutage et blocage complet de l’interface jusqu’au renouvellement ;
+- ancien mot de passe non demandé uniquement dans le contexte imposé par l’Administrateur ;
+- validation du nouveau mot de passe côté client et côté serveur ;
+- blocage serveur des autres pages tant que le changement forcé n’est pas terminé ;
+- refonte complète de `setup.php` et de ses états erreur/succès ;
+- amélioration des règles de sécurité du mot de passe lors de la création du premier Administrateur.
+
+## v1.2.0-dev.6.2 — Lisibilité du badge interne
+
+- amélioration du contraste du badge "Interne Support IT" en thème clair ;
+- amélioration du contraste du badge "Interne Support IT" en thème sombre ;
+- cache-busting mis à jour pour recharger immédiatement les styles.
+
+
+## v1.2.0-dev.6.2 — Multilingue FR / EN
+
+- ajout d’un système centralisé de traduction ;
+- français et anglais disponibles (espagnol reporté à une version ultérieure) ;
+- langue enregistrée par utilisateur dans les préférences ;
+- langue par défaut configurable par l’Administrateur ;
+- navigation globale, paramètres, dashboard et création de ticket traduits en première passe ;
+- architecture prête pour étendre progressivement la traduction aux autres écrans et messages système.
+
+
+## v1.2.0-dev.6.2 — Import Excel robuste
+
+- remplacement du lecteur XLSX par un parseur DOM indépendant des namespaces Office Open XML ;
+- prise en charge robuste des `sharedStrings`, `inlineStr`, cellules numériques et fichiers réenregistrés par Microsoft Excel ;
+- détection automatique de la première feuille via les relations du classeur ;
+- normalisation renforcée des en-têtes invisibles/BOM/espaces spéciaux ;
+- message d’erreur enrichi avec les colonnes réellement détectées.
+
+
+## v1.2.0-dev.6.2 — Correctif de chargement et finitions UI
+
+- correction du cache-busting qui empêchait les nouveaux styles v1.2 de se charger ;
+- boutons sombres avec contraste renforcé ;
+- description des tickets rendue plus lisible ;
+- carte « Version installée » ciblée avec la bonne classe ;
+- calendrier/date-heure remplacé par un sélecteur TicketFlow personnalisé ;
+- espacements de la page Alertes de service améliorés.
+
+
+## v1.2.0-dev.1.2 — Finitions visuelles supplémentaires
+
+- amélioration de la visibilité des boutons, surtout en thème sombre ;
+- amélioration de la lisibilité de la description des tickets ;
+- nouvelle couleur de fond pour la carte « Version installée » ;
+- harmonisation visuelle des champs calendrier/date-heure ;
+- amélioration des espacements sur la page Alertes de service.
+
+
+## v1.2.0-dev.1.1 — Correctifs thème sombre et historique des alertes
+
+- correction des textes devenus trop sombres/invisibles sur les statistiques ;
+- correction des cartes, badges et surfaces restant trop clairs en thème sombre ;
+- correction de la page À propos & Nouveautés en thème sombre ;
+- amélioration du contraste des tableaux, distributions et indicateurs ;
+- nouvelle présentation complète de l’historique des alertes de service ;
+- couleurs des niveaux d’alerte adaptées au thème sombre.
+
+
+## v1.2.0-dev.1 — Thèmes et identité Support IT
+
+- réparation et harmonisation du thème sombre ;
+- thème personnel Clair / Sombre / Système mémorisé par utilisateur ;
+- aperçu immédiat du thème dans Paramètres ;
+- valeur de repli « Système » pour les nouveaux profils ;
+- renommage visuel du rôle IT en « Support IT » sans modifier la valeur technique `IT` ;
+- libellés Support IT harmonisés dans les tickets, exports, maintenance et administration.
+
+
 ## v1.1.0 — Alertes, maintenance et nouveautés
 
-- ajout des alertes de service globales en temps réel ;
-- détail complet des alertes accessible au clic ;
-- nouvelle page À propos & Nouveautés et journal consulté par utilisateur ;
-- ajout du mode maintenance avec redirection automatique et fin automatique ;
-- accès Administrateur maintenu et accès IT configurable pendant la maintenance ;
-- ajout des maintenances planifiées avec bannière d'information ;
-- nouvelle extraction Excel des alertes et maintenances ;
-- harmonisation des menus déroulants, champs fichiers et filtres ;
-- migration `v110_service_alerts_maintenance.sql` et script `upgrade_v110.php` ;
-- documentation et contrôles de release mis à jour.
+- alertes de service globales visibles dans toute l'application ;
+- détail complet d'une alerte au clic, avec titre limité à 80 caractères et message à 2000 caractères ;
+- page À propos & Nouveautés avec version installée et historique ;
+- journal des nouveautés par utilisateur ;
+- mode maintenance TicketFlow avec redirection automatique des Collaborateurs et Managers ;
+- accès Administrateur maintenu et accès IT configurable pendant une maintenance ;
+- fin automatique du mode maintenance à l'heure estimée ;
+- maintenances planifiées avec bandeau d'information ;
+- extraction Excel des alertes et maintenances ;
+- harmonisation des menus déroulants, champs de recherche, sélecteurs de fichiers et écrans de maintenance ;
+- ajout de la migration `v110_service_alerts_maintenance.sql` et du script `upgrade_v110.php`.
 
-## v1.0.0 — Stable
+## v1.0.0 — Première version stable
 
 - première version stable de TicketFlow ;
-- validation complète de la checklist Release Candidate ;
-- installation automatique Debian/Ubuntu avec `install.sh` ;
-- assistant web sécurisé pour créer le premier Administrateur ;
-- configuration automatique d'Apache, MariaDB, PHP et du cron ;
+- installation automatique Debian/Ubuntu et assistant Web sécurisé ;
+- workflows Administrateur, IT, Manager et Collaborateur ;
 - recherche globale, filtres avancés, vues enregistrées et actions multiples ;
-- workflows Administrateur, IT, Manager et Collaborateur validés ;
 - SLA, notifications, exports, statistiques, audit, e-mails et automatisations ;
-- durcissement des sessions, contrôles d'accès et protections CSRF ;
-- documentation GitHub et procédures d'installation finalisées.
+- durcissement sécurité et documentation de production.
 
 ## v0.9.0-rc1 — Release Candidate
 
@@ -205,3 +349,9 @@
 - configuration automatique du VirtualHost Apache et du cron ;
 - ajout de `public/setup.php` pour créer le premier Administrateur dans le navigateur ;
 - jeton temporaire et verrouillage de l'assistant après installation.
+
+## 1.2.0-dev.6.2
+- Corrections du thème sombre sur la conversation des tickets.
+- Refonte visuelle des cartes de pièces jointes et de leur état au survol.
+- Amélioration du calendrier TicketFlow et prise en charge des champs `date` en plus des champs `datetime-local`.
+- Mise à jour du cache-busting front (`v120.css`, `theme-preferences.js`, `datetime-picker.js`).

@@ -425,22 +425,25 @@ final class TicketService
         );
     }
 
-    public function requestManagerApproval(int $ticketId, array $user): void
+    public function requestManagerApproval(int $ticketId, int $targetManagerId, array $user): void
     {
         $this->assertItOrAdmin($user);
+        if ($targetManagerId <= 0) {
+            throw new RuntimeException('Sélectionnez le Manager qui devra effectuer la validation finale.');
+        }
 
         $this->pdo->beginTransaction();
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT t.id, t.requester_id, ts.code AS status_code, g.manager_id,
-                        CONCAT(m.firstname, ' ', m.lastname) AS manager_name,
-                        m.active AS manager_active, r.name AS manager_role
+                "SELECT t.id, t.requester_id, ts.code AS status_code, g.manager_id AS n1_manager_id,
+                        CONCAT(n1.firstname, ' ', n1.lastname) AS n1_manager_name,
+                        n1.active AS n1_manager_active, n1r.name AS n1_manager_role
                  FROM tickets t
                  INNER JOIN ticket_statuses ts ON ts.id = t.status_id
                  INNER JOIN users requester ON requester.id = t.requester_id
                  LEFT JOIN groups_company g ON g.id = requester.group_id
-                 LEFT JOIN users m ON m.id = g.manager_id
-                 LEFT JOIN roles r ON r.id = m.role_id
+                 LEFT JOIN users n1 ON n1.id = g.manager_id
+                 LEFT JOIN roles n1r ON n1r.id = n1.role_id
                  WHERE t.id = :id AND t.deleted_at IS NULL
                  FOR UPDATE"
             );
@@ -452,34 +455,48 @@ final class TicketService
             if (in_array($ticket['status_code'], ['closed', 'cancelled', 'waiting_confirmation'], true)) {
                 throw new RuntimeException('Une validation Manager ne peut pas être demandée dans l’état actuel du ticket.');
             }
-            if (empty($ticket['manager_id'])) {
-                throw new RuntimeException('Le demandeur n\'a aucun Manager défini pour son groupe.');
+            if (empty($ticket['n1_manager_id'])) {
+                throw new RuntimeException('Le demandeur n\'a aucun Manager N+1 défini pour son groupe.');
             }
-            if ((int) $ticket['manager_active'] !== 1 || $ticket['manager_role'] !== 'Manager') {
-                throw new RuntimeException('Le Manager associé au groupe est invalide ou inactif.');
+            if ((int) $ticket['n1_manager_active'] !== 1 || $ticket['n1_manager_role'] !== 'Manager') {
+                throw new RuntimeException('Le Manager N+1 associé au groupe est invalide ou inactif.');
+            }
+            if ((int) $ticket['n1_manager_id'] === $targetManagerId) {
+                throw new RuntimeException('Le Manager final doit être différent du Manager N+1 du demandeur.');
+            }
+
+            $targetStmt = $this->pdo->prepare(
+                "SELECT u.id, u.active, CONCAT(u.firstname, ' ', u.lastname) AS manager_name, r.name AS role_name
+                 FROM users u
+                 INNER JOIN roles r ON r.id = u.role_id
+                 WHERE u.id = :id
+                 LIMIT 1"
+            );
+            $targetStmt->execute(['id' => $targetManagerId]);
+            $target = $targetStmt->fetch();
+            if (!$target || (int) $target['active'] !== 1 || $target['role_name'] !== 'Manager') {
+                throw new RuntimeException('Le Manager sélectionné est invalide ou inactif.');
             }
 
             $pending = $this->pdo->prepare(
-                "SELECT id FROM manager_approvals
-                 WHERE ticket_id = :ticket_id AND manager_id = :manager_id AND status = 'pending'
-                 LIMIT 1"
+                "SELECT id FROM manager_approvals WHERE ticket_id = :ticket_id AND status = 'pending' LIMIT 1"
             );
-            $pending->execute([
-                'ticket_id' => $ticketId,
-                'manager_id' => $ticket['manager_id'],
-            ]);
+            $pending->execute(['ticket_id' => $ticketId]);
             if ($pending->fetchColumn()) {
-                throw new RuntimeException('Une validation de ce Manager est déjà en attente.');
+                throw new RuntimeException('Une chaîne de validation Manager est déjà en attente pour ce ticket.');
             }
 
             $insert = $this->pdo->prepare(
-                'INSERT INTO manager_approvals (ticket_id, manager_id, requested_by)
-                 VALUES (:ticket_id, :manager_id, :requested_by)'
+                "INSERT INTO manager_approvals
+                    (ticket_id, manager_id, requested_by, stage, target_manager_id)
+                 VALUES
+                    (:ticket_id, :manager_id, :requested_by, 'n1', :target_manager_id)"
             );
             $insert->execute([
                 'ticket_id' => $ticketId,
-                'manager_id' => $ticket['manager_id'],
+                'manager_id' => $ticket['n1_manager_id'],
                 'requested_by' => $user['id'],
+                'target_manager_id' => $targetManagerId,
             ]);
 
             $statusId = $this->statusId('waiting_manager');
@@ -489,16 +506,17 @@ final class TicketService
             $this->addHistory(
                 $ticketId,
                 (int) $user['id'],
-                'Validation Manager demandée',
+                'Validation Manager à deux niveaux demandée',
                 null,
-                (string) $ticket['manager_name']
+                'N+1 : ' . $ticket['n1_manager_name'] . ' → Validation finale : ' . $target['manager_name']
             );
+
             $meta = $this->ticketMeta($ticketId);
             $this->notifications->notify(
-                (int) $ticket['manager_id'],
+                (int) $ticket['n1_manager_id'],
                 'manager_approval',
-                'Validation Manager requise',
-                'Une validation est demandée pour ' . $meta['ticket_number'] . ' — ' . $meta['title'],
+                'Validation N+1 requise',
+                'Votre validation est requise pour ' . $meta['ticket_number'] . ' avant transmission à ' . $target['manager_name'] . '.',
                 $ticketId,
                 'ticket.php?number=' . rawurlencode((string) $meta['ticket_number'])
             );
@@ -530,9 +548,13 @@ final class TicketService
         $this->pdo->beginTransaction();
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT ma.id, ma.ticket_id, ma.manager_id, ma.requested_by, ma.status, t.ticket_number, t.assigned_it_id, t.title
+                "SELECT ma.id, ma.ticket_id, ma.manager_id, ma.requested_by, ma.stage,
+                        ma.target_manager_id, ma.parent_approval_id, ma.status,
+                        t.ticket_number, t.assigned_it_id, t.title,
+                        CONCAT(target.firstname, ' ', target.lastname) AS target_manager_name
                  FROM manager_approvals ma
                  INNER JOIN tickets t ON t.id = ma.ticket_id
+                 LEFT JOIN users target ON target.id = ma.target_manager_id
                  WHERE ma.id = :id
                  FOR UPDATE"
             );
@@ -556,20 +578,17 @@ final class TicketService
                 'id' => $approvalId,
             ]);
 
-            $statusId = $this->statusId('in_progress');
-            $updateTicket = $this->pdo->prepare('UPDATE tickets SET status_id = :status_id WHERE id = :id');
-            $updateTicket->execute(['status_id' => $statusId, 'id' => $approval['ticket_id']]);
-
             $label = match ($decision) {
                 'approved' => 'Validée',
                 'rejected' => 'Refusée',
                 'more_info' => 'Informations supplémentaires demandées',
             };
-            $newValue = $label . ($comment !== '' ? ' — ' . $comment : '');
+            $stageLabel = $approval['stage'] === 'target' ? 'Manager sélectionné' : 'Manager N+1';
+            $newValue = $stageLabel . ' : ' . $label . ($comment !== '' ? ' — ' . $comment : '');
             $this->addHistory(
                 (int) $approval['ticket_id'],
                 (int) $user['id'],
-                'Réponse du Manager',
+                'Réponse du ' . $stageLabel,
                 'En attente',
                 $newValue
             );
@@ -578,10 +597,79 @@ final class TicketService
             if (!empty($approval['assigned_it_id'])) {
                 $recipients[] = (int) $approval['assigned_it_id'];
             }
+
+            if ($approval['stage'] === 'n1' && $decision === 'approved') {
+                if (empty($approval['target_manager_id'])) {
+                    throw new RuntimeException('Le Manager final sélectionné est introuvable.');
+                }
+
+                $targetStmt = $this->pdo->prepare(
+                    "SELECT u.id, u.active, CONCAT(u.firstname, ' ', u.lastname) AS manager_name, r.name AS role_name
+                     FROM users u
+                     INNER JOIN roles r ON r.id = u.role_id
+                     WHERE u.id = :id LIMIT 1"
+                );
+                $targetStmt->execute(['id' => $approval['target_manager_id']]);
+                $target = $targetStmt->fetch();
+                if (!$target || (int) $target['active'] !== 1 || $target['role_name'] !== 'Manager') {
+                    throw new RuntimeException('Le Manager final sélectionné est devenu invalide ou inactif.');
+                }
+
+                $insertNext = $this->pdo->prepare(
+                    "INSERT INTO manager_approvals
+                        (ticket_id, manager_id, requested_by, stage, target_manager_id, parent_approval_id)
+                     VALUES
+                        (:ticket_id, :manager_id, :requested_by, 'target', :target_manager_id, :parent_approval_id)"
+                );
+                $insertNext->execute([
+                    'ticket_id' => $approval['ticket_id'],
+                    'manager_id' => $target['id'],
+                    'requested_by' => $approval['requested_by'],
+                    'target_manager_id' => $target['id'],
+                    'parent_approval_id' => $approvalId,
+                ]);
+
+                $this->addHistory(
+                    (int) $approval['ticket_id'],
+                    (int) $user['id'],
+                    'Validation transmise au Manager sélectionné',
+                    null,
+                    (string) $target['manager_name']
+                );
+
+                $this->notifications->notify(
+                    (int) $target['id'],
+                    'manager_approval',
+                    'Validation finale Manager requise',
+                    $approval['ticket_number'] . ' a été validé par le N+1 et attend maintenant votre décision finale.',
+                    (int) $approval['ticket_id'],
+                    'ticket.php?number=' . rawurlencode((string) $approval['ticket_number'])
+                );
+                $this->notifications->notifyMany(
+                    $recipients,
+                    'manager_response',
+                    'Validation N+1 accordée',
+                    $approval['ticket_number'] . ' : la demande est transmise à ' . $target['manager_name'] . ' pour validation finale.',
+                    (int) $approval['ticket_id'],
+                    'ticket.php?number=' . rawurlencode((string) $approval['ticket_number']),
+                    (int) $user['id']
+                );
+
+                $this->pdo->commit();
+                return;
+            }
+
+            $statusId = $this->statusId('in_progress');
+            $updateTicket = $this->pdo->prepare('UPDATE tickets SET status_id = :status_id WHERE id = :id');
+            $updateTicket->execute(['status_id' => $statusId, 'id' => $approval['ticket_id']]);
+
+            $notificationTitle = $approval['stage'] === 'target'
+                ? 'Réponse du Manager sélectionné'
+                : 'Réponse du Manager N+1';
             $this->notifications->notifyMany(
                 $recipients,
                 'manager_response',
-                'Réponse du Manager',
+                $notificationTitle,
                 $approval['ticket_number'] . ' : ' . $label,
                 (int) $approval['ticket_id'],
                 'ticket.php?number=' . rawurlencode((string) $approval['ticket_number']),

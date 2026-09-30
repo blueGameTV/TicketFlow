@@ -4,6 +4,7 @@ set -Eeuo pipefail
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 BACKUP_ROOT="${TICKETFLOW_BACKUP_DIR:-/var/backups/ticketflow}"
 BRANCH="${TICKETFLOW_BRANCH:-main}"
+UPDATER_BUILD="1.2.0-r1"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -25,20 +26,13 @@ TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP-v$OLD_VERSION"
 
 say "Préparation de la mise à jour"
-printf 'Updater            : 1.1.0-r2\n'
+printf 'Updater            : %s\n' "$UPDATER_BUILD"
 printf 'Version installée : %s\n' "$OLD_VERSION"
 printf 'Branche cible      : %s\n' "$BRANCH"
 
-# Les installations v1.0.0 ont pu changer uniquement le bit exécutable des
-# fichiers .gitkeep de storage. TicketFlow ne versionne pas les permissions
-# runtime : on désactive donc la détection du file mode dans ce dépôt.
+# Les permissions runtime peuvent modifier le bit exécutable des placeholders.
 git -C "$APP_DIR" config core.fileMode false
 
-# Les anciennes installations v1.0.0 pouvaient rendre exécutables les fichiers
-# storage/**/.gitkeep via "chmod -R 770". Git considère alors ces changements
-# de mode comme des modifications locales. Ces fichiers sont uniquement des
-# placeholders de répertoires runtime : on peut les restaurer sans toucher aux
-# données réelles (logs, uploads, cache ou sessions).
 SAFE_RUNTIME_PLACEHOLDERS=(
   "storage/cache/.gitkeep"
   "storage/logs/.gitkeep"
@@ -46,7 +40,6 @@ SAFE_RUNTIME_PLACEHOLDERS=(
   "storage/uploads/.gitkeep"
   "storage/uploads/avatars/.gitkeep"
 )
-
 for placeholder in "${SAFE_RUNTIME_PLACEHOLDERS[@]}"; do
   if git -C "$APP_DIR" ls-files --error-unmatch "$placeholder" >/dev/null 2>&1; then
     if ! git -C "$APP_DIR" diff --quiet -- "$placeholder" || ! git -C "$APP_DIR" diff --cached --quiet -- "$placeholder"; then
@@ -86,10 +79,15 @@ DB_PORT="${DB_VALUES[1]:-3306}"
 DB_NAME="${DB_VALUES[2]:-ticketflow}"
 DB_USER="${DB_VALUES[3]:-}"
 DB_PASS="${DB_VALUES[4]:-}"
-
 [[ -n "$DB_USER" && -n "$DB_NAME" ]] || fail "Configuration MariaDB incomplète."
 
-MYSQL_PWD="$DB_PASS" mysqldump   --single-transaction   --routines   --triggers   --events   -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME"   > "$BACKUP_DIR/database.sql"
+MYSQL_PWD="$DB_PASS" mysqldump \
+  --single-transaction \
+  --routines \
+  --triggers \
+  --events \
+  -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" \
+  > "$BACKUP_DIR/database.sql"
 
 chmod 600 "$BACKUP_DIR/config.php" "$BACKUP_DIR/database.sql"
 ok "Sauvegarde créée : $BACKUP_DIR"
@@ -102,23 +100,27 @@ git -C "$APP_DIR" pull --ff-only origin "$BRANCH"
 NEW_VERSION="$(tr -d '[:space:]' < "$APP_DIR/VERSION")"
 ok "Code mis à jour : v$OLD_VERSION → v$NEW_VERSION"
 
-needs_v110="$(
+needs_migration() {
+  local target="$1"
   php -r '
-  $old=$argv[1]; $new=$argv[2];
-  echo (version_compare($old,"1.1.0","<") && version_compare($new,"1.1.0",">=")) ? "1" : "0";
-  ' "$OLD_VERSION" "$NEW_VERSION"
-)"
+$old=$argv[1]; $new=$argv[2]; $target=$argv[3];
+echo (version_compare($old,$target,"<") && version_compare($new,$target,">=")) ? "1" : "0";
+' "$OLD_VERSION" "$NEW_VERSION" "$target"
+}
 
-if [[ "$needs_v110" == "1" ]]; then
+if [[ "$(needs_migration '1.1.0')" == "1" ]]; then
   say "Migration base de données vers v1.1.0"
   php "$APP_DIR/scripts/upgrade_v110.php"
 fi
 
+if [[ "$(needs_migration '1.2.0')" == "1" ]]; then
+  say "Migration base de données vers v1.2.0"
+  php "$APP_DIR/scripts/upgrade_v120.php"
+fi
+
 say "Permissions"
-mkdir -p "$APP_DIR/storage/logs" "$APP_DIR/storage/uploads" "$APP_DIR/storage/cache" "$APP_DIR/storage/sessions"
+mkdir -p "$APP_DIR/storage/logs" "$APP_DIR/storage/uploads" "$APP_DIR/storage/uploads/avatars" "$APP_DIR/storage/cache" "$APP_DIR/storage/sessions"
 chown -R www-data:www-data "$APP_DIR/storage"
-# Répertoires exécutables/traversables, fichiers non exécutables.
-# Cela évite de recréer le problème Git des anciens .gitkeep en mode 770.
 find "$APP_DIR/storage" -type d -exec chmod 770 {} +
 find "$APP_DIR/storage" -type f -exec chmod 660 {} +
 chown root:www-data "$APP_DIR/config/config.php"
@@ -140,4 +142,4 @@ printf '\n\033[1;32m============================================================
 printf '\033[1;32m TicketFlow a été mis à jour avec succès vers v%s.\033[0m\n' "$NEW_VERSION"
 printf '\033[1;32m============================================================\033[0m\n'
 printf 'Sauvegarde de sécurité : %s\n' "$BACKUP_DIR"
-printf 'Configuration, base de données et pièces jointes ont été conservées.\n'
+printf 'Configuration, comptes, tickets, base de données et pièces jointes ont été conservés.\n'

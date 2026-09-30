@@ -120,6 +120,13 @@ final class ServiceAlertService
         $stmt->execute(['id' => $id]);
     }
 
+    public function deleteResolvedHistory(): int
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM service_alerts WHERE status = 'resolved'");
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
     public function severityLabel(string $severity): string
     {
         return [

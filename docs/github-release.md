@@ -8,38 +8,24 @@ php scripts/security_audit.php
 php scripts/release_check.php
 ```
 
-Vérifiez ensuite :
-
-```bash
-git status
-```
-
-Les fichiers suivants ne doivent pas être suivis :
-
-```text
-config/config.php
-.env
-storage/logs/*
-storage/uploads/*
-*.sql contenant des données réelles
-```
+Vérifiez ensuite `git status`. Les fichiers suivants ne doivent pas être suivis : `config/config.php`, `.env`, les logs, les uploads utilisateurs et les dumps contenant des données réelles.
 
 ## Tag de version
 
-Exemple :
+Pour TicketFlow v1.2.0 :
 
 ```bash
-git tag -a v0.9.0-rc1 -m "TicketFlow v0.9.0-rc1"
-git push origin v0.9.0-rc1
+git tag -a v1.2.0 -m "TicketFlow v1.2.0"
+git push origin v1.2.0
 ```
 
 ## Contenu recommandé de la release
 
-- résumé des changements ;
-- procédure de mise à niveau ;
-- éventuelles migrations SQL ;
-- problèmes connus ;
-- avertissement « préversion » avant v1.0.
+- titre : `TicketFlow v1.2.0` ;
+- notes : `docs/release-notes-v120.md` ;
+- archive : `TicketFlow-v1.2.0.zip` ;
+- somme SHA-256 de l'archive ;
+- rappel de la commande de mise à jour automatique.
 
 ## Ne pas joindre
 

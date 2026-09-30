@@ -63,7 +63,7 @@ require __DIR__ . '/../templates/shared/header.php';
 ?>
 <section class="page-heading ticket-queue-heading my-tickets-heading">
     <div>
-        <span class="badge"><i class="fa-solid <?= $user['role'] === 'Manager' ? 'fa-user-tie' : 'fa-user' ?>"></i> <?= htmlspecialchars($user['role']) ?></span>
+        <span class="badge"><i class="fa-solid <?= $user['role'] === 'Manager' ? 'fa-user-tie' : 'fa-user' ?>"></i> <?= htmlspecialchars($user['role'] === 'IT' ? 'Support IT' : $user['role']) ?></span>
         <h1>Mes tickets</h1>
         <p>Suivez vos demandes en cours, leur priorité et l’état de leur prise en charge.</p>
     </div>
@@ -119,7 +119,7 @@ require __DIR__ . '/../templates/shared/header.php';
                     <span class="priority-pill priority-level-<?= (int) $ticket['priority_level'] ?>"><i class="fa-solid fa-flag"></i> <?= htmlspecialchars($ticket['priority_name']) ?></span>
                     <span class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><i class="fa-solid fa-circle-dot"></i> <?= htmlspecialchars($ticket['status_name']) ?></span>
                 </div>
-                <div class="queue-assignee"><span>IT assigné</span><strong><i class="fa-solid fa-headset"></i> <?= htmlspecialchars($ticket['assigned_it'] ?: 'Non assigné') ?></strong></div>
+                <div class="queue-assignee"><span>Support IT assigné</span><strong><i class="fa-solid fa-headset"></i> <?= htmlspecialchars($ticket['assigned_it'] ?: 'Non assigné') ?></strong></div>
                 <a class="btn secondary queue-open-btn" href="ticket.php?number=<?= urlencode($ticket['ticket_number']) ?>"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir</a>
             </article>
         <?php endforeach; ?>

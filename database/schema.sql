@@ -79,6 +79,7 @@ CREATE TABLE user_preferences (
     theme ENUM('light','dark','system') NOT NULL DEFAULT 'light',
     density ENUM('comfortable','compact') NOT NULL DEFAULT 'comfortable',
     sidebar_mode ENUM('expanded','compact') NOT NULL DEFAULT 'expanded',
+    language ENUM('fr','en') NOT NULL DEFAULT 'fr',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_preferences_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -224,13 +225,20 @@ CREATE TABLE manager_approvals (
     ticket_id BIGINT UNSIGNED NOT NULL,
     manager_id INT UNSIGNED NOT NULL,
     requested_by INT UNSIGNED NOT NULL,
+    stage ENUM('n1','target') NOT NULL DEFAULT 'n1',
+    target_manager_id INT UNSIGNED NULL,
+    parent_approval_id BIGINT UNSIGNED NULL,
     status ENUM('pending','approved','rejected','more_info') NOT NULL DEFAULT 'pending',
     comment TEXT NULL,
     requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     responded_at DATETIME NULL,
     CONSTRAINT fk_approvals_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
     CONSTRAINT fk_approvals_manager FOREIGN KEY (manager_id) REFERENCES users(id),
-    CONSTRAINT fk_approvals_requested_by FOREIGN KEY (requested_by) REFERENCES users(id)
+    CONSTRAINT fk_approvals_requested_by FOREIGN KEY (requested_by) REFERENCES users(id),
+    CONSTRAINT fk_approvals_target_manager FOREIGN KEY (target_manager_id) REFERENCES users(id),
+    CONSTRAINT fk_approvals_parent FOREIGN KEY (parent_approval_id) REFERENCES manager_approvals(id) ON DELETE SET NULL,
+    INDEX idx_manager_approvals_ticket_status (ticket_id, status),
+    INDEX idx_manager_approvals_target (target_manager_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE notifications (
@@ -376,7 +384,8 @@ INSERT INTO app_settings (setting_key, setting_value) VALUES
 ('auto_close_enabled', '0'),
 ('auto_close_hours', '72'),
 ('daily_digest_enabled', '0'),
-('daily_digest_hour', '8');
+('daily_digest_hour', '8'),
+('default_language', 'fr');
 
 -- TicketFlow v0.15.1 — vues enregistrées
 CREATE TABLE saved_ticket_views (
@@ -393,7 +402,9 @@ CREATE TABLE saved_ticket_views (
 
 
 -- TicketFlow v1.1.0 — alertes de service, maintenance et journal des nouveautés
-CREATE TABLE IF NOT EXISTS service_alerts (
+-- TicketFlow v1.1.0 — alertes de service, maintenance et journal des nouveautés
+
+CREATE TABLE service_alerts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_by INT UNSIGNED NOT NULL,
     resolved_by INT UNSIGNED NULL,
@@ -413,7 +424,7 @@ CREATE TABLE IF NOT EXISTS service_alerts (
     INDEX idx_service_alert_severity (severity, status)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS maintenance_windows (
+CREATE TABLE maintenance_windows (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     created_by INT UNSIGNED NOT NULL,
     title VARCHAR(160) NOT NULL,
@@ -430,7 +441,7 @@ CREATE TABLE IF NOT EXISTS maintenance_windows (
     INDEX idx_maintenance_window (starts_at, ends_at, cancelled_at)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS user_release_views (
+CREATE TABLE user_release_views (
     user_id INT UNSIGNED NOT NULL,
     version VARCHAR(30) NOT NULL,
     seen_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

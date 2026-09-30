@@ -6,7 +6,7 @@ REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
-INSTALLER_BUILD="1.1.0-r3"
+INSTALLER_BUILD="1.2.0-r1"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }

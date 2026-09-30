@@ -19,6 +19,7 @@ final class AppSettingService
         'auto_close_hours' => '72',
         'daily_digest_enabled' => '0',
         'daily_digest_hour' => '8',
+        'default_language' => 'fr',
     ];
 
     public function __construct(private PDO $pdo)

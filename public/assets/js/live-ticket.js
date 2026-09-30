@@ -1,6 +1,7 @@
 (() => {
   const number = window.TICKETFLOW_TICKET_NUMBER;
   const currentUserId = Number(window.TICKETFLOW_CURRENT_USER_ID || 0);
+  const pageLocale = (document.documentElement.lang || 'fr').toLowerCase() === 'en' ? 'en-GB' : 'fr-FR';
   if (!number) return;
 
   let lastStateHash = null;
@@ -35,7 +36,7 @@
 
     box.innerHTML = items.length
       ? ''
-      : '<p class="empty-state">Aucun message pour le moment.</p>';
+      : `<p class="empty-state">${pageLocale === 'en-GB' ? 'No messages yet.' : 'Aucun message pour le moment.'}</p>`;
 
     for (const message of items) {
       const own = Number(message.author_id || 0) === currentUserId;
@@ -48,9 +49,9 @@
             <div>
               <strong>${esc(message.author_name)}</strong>
               <span>${esc(message.author_role)}</span>
-              ${Number(message.internal) ? ' <span class="internal-badge">Interne IT</span>' : ''}
+              ${Number(message.internal) ? ` <span class="internal-badge">${pageLocale === 'en-GB' ? 'Internal IT Support' : 'Interne Support IT'}</span>` : ''}
             </div>
-            <time>${new Date(String(message.created_at).replace(' ', 'T')).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'})}</time>
+            <time>${new Date(String(message.created_at).replace(' ', 'T')).toLocaleString(pageLocale, {dateStyle: 'short', timeStyle: 'short'})}</time>
           </div>
           <div class="chat-message-text-v0136">${esc(message.message).replace(/\n/g, '<br>')}</div>
         </div>`;
@@ -58,7 +59,8 @@
     }
 
     const count = document.getElementById('live-message-count');
-    if (count) count.textContent = `${items.length} message${items.length > 1 ? 's' : ''}`;
+    if (count) count.textContent = pageLocale === 'en-GB' ? `${items.length} message${items.length === 1 ? '' : 's'}` : `${items.length} message${items.length > 1 ? 's' : ''}`;
+    box.scrollTop = box.scrollHeight;
   };
 
   const updateLightweightState = (data) => {

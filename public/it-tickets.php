@@ -7,7 +7,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $auth->requireRole('IT', 'Administrateur');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
-$pageTitle = 'Tickets IT';
+$pageTitle = 'Tickets Support IT';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$csrf->validate($_POST['csrf_token'] ?? null)) {
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } elseif ($bulkAction === 'assign') {
                             $itId = (int) ($_POST['bulk_it_id'] ?? 0);
                             if ($itId <= 0) {
-                                throw new RuntimeException('Sélectionnez un technicien IT.');
+                                throw new RuntimeException('Sélectionnez un technicien Support IT.');
                             }
                             $ticketService->transfer($ticketId, $itId, $user);
                         }
@@ -310,18 +310,18 @@ $typeIcons = [
 ?>
 <section class="page-heading ticket-queue-heading">
     <div>
-        <span class="badge"><i class="fa-solid <?= $user['role'] === 'Administrateur' ? 'fa-shield-halved' : 'fa-screwdriver-wrench' ?>"></i> <?= $user['role'] === 'Administrateur' ? 'Administration' : 'Support IT' ?></span>
-        <h1><?= $scope === 'archive' ? 'Archives des tickets' : 'File des tickets' ?></h1>
-        <p><?= $scope === 'archive' ? 'Retrouvez les tickets résolus, fermés ou annulés.' : 'Priorisez, attribuez et suivez les demandes depuis une file de travail claire.' ?></p>
+        <span class="badge"><i class="fa-solid <?= $user['role'] === 'Administrateur' ? 'fa-shield-halved' : 'fa-screwdriver-wrench' ?>"></i> <?= htmlspecialchars($user['role'] === 'Administrateur' ? t('common.administration') : t('role.IT')) ?></span>
+        <h1><?= htmlspecialchars($scope === 'archive' ? t('queue.archive_title') : t('queue.title')) ?></h1>
+        <p><?= htmlspecialchars($scope === 'archive' ? t('queue.archive_subtitle') : t('queue.subtitle')) ?></p>
     </div>
-    <div class="queue-summary"><i class="fa-solid fa-ticket"></i><div><strong><?= $totalTickets ?></strong><span>ticket<?= $totalTickets > 1 ? 's' : '' ?> dans cette vue</span></div></div>
+    <div class="queue-summary"><i class="fa-solid fa-ticket"></i><div><strong><?= $totalTickets ?></strong><span><?= htmlspecialchars(t('queue.ticket_count',['count'=>$totalTickets])) ?></span></div></div>
 </section>
 <?php if ($flashSuccess): ?><div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($flashSuccess) ?></div><?php endif; ?>
 <?php if ($flashError): ?><div class="alert error"><i class="fa-solid fa-circle-exclamation"></i> <?= htmlspecialchars($flashError) ?></div><?php endif; ?>
 
 <section class="panel saved-views-panel-v0151">
     <div class="saved-views-header-v0151">
-        <div><h2><i class="fa-solid fa-bookmark"></i> Vues enregistrées</h2><p>Enregistrez vos filtres actuels pour les retrouver en un clic.</p></div>
+        <div><h2><i class="fa-solid fa-bookmark"></i> <?= htmlspecialchars(t('queue.saved_views')) ?></h2><p><?= htmlspecialchars(t('queue.saved_views_help')) ?></p></div>
         <form method="post" class="saved-view-create-v0151">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
             <input type="hidden" name="view_action" value="save">
@@ -339,23 +339,23 @@ $typeIcons = [
             <input type="hidden" name="date_to" value="<?= htmlspecialchars($dateTo) ?>">
             <input type="hidden" name="sla" value="<?= htmlspecialchars($sla) ?>">
             <input type="hidden" name="per_page" value="<?= (int) $perPage ?>">
-            <input type="text" name="view_name" maxlength="60" placeholder="Ex. Mes urgences" required>
-            <button class="btn primary small" type="submit"><i class="fa-solid fa-bookmark"></i> Enregistrer cette vue</button>
+            <input type="text" name="view_name" maxlength="60" placeholder="<?= htmlspecialchars(t('queue.save_view_placeholder')) ?>" required>
+            <button class="btn primary small" type="submit"><i class="fa-solid fa-bookmark"></i> <?= htmlspecialchars(t('queue.save_view')) ?></button>
         </form>
     </div>
     <div class="saved-view-list-v0151">
         <?php if (!$savedViews): ?>
-            <div class="saved-view-empty-v0151"><i class="fa-regular fa-bookmark"></i><span>Aucune vue enregistrée pour le moment.</span></div>
+            <div class="saved-view-empty-v0151"><i class="fa-regular fa-bookmark"></i><span><?= htmlspecialchars(t('queue.no_saved_views')) ?></span></div>
         <?php else: ?>
             <?php foreach ($savedViews as $view): ?>
                 <div class="saved-view-chip-v0151">
                     <a href="<?= htmlspecialchars((string) $view['url']) ?>"><i class="fa-solid fa-bookmark"></i><span><?= htmlspecialchars((string) $view['name']) ?></span></a>
-                    <form method="post" onsubmit="return confirm('Supprimer cette vue enregistrée ?');">
+                    <form method="post" onsubmit="return confirm('<?= htmlspecialchars(addslashes(t('queue.delete_saved_confirm'))) ?>');">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="view_action" value="delete">
                         <input type="hidden" name="view_id" value="<?= (int) $view['id'] ?>">
                         <input type="hidden" name="return_query" value="<?= htmlspecialchars($currentQueryForReturn) ?>">
-                        <button type="submit" aria-label="Supprimer <?= htmlspecialchars((string) $view['name']) ?>"><i class="fa-solid fa-xmark"></i></button>
+                        <button type="submit" aria-label="<?= htmlspecialchars(t('queue.delete_saved_aria',['name'=>(string)$view['name']])) ?>"><i class="fa-solid fa-xmark"></i></button>
                     </form>
                 </div>
             <?php endforeach; ?>
@@ -364,71 +364,71 @@ $typeIcons = [
 </section>
 
 <div class="ticket-scope-tabs queue-tabs">
-    <a class="<?= $scope === 'mine' ? 'active' : '' ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-user-check"></i> Mes tickets</a>
-    <a class="<?= $scope === 'unassigned' ? 'active' : '' ?>" href="it-tickets.php?scope=unassigned"><i class="fa-solid fa-inbox"></i> Non attribués</a>
-    <a class="<?= $scope === 'team' ? 'active' : '' ?>" href="it-tickets.php?scope=team"><i class="fa-solid fa-users-gear"></i> Équipe IT</a>
-    <?php if ($user['role'] === 'Administrateur'): ?><a class="<?= $scope === 'all' ? 'active' : '' ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-layer-group"></i> Tous</a><?php endif; ?>
-    <a class="<?= $scope === 'archive' ? 'active' : '' ?>" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i> Archives</a>
+    <a class="<?= $scope === 'mine' ? 'active' : '' ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-user-check"></i> <?= htmlspecialchars(t('queue.my_tickets')) ?></a>
+    <a class="<?= $scope === 'unassigned' ? 'active' : '' ?>" href="it-tickets.php?scope=unassigned"><i class="fa-solid fa-inbox"></i> <?= htmlspecialchars(t('queue.unassigned')) ?></a>
+    <a class="<?= $scope === 'team' ? 'active' : '' ?>" href="it-tickets.php?scope=team"><i class="fa-solid fa-users-gear"></i> <?= htmlspecialchars(t('queue.team')) ?></a>
+    <?php if ($user['role'] === 'Administrateur'): ?><a class="<?= $scope === 'all' ? 'active' : '' ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars(t('queue.all')) ?></a><?php endif; ?>
+    <a class="<?= $scope === 'archive' ? 'active' : '' ?>" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i> <?= htmlspecialchars(t('queue.archives')) ?></a>
 </div>
 <section class="panel queue-filter-panel queue-filter-panel-v015">
     <div class="panel-heading-inline queue-filter-heading">
-        <div><h2><i class="fa-solid fa-sliders"></i> Filtres</h2><p>Combinez les critères pour affiner la file. Les filtres restent dans l’URL pour pouvoir partager la vue.</p></div>
-        <button class="btn secondary small" type="button" data-advanced-filter-toggle><i class="fa-solid fa-sliders"></i> Filtres avancés</button>
+        <div><h2><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('queue.filters')) ?></h2><p><?= htmlspecialchars(t('queue.filters_help')) ?></p></div>
+        <button class="btn secondary small" type="button" data-advanced-filter-toggle><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('queue.advanced')) ?></button>
     </div>
     <form class="ticket-filter-form-v015" method="get">
         <input type="hidden" name="scope" value="<?= htmlspecialchars($scope) ?>">
         <div class="ticket-filter-main-v015">
-            <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Numéro, titre ou demandeur…"></label>
-            <select name="status"><option value="">Tous les statuts</option><?php foreach ($statuses as $item): ?><option value="<?= htmlspecialchars($item['code']) ?>" <?= $status === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select>
-            <select name="priority"><option value="">Toutes les importances</option><?php foreach ($priorities as $item): ?><option value="<?= (int)$item['id'] ?>" <?= (string)$item['id'] === $priority ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select>
-            <button class="btn primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrer</button>
-            <a class="btn ghost" href="it-tickets.php?scope=<?= urlencode($scope) ?>"><i class="fa-solid fa-rotate-left"></i> Réinitialiser</a>
+            <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="<?= htmlspecialchars(t('queue.search_placeholder')) ?>"></label>
+            <select name="status"><option value=""><?= htmlspecialchars(t('queue.all_statuses')) ?></option><?php foreach ($statuses as $item): ?><option value="<?= htmlspecialchars($item['code']) ?>" <?= $status === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars(t('status.'.$item['code'])) ?></option><?php endforeach; ?></select>
+            <select name="priority"><option value=""><?= htmlspecialchars(t('queue.all_priorities')) ?></option><?php foreach ($priorities as $item): ?><option value="<?= (int)$item['id'] ?>" <?= (string)$item['id'] === $priority ? 'selected' : '' ?>><?= htmlspecialchars(t('priority.'.strtolower($item['name']))) ?></option><?php endforeach; ?></select>
+            <button class="btn primary" type="submit"><i class="fa-solid fa-filter"></i> <?= htmlspecialchars(t('common.filter')) ?></button>
+            <a class="btn ghost" href="it-tickets.php?scope=<?= urlencode($scope) ?>"><i class="fa-solid fa-rotate-left"></i> <?= htmlspecialchars(t('common.reset')) ?></a>
         </div>
         <div class="advanced-filter-grid-v015" data-advanced-filter-panel <?= ($typeId || $categoryId || $groupId || $managerId || $assignedIt !== '' || $dateFrom !== '' || $dateTo !== '' || $sla !== '') ? '' : 'hidden' ?>>
-            <div class="field"><label>Type</label><select name="type_id"><option value="0">Tous les types</option><?php foreach ($types as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $typeId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['code'].' — '.$item['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label>Catégorie</label><select name="category_id"><option value="0">Toutes les catégories</option><?php foreach ($categories as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $categoryId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label>Groupe demandeur</label><select name="group_id"><option value="0">Tous les groupes</option><?php foreach ($groups as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $groupId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label>Manager</label><select name="manager_id"><option value="0">Tous les Managers</option><?php foreach ($managers as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $managerId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['firstname'].' '.$item['lastname']) ?></option><?php endforeach; ?></select></div>
-            <div class="field"><label>IT assigné</label><select name="assigned_it"><option value="">Tous les IT</option><option value="unassigned" <?= $assignedIt === 'unassigned' ? 'selected' : '' ?>>Non assigné</option><?php foreach ($itUsers as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $assignedIt === (string)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['firstname'].' '.$item['lastname']) ?></option><?php endforeach; ?></select></div>
-            <?php if ($user['role'] === 'Administrateur' && $scope !== 'archive'): ?><div class="field"><label>SLA</label><select name="sla"><option value="">Tous les SLA</option><option value="response" <?= $sla === 'response' ? 'selected' : '' ?>>Prise en charge dépassée</option><option value="resolution" <?= $sla === 'resolution' ? 'selected' : '' ?>>Résolution dépassée</option><option value="ok" <?= $sla === 'ok' ? 'selected' : '' ?>>Dans les délais</option></select></div><?php endif; ?>
-            <div class="field"><label>Créé à partir du</label><input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>"></div>
-            <div class="field"><label>Créé jusqu’au</label><input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>"></div>
-            <div class="field"><label>Résultats par page</label><select name="per_page"><option value="15" <?= $perPage === 15 ? 'selected' : '' ?>>15</option><option value="30" <?= $perPage === 30 ? 'selected' : '' ?>>30</option><option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option></select></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.type')) ?></label><select name="type_id"><option value="0"><?= htmlspecialchars(t('queue.all_types')) ?></option><?php foreach ($types as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $typeId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['code'].' — '.$item['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.category')) ?></label><select name="category_id"><option value="0"><?= htmlspecialchars(t('queue.all_categories')) ?></option><?php foreach ($categories as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $categoryId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.requester_group')) ?></label><select name="group_id"><option value="0"><?= htmlspecialchars(t('queue.all_groups')) ?></option><?php foreach ($groups as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $groupId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label><?= htmlspecialchars(t('common.manager')) ?></label><select name="manager_id"><option value="0"><?= htmlspecialchars(t('queue.all_managers')) ?></option><?php foreach ($managers as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $managerId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['firstname'].' '.$item['lastname']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.assigned_it')) ?></label><select name="assigned_it"><option value=""><?= htmlspecialchars(t('queue.all_it')) ?></option><option value="unassigned" <?= $assignedIt === 'unassigned' ? 'selected' : '' ?>><?= htmlspecialchars(t('queue.not_assigned')) ?></option><?php foreach ($itUsers as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $assignedIt === (string)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['firstname'].' '.$item['lastname']) ?></option><?php endforeach; ?></select></div>
+            <?php if ($user['role'] === 'Administrateur' && $scope !== 'archive'): ?><div class="field"><label>SLA</label><select name="sla"><option value=""><?= htmlspecialchars(t('queue.sla_all')) ?></option><option value="response" <?= $sla === 'response' ? 'selected' : '' ?>><?= htmlspecialchars(t('queue.sla_response')) ?></option><option value="resolution" <?= $sla === 'resolution' ? 'selected' : '' ?>><?= htmlspecialchars(t('queue.sla_resolution')) ?></option><option value="ok" <?= $sla === 'ok' ? 'selected' : '' ?>><?= htmlspecialchars(t('queue.sla_ok')) ?></option></select></div><?php endif; ?>
+            <div class="field"><label><?= htmlspecialchars(t('queue.created_from')) ?></label><input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>"></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.created_to')) ?></label><input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>"></div>
+            <div class="field"><label><?= htmlspecialchars(t('queue.per_page')) ?></label><select name="per_page"><option value="15" <?= $perPage === 15 ? 'selected' : '' ?>>15</option><option value="30" <?= $perPage === 30 ? 'selected' : '' ?>>30</option><option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option></select></div>
         </div>
     </form>
 </section>
 <section class="panel table-panel ticket-queue-panel">
-    <div class="table-header"><div><h2>Tickets</h2><p class="muted"><?= $totalTickets ?> résultat<?= $totalTickets > 1 ? 's' : '' ?></p></div><span class="queue-page-chip"><i class="fa-regular fa-file-lines"></i> Page <?= $page ?> / <?= $totalPages ?></span></div>
+    <div class="table-header"><div><h2><?= htmlspecialchars(t('queue.tickets')) ?></h2><p class="muted"><?= htmlspecialchars(t('queue.results',['count'=>$totalTickets])) ?></p></div><span class="queue-page-chip"><i class="fa-regular fa-file-lines"></i> <?= htmlspecialchars(t('queue.page',['page'=>$page,'pages'=>$totalPages])) ?></span></div>
     <?php if (!$tickets): ?>
-        <div class="empty-state queue-empty"><i class="fa-regular fa-folder-open"></i><strong>Aucun ticket dans cette vue.</strong><span>Modifiez les filtres ou choisissez une autre file.</span></div>
+        <div class="empty-state queue-empty"><i class="fa-regular fa-folder-open"></i><strong><?= htmlspecialchars(t('queue.no_ticket')) ?></strong><span><?= htmlspecialchars(t('queue.no_ticket_help')) ?></span></div>
     <?php else: ?>
         <?php if ($scope !== 'archive'): ?>
         <form method="post" class="bulk-ticket-form-v0152" data-bulk-ticket-form>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
             <input type="hidden" name="return_query" value="<?= htmlspecialchars($currentQueryForReturn) ?>">
             <div class="bulk-toolbar-v0152">
-                <label class="bulk-select-all-v0152"><input type="checkbox" data-select-all-tickets> <span>Sélectionner la page</span></label>
-                <span class="bulk-count-v0152" data-bulk-count>0 sélectionné</span>
+                <label class="bulk-select-all-v0152"><input type="checkbox" data-select-all-tickets> <span><?= htmlspecialchars(t('queue.select_page')) ?></span></label>
+                <span class="bulk-count-v0152" data-bulk-count><?= htmlspecialchars(t('queue.selected',['count'=>0])) ?></span>
                 <div class="bulk-actions-v0152">
                     <select name="bulk_action" data-bulk-action required>
-                        <option value="">Action multiple…</option>
-                        <option value="priority">Changer l’importance</option>
-                        <option value="status">Changer le statut</option>
-                        <option value="assign">Assigner / transférer</option>
+                        <option value=""><?= htmlspecialchars(t('queue.bulk_action')) ?></option>
+                        <option value="priority"><?= htmlspecialchars(t('queue.change_priority')) ?></option>
+                        <option value="status"><?= htmlspecialchars(t('queue.change_status')) ?></option>
+                        <option value="assign"><?= htmlspecialchars(t('queue.assign_transfer')) ?></option>
                     </select>
                     <select name="bulk_priority_id" data-bulk-field="priority" hidden>
-                        <option value="">Choisir l’importance…</option>
-                        <?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>"><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?>
+                        <option value=""><?= htmlspecialchars(t('queue.choose_priority')) ?></option>
+                        <?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>"><?= htmlspecialchars(t('priority.'.strtolower($item['name']))) ?></option><?php endforeach; ?>
                     </select>
                     <select name="bulk_status_code" data-bulk-field="status" hidden>
-                        <option value="">Choisir le statut…</option>
-                        <?php foreach ($bulkStatuses as $item): ?><option value="<?= htmlspecialchars($item['code']) ?>"><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?>
+                        <option value=""><?= htmlspecialchars(t('queue.choose_status')) ?></option>
+                        <?php foreach ($bulkStatuses as $item): ?><option value="<?= htmlspecialchars($item['code']) ?>"><?= htmlspecialchars(t('status.'.$item['code'])) ?></option><?php endforeach; ?>
                     </select>
                     <select name="bulk_it_id" data-bulk-field="assign" hidden>
-                        <option value="">Choisir un IT…</option>
+                        <option value=""><?= htmlspecialchars(t('queue.choose_it')) ?></option>
                         <?php foreach ($itUsers as $item): ?><option value="<?= (int) $item['id'] ?>"><?= htmlspecialchars($item['firstname'].' '.$item['lastname']) ?></option><?php endforeach; ?>
                     </select>
-                    <button class="btn primary small" type="submit" data-bulk-submit disabled><i class="fa-solid fa-wand-magic-sparkles"></i> Appliquer</button>
+                    <button class="btn primary small" type="submit" data-bulk-submit disabled><i class="fa-solid fa-wand-magic-sparkles"></i> <?= htmlspecialchars(t('queue.apply')) ?></button>
                 </div>
             </div>
             <div class="ticket-queue-list ticket-queue-list-selectable-v0152">
@@ -441,33 +441,33 @@ $typeIcons = [
             $resolutionOver = $ticket['sla_resolution_due_at'] !== null && $ticket['resolved_at'] === null && !in_array($ticket['status_code'], ['resolved','closed','cancelled'], true) && strtotime((string)$ticket['sla_resolution_due_at']) < time();
         ?>
             <article class="ticket-queue-item <?= $scope !== 'archive' ? 'has-selection-v0152' : '' ?> priority-border-<?= (int)$ticket['priority_level'] ?>">
-                <?php if ($scope !== 'archive'): ?><label class="ticket-select-v0152" title="Sélectionner ce ticket"><input type="checkbox" name="ticket_ids[]" value="<?= (int) $ticket['id'] ?>" data-ticket-checkbox><span></span></label><?php endif; ?>
+                <?php if ($scope !== 'archive'): ?><label class="ticket-select-v0152" title="<?= htmlspecialchars(t('queue.select_ticket')) ?>"><input type="checkbox" name="ticket_ids[]" value="<?= (int) $ticket['id'] ?>" data-ticket-checkbox><span></span></label><?php endif; ?>
                 <div class="queue-type-icon"><i class="fa-solid <?= htmlspecialchars($typeIcon) ?>"></i></div>
                 <div class="queue-ticket-main">
                     <div class="queue-ticket-topline"><strong><?= htmlspecialchars($ticket['ticket_number']) ?></strong><span><?= htmlspecialchars($ticket['type_name']) ?></span></div>
                     <h3><?= htmlspecialchars($ticket['title']) ?></h3>
                     <div class="queue-ticket-meta">
                         <span><i class="fa-regular fa-user"></i> <?= htmlspecialchars($ticket['requester_name']) ?></span>
-                        <span><i class="fa-solid fa-people-group"></i> <?= htmlspecialchars($ticket['requester_group_name'] ?: 'Sans groupe') ?></span>
-                        <span><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($ticket['category_name'] ?: 'Sans catégorie') ?></span>
+                        <span><i class="fa-solid fa-people-group"></i> <?= htmlspecialchars($ticket['requester_group_name'] ?: t('queue.no_group')) ?></span>
+                        <span><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($ticket['category_name'] ?: t('queue.no_category')) ?></span>
                         <span><i class="fa-regular fa-clock"></i> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($ticket['created_at']))) ?></span>
                     </div>
                 </div>
                 <div class="queue-ticket-badges">
-                    <span class="priority-pill priority-level-<?= (int)$ticket['priority_level'] ?>"><i class="fa-solid fa-flag"></i> <?= htmlspecialchars($ticket['priority_name']) ?></span>
-                    <span class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><i class="fa-solid fa-circle-dot"></i> <?= htmlspecialchars($ticket['status_name']) ?></span>
+                    <span class="priority-pill priority-level-<?= (int)$ticket['priority_level'] ?>"><i class="fa-solid fa-flag"></i> <?= htmlspecialchars(t('priority.'.strtolower($ticket['priority_name']))) ?></span>
+                    <span class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><i class="fa-solid fa-circle-dot"></i> <?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></span>
                     <?php if ($user['role'] === 'Administrateur' && $scope !== 'archive'): ?>
-                        <span class="sla-pill <?= ($resolutionOver || $responseOver) ? 'sla-breached' : 'sla-ok' ?>"><i class="fa-solid <?= ($resolutionOver || $responseOver) ? 'fa-clock-rotate-left' : 'fa-clock' ?>"></i> <?= $resolutionOver ? 'Résolution dépassée' : ($responseOver ? 'Prise en charge dépassée' : 'SLA OK') ?></span>
+                        <span class="sla-pill <?= ($resolutionOver || $responseOver) ? 'sla-breached' : 'sla-ok' ?>"><i class="fa-solid <?= ($resolutionOver || $responseOver) ? 'fa-clock-rotate-left' : 'fa-clock' ?>"></i> <?= htmlspecialchars($resolutionOver ? t('queue.sla_resolution') : ($responseOver ? t('queue.sla_response') : t('queue.sla_ok'))) ?></span>
                     <?php endif; ?>
                 </div>
-                <div class="queue-assignee"><span>IT assigné</span><strong><i class="fa-solid fa-headset"></i> <?= htmlspecialchars($ticket['assigned_it_name'] ?: 'Non assigné') ?></strong></div>
-                <a class="btn secondary queue-open-btn" href="ticket.php?number=<?= urlencode($ticket['ticket_number']) ?>"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir</a>
+                <div class="queue-assignee"><span><?= htmlspecialchars(t('queue.assigned_it')) ?></span><strong><i class="fa-solid fa-headset"></i> <?= htmlspecialchars($ticket['assigned_it_name'] ?: t('queue.not_assigned')) ?></strong></div>
+                <a class="btn secondary queue-open-btn" href="ticket.php?number=<?= urlencode($ticket['ticket_number']) ?>"><i class="fa-solid fa-arrow-up-right-from-square"></i> <?= htmlspecialchars(t('queue.open')) ?></a>
             </article>
         <?php endforeach; ?>
         </div>
         <?php if ($scope !== 'archive'): ?></form><?php endif; ?>
     <?php endif; ?>
-    <?php if ($totalPages > 1): ?><nav class="pagination" aria-label="Pagination des tickets">
+    <?php if ($totalPages > 1): ?><nav class="pagination" aria-label="<?= htmlspecialchars(t('queue.pagination')) ?>">
         <a class="pagination-link <?= $page <= 1 ? 'disabled' : '' ?>" href="<?= $page > 1 ? htmlspecialchars($paginationUrl($page - 1)) : '#' ?>"><i class="fa-solid fa-chevron-left"></i></a>
         <?php for ($i=1; $i <= $totalPages; $i++): ?><?php if ($i === 1 || $i === $totalPages || abs($i-$page) <= 2): ?><a class="pagination-link <?= $i === $page ? 'active' : '' ?>" href="<?= htmlspecialchars($paginationUrl($i)) ?>"><?= $i ?></a><?php elseif (($i === 2 && $page > 4) || ($i === $totalPages-1 && $page < $totalPages-3)): ?><span class="pagination-ellipsis">…</span><?php endif; ?><?php endfor; ?>
         <a class="pagination-link <?= $page >= $totalPages ? 'disabled' : '' ?>" href="<?= $page < $totalPages ? htmlspecialchars($paginationUrl($page + 1)) : '#' ?>"><i class="fa-solid fa-chevron-right"></i></a>

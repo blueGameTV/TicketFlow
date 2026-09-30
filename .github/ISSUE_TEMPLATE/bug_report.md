@@ -7,7 +7,7 @@ labels: bug
 
 ## Version TicketFlow
 
-Exemple : `v0.9.0-rc1`
+Exemple : `v1.2.0`
 
 ## Environnement
 

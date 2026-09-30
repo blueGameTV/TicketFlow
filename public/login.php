@@ -25,12 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         usleep(250000);
         $error = $auth->lastError() ?? 'Identifiant/e-mail ou mot de passe incorrect.';
     } else {
-        $u = $auth->user();
-        if (!empty($u['must_change_password'])) {
-            header('Location: change-password.php?required=1');
-        } else {
-            header('Location: dashboard.php');
-        }
+        header('Location: dashboard.php');
         exit;
     }
 }

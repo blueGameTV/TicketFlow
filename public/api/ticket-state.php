@@ -97,10 +97,10 @@ echo json_encode([
     'state_hash' => $stateHash,
     'ticket' => [
         'status_code' => $ticket['status_code'],
-        'status_name' => $ticket['status_name'],
-        'priority_name' => $ticket['priority_name'],
+        'status_name' => t('status.'.$ticket['status_code']),
+        'priority_name' => t('priority.'.strtolower((string)$ticket['priority_name'])),
         'priority_level' => (int) $ticket['priority_level'],
-        'assigned_it_name' => $ticket['assigned_it_name'] ?: 'Non assigné',
+        'assigned_it_name' => $ticket['assigned_it_name'] ?: t('common.unassigned'),
         'updated_at' => $ticket['updated_at'],
         'resolution' => $ticket['resolution'],
     ],

@@ -29,9 +29,15 @@ try {
     $alertStmt->execute(['from' => $from, 'to' => $to]);
     foreach ($alertStmt->fetchAll() as $row) {
         $rows[] = [
-            'Alerte service', (int)$row['id'], (string)$row['service_name'], (string)$row['title'],
-            $serviceAlertService->severityLabel((string)$row['severity']), (string)$row['status'],
-            (string)$row['starts_at'], (string)($row['ends_at'] ?? ''), (string)($row['resolved_at'] ?? ''),
+            'Alerte service',
+            (int)$row['id'],
+            (string)$row['service_name'],
+            (string)$row['title'],
+            $serviceAlertService->severityLabel((string)$row['severity']),
+            (string)$row['status'],
+            (string)$row['starts_at'],
+            (string)($row['ends_at'] ?? ''),
+            (string)($row['resolved_at'] ?? ''),
             trim($row['firstname'] . ' ' . $row['lastname']),
         ];
     }
@@ -47,10 +53,15 @@ try {
     $maintStmt->execute(['from' => $from, 'to' => $to]);
     foreach ($maintStmt->fetchAll() as $row) {
         $rows[] = [
-            'Maintenance', (int)$row['id'], 'TicketFlow / infrastructure', (string)$row['title'],
+            'Maintenance',
+            (int)$row['id'],
+            'TicketFlow / infrastructure',
+            (string)$row['title'],
             !empty($row['block_access']) ? 'Blocage accès' : 'Information',
             !empty($row['cancelled_at']) ? 'Annulée' : (strtotime((string)$row['ends_at']) < time() ? 'Terminée' : 'Planifiée'),
-            (string)$row['starts_at'], (string)$row['ends_at'], (string)($row['cancelled_at'] ?? ''),
+            (string)$row['starts_at'],
+            (string)$row['ends_at'],
+            (string)($row['cancelled_at'] ?? ''),
             trim($row['firstname'] . ' ' . $row['lastname']),
         ];
     }
@@ -61,16 +72,13 @@ try {
     ], $rows);
 
     $auditService->log((int)$user['id'], 'operations_exported', 'export', null, [
-        'from' => $start->format('Y-m-d'), 'to' => $end->format('Y-m-d'), 'rows' => count($rows),
+        'from' => $start->format('Y-m-d'),
+        'to' => $end->format('Y-m-d'),
+        'rows' => count($rows),
     ]);
 
     $filename = 'ticketflow-operations-' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Content-Length: ' . filesize($file));
-    readfile($file);
-    @unlink($file);
-    exit;
+    $excelExportService->sendDownload($file, $filename);
 } catch (Throwable $e) {
     $_SESSION['flash_error'] = $e->getMessage();
     header('Location: admin-exports.php');

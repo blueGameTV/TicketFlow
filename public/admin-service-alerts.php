@@ -47,6 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: admin-service-alerts.php');
                 exit;
             }
+            if ($action === 'delete_history') {
+                if (($user['role'] ?? '') !== 'Administrateur') {
+                    throw new RuntimeException('Seul un Administrateur peut supprimer l’historique des alertes.');
+                }
+                $deleted = $serviceAlertService->deleteResolvedHistory();
+                $auditService->log((int)$user['id'], 'service_alert_history_deleted', 'service_alert', null, ['deleted_count'=>$deleted]);
+                $_SESSION['flash_success'] = $deleted > 0 ? $deleted . ' alerte(s) historique(s) supprimée(s).' : 'Aucune alerte historique à supprimer.';
+                header('Location: admin-service-alerts.php');
+                exit;
+            }
         } catch (Throwable $e) {
             $errors[] = $e->getMessage();
         }
@@ -54,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $alerts = $serviceAlertService->all(150);
+$resolvedHistoryCount = count(array_filter($alerts, static fn(array $alert): bool => ($alert['status'] ?? '') === 'resolved'));
 require __DIR__ . '/../templates/shared/header.php';
 ?>
 <section class="page-heading page-heading-enhanced">
@@ -62,8 +73,8 @@ require __DIR__ . '/../templates/shared/header.php';
 <?php if ($success): ?><div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
 <?php if ($errors): ?><div class="alert error"><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 
-<div class="v110-grid">
-    <section class="panel">
+<div class="v110-grid v120-service-alerts-grid">
+    <section class="panel v120-service-alert-create">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-bullhorn"></i></span><div><h2>Créer une alerte</h2><p>La banderole apparaît automatiquement pour les utilisateurs connectés.</p></div></div></div>
         <form method="post" class="form-grid">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
@@ -71,7 +82,7 @@ require __DIR__ . '/../templates/shared/header.php';
             <div class="field"><label>Application / service *</label><input name="service_name" maxlength="120" required placeholder="Microsoft Outlook, VPN, ERP…"></div>
             <div class="field"><label>Niveau *</label><select name="severity" required><option value="info">Information</option><option value="degraded">Dégradation</option><option value="major">Incident majeur</option><option value="critical">Incident critique</option><option value="maintenance">Maintenance</option></select></div>
             <div class="field span-2"><label>Titre * <span class="v110-form-help">80 caractères maximum</span></label><input name="title" maxlength="80" required placeholder="Indisponibilité en cours"></div>
-            <div class="field span-2"><label>Message * <span class="v110-form-help">2000 caractères maximum</span></label><textarea name="message" maxlength="2000" rows="6" required placeholder="L’équipe IT analyse actuellement le problème…"></textarea></div>
+            <div class="field span-2"><label>Message * <span class="v110-form-help">2000 caractères maximum</span></label><textarea name="message" maxlength="2000" rows="6" required placeholder="L’équipe Support IT analyse actuellement le problème…"></textarea></div>
             <div class="field"><label>Début</label><input type="datetime-local" name="starts_at" value="<?= date('Y-m-d\TH:i') ?>"></div>
             <div class="field"><label>Fin prévue</label><input type="datetime-local" name="ends_at"></div>
             <div class="field span-2"><label>État initial</label><select name="status"><option value="active">En cours</option><option value="monitoring">Surveillance</option></select></div>
@@ -79,7 +90,7 @@ require __DIR__ . '/../templates/shared/header.php';
         </form>
     </section>
 
-    <section class="panel">
+    <section class="panel v120-service-alert-active">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-wave-square"></i></span><div><h2>Alertes actives</h2><p><?= count($serviceAlertService->active()) ?> alerte(s) actuellement visible(s).</p></div></div></div>
         <div class="v110-list">
             <?php $activeCount = 0; foreach ($alerts as $alert): if (!in_array($alert['status'], ['active','monitoring'], true)) continue; $activeCount++; ?>
@@ -93,13 +104,48 @@ require __DIR__ . '/../templates/shared/header.php';
         </div>
     </section>
 
-    <section class="panel v110-span-2">
-        <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-clock-rotate-left"></i></span><div><h2>Historique</h2><p>Dernières alertes publiées.</p></div></div></div>
-        <div class="v110-list">
+    <section class="panel v110-span-2 v120-alert-history-panel v12061-alert-history-panel">
+        <div class="v12061-history-header">
+            <div class="v12061-history-heading">
+                <span class="panel-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <div><h2>Historique</h2><p>Retrouvez les dernières alertes publiées et leur état.</p></div>
+            </div>
+            <div class="v12061-history-toolbar">
+                <span class="v120-history-count"><i class="fa-regular fa-bell"></i> <?= count($alerts) ?> alerte<?= count($alerts) > 1 ? 's' : '' ?></span>
+                <?php if (($user['role'] ?? '') === 'Administrateur'): ?>
+                <form method="post" onsubmit="return confirm('Supprimer toutes les alertes résolues de l’historique ? Cette action est irréversible.');">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
+                    <input type="hidden" name="action" value="delete_history">
+                    <button class="btn danger small" type="submit" <?= $resolvedHistoryCount === 0 ? 'disabled' : '' ?>><i class="fa-solid fa-trash-can"></i> Supprimer les alertes résolues</button>
+                </form>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <?php if (!$alerts): ?>
+            <div class="v12061-history-empty"><span><i class="fa-regular fa-bell-slash"></i></span><strong>Aucune alerte dans l’historique</strong><p>Les alertes publiées apparaîtront ici avec leur état et leurs dates.</p></div>
+        <?php else: ?>
+        <div class="v12061-history-list">
             <?php foreach ($alerts as $alert): ?>
-                <article class="v110-list-item"><div class="v110-list-item-head"><div><span class="v110-pill <?= $alert['status'] === 'resolved' ? 'resolved' : htmlspecialchars((string)$alert['severity']) ?>"><?= $alert['status'] === 'resolved' ? 'Résolue' : htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span><strong><?= htmlspecialchars((string)$alert['title']) ?></strong></div><span><?= htmlspecialchars((string)$alert['service_name']) ?></span></div><div class="v110-meta"><span>Créée le <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['created_at']))) ?></span><?php if (!empty($alert['resolved_at'])): ?><span>Résolue le <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['resolved_at']))) ?></span><?php endif; ?></div></article>
+                <article class="v12061-history-card <?= $alert['status'] === 'resolved' ? 'is-resolved' : 'is-open' ?>">
+                    <div class="v12061-history-state"><i class="fa-solid <?= $alert['status'] === 'resolved' ? 'fa-circle-check' : 'fa-triangle-exclamation' ?>"></i></div>
+                    <div class="v12061-history-content">
+                        <div class="v12061-history-title-row">
+                            <div class="v12061-history-title">
+                                <span class="v110-pill <?= $alert['status'] === 'resolved' ? 'resolved' : htmlspecialchars((string)$alert['severity']) ?>"><?= $alert['status'] === 'resolved' ? 'Résolue' : htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span>
+                                <h3><?= htmlspecialchars((string)$alert['title']) ?></h3>
+                            </div>
+                            <span class="v12061-history-service"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars((string)$alert['service_name']) ?></span>
+                        </div>
+                        <div class="v12061-history-dates">
+                            <span><small>Création</small><strong><i class="fa-regular fa-calendar-plus"></i> <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['created_at']))) ?></strong></span>
+                            <span><small>État</small><strong><i class="fa-regular <?= !empty($alert['resolved_at']) ? 'fa-circle-check' : 'fa-clock' ?>"></i> <?= !empty($alert['resolved_at']) ? 'Résolue le '.htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['resolved_at']))) : 'Alerte en cours' ?></strong></span>
+                        </div>
+                    </div>
+                </article>
             <?php endforeach; ?>
         </div>
+        <?php endif; ?>
     </section>
 </div>
 <?php require __DIR__ . '/../templates/shared/footer.php'; ?>
