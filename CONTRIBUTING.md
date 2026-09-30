@@ -1,187 +1,291 @@
 # Contribuer à TicketFlow
 
-Merci de contribuer à **TicketFlow**.
+Merci de vouloir aider à améliorer **TicketFlow**.
 
-Ce document décrit la méthode recommandée pour proposer une correction, une amélioration ou de la documentation sur la branche stable **v1.1.x**.
+Il n'est pas nécessaire d'être un développeur expérimenté pour contribuer.
 
-## Avant de commencer
+Vous pouvez aider en :
 
-Avant toute modification :
+- signalant un bug ;
+- proposant une idée ;
+- améliorant une explication ;
+- corrigeant une faute ;
+- améliorant l'interface ;
+- proposant du code.
 
-1. vérifiez qu'une Issue similaire n'existe pas déjà ;
-2. pour un bug, indiquez la version de TicketFlow, l'OS, PHP, Apache et MariaDB/MySQL ;
-3. pour une nouvelle fonctionnalité importante, ouvrez d'abord une Issue afin de discuter du besoin ;
-4. ne publiez jamais de secret, mot de passe, jeton, dump de production ou pièce jointe utilisateur.
+Ce guide explique simplement comment procéder.
 
-Les vulnérabilités de sécurité ne doivent pas être signalées dans une Issue publique. Consultez [SECURITY.md](SECURITY.md).
+# J'ai trouvé un bug
 
-## Workflow Git
+Avant de créer un nouveau signalement, vérifiez rapidement si le problème n'a pas déjà été signalé.
 
-Ne travaillez pas directement sur `main`.
+Dans votre message, essayez d'indiquer :
 
-Créez une branche dédiée à partir de la dernière version de `main` :
+- la version de TicketFlow ;
+- ce que vous étiez en train de faire ;
+- ce que vous pensiez qu'il allait se passer ;
+- ce qui s'est réellement passé ;
+- le message d'erreur, s'il y en a un ;
+- une capture d'écran si elle aide à comprendre.
+
+Exemple :
+
+```text
+Version : TicketFlow v1.2.0
+Rôle : Collaborateur
+Page : Création d'un ticket
+
+Problème :
+Lorsque je clique sur « Envoyer », la page affiche une erreur.
+
+Résultat attendu :
+Le ticket devrait être créé.
+```
+
+Vous n'avez pas besoin de connaître PHP ou MariaDB pour signaler un bug.
+
+# J'ai une idée
+
+Vous pouvez proposer une amélioration en expliquant simplement :
+
+1. le problème actuel ;
+2. ce que vous aimeriez pouvoir faire ;
+3. à qui cette fonction serait utile ;
+4. éventuellement un exemple.
+
+Une bonne proposition décrit surtout **le besoin**, pas uniquement la solution technique.
+
+# Je veux modifier le code
+
+La branche `main` contient la version stable actuelle.
+
+Évitez de modifier directement `main`.
+
+Commencez par créer une branche :
 
 ```bash
 git checkout main
 git pull
-git checkout -b feature/ma-fonctionnalite
+git checkout -b feature/nom-de-ma-modification
 ```
 
-Exemples de noms de branches :
+Exemples :
 
 ```text
-feature/saved-views
-fix/ticket-permission
-security/session-hardening
+feature/import-users
+fix/ticket-display
+ui/settings-page
 docs/installation
-ui/ticket-list
+security/session-check
 ```
 
-## Types de contributions
+# Faire une modification simple
 
-Les contributions peuvent notamment concerner :
+Essayez de garder une contribution centrée sur un seul sujet.
 
-- corrections de bugs ;
-- sécurité ;
-- interface et expérience utilisateur ;
-- documentation ;
-- performances ;
-- tests ;
-- nouvelles fonctionnalités cohérentes avec TicketFlow.
+Par exemple :
 
-Évitez les changements massifs non liés dans une seule Pull Request.
+✅ une correction du calendrier
 
-## Règles de développement
+✅ une amélioration de la page Utilisateurs
 
-### PHP
+✅ une correction de documentation
 
-- utiliser `declare(strict_types=1)` pour les nouveaux fichiers PHP ;
-- utiliser PDO et des requêtes préparées pour toute donnée provenant d'un utilisateur ;
-- vérifier les autorisations côté serveur, jamais uniquement dans l'interface ;
-- protéger les actions sensibles avec CSRF ;
-- échapper les données affichées dans le HTML ;
-- ne jamais stocker de mot de passe en clair ;
-- utiliser `password_hash()` et `password_verify()` ;
-- conserver la compatibilité avec **PHP 8.1+**.
+Évitez si possible :
 
-### Base de données
+❌ refaire le calendrier + le système d'e-mail + les statistiques dans la même Pull Request
 
-Toute modification du schéma doit être accompagnée d'une migration dans :
+Cela rend les changements plus faciles à vérifier.
+
+# Quelques règles importantes pour le code
+
+## Sécurité
+
+TicketFlow contient des comptes utilisateurs, des tickets et parfois des pièces jointes internes.
+
+Il faut donc toujours :
+
+- vérifier les droits côté serveur ;
+- protéger les formulaires sensibles contre les attaques CSRF ;
+- valider les données envoyées par les utilisateurs ;
+- utiliser des requêtes PDO préparées ;
+- ne jamais enregistrer un mot de passe en clair ;
+- ne jamais exposer les fichiers de configuration ;
+- conserver les pièces jointes hors du dossier public.
+
+Un bouton caché dans l'interface **n'est pas une protection de sécurité**. Le serveur doit toujours vérifier les permissions.
+
+## PHP
+
+Pour les nouveaux fichiers PHP :
+
+```php
+<?php
+
+declare(strict_types=1);
+```
+
+TicketFlow doit rester compatible avec **PHP 8.1 ou plus récent**.
+
+Pour les mots de passe, utilisez les fonctions prévues par PHP :
+
+```php
+password_hash()
+password_verify()
+```
+
+## Base de données
+
+Si une modification nécessite une nouvelle colonne ou une nouvelle table, ajoutez une migration dans :
 
 ```text
 database/migrations/
 ```
 
-Une migration doit :
+Une migration doit autant que possible :
 
-- être non destructive autant que possible ;
-- être documentée ;
-- fonctionner sur une installation existante ;
-- ne contenir aucune donnée personnelle réelle.
+- conserver les données existantes ;
+- fonctionner sur une installation déjà utilisée ;
+- pouvoir être exécutée sans remettre TicketFlow à zéro ;
+- ne jamais contenir de données réelles d'une entreprise.
 
-### Sécurité
+## Interface
 
-Toute fonctionnalité doit respecter les règles existantes :
+Essayez de conserver le style actuel de TicketFlow.
 
-- contrôle des rôles ;
-- contrôle d'accès aux tickets ;
-- CSRF ;
-- validation des entrées ;
-- pièces jointes hors du répertoire public ;
-- aucune fuite de configuration ou de secrets.
+Pensez notamment à vérifier :
 
-### Interface
+- thème clair ;
+- thème sombre ;
+- écran 1920 px ;
+- écran 1366 px ;
+- affichage mobile ;
+- textes Français / English lorsqu'une page est traduite.
 
-- conserver le style général de TicketFlow ;
-- privilégier les composants CSS/JS réutilisables ;
-- éviter les rechargements complets lorsqu'une interaction est déjà prévue en AJAX/fetch ;
-- vérifier au minimum l'affichage desktop 1920 px et 1366 px ;
-- ne pas casser le comportement mobile existant.
+Lorsque TicketFlow utilise déjà AJAX ou `fetch()` sur une page, évitez de réintroduire un rechargement complet sans raison.
 
-## Tests avant Pull Request
+# Tester avant d'envoyer une modification
 
-Avant de proposer une modification, lancez au minimum :
+Pour vérifier rapidement la syntaxe PHP :
 
 ```bash
 find public src templates scripts -name '*.php' -print0 | xargs -0 -n1 php -l
+```
 
+TicketFlow fournit aussi plusieurs outils :
+
+```bash
 php scripts/healthcheck.php
 php scripts/security_audit.php
 php scripts/route_check.php
 php scripts/release_check.php
 ```
 
-Pour une modification importante ou avant une release :
-
-```bash
-php scripts/rc_preflight.php
-```
-
-Testez également manuellement les rôles concernés :
+Pour une grosse modification, testez également les rôles concernés :
 
 - Administrateur ;
-- IT ;
+- Support IT ;
 - Manager ;
 - Collaborateur.
 
-## Commits
+Exemple : si vous modifiez une validation Manager, testez au minimum le Support IT, le Manager N+1 et le Manager final.
 
-Utilisez des messages courts et explicites.
+# Envoyer une Pull Request
+
+Une Pull Request est simplement une proposition de modification du projet.
+
+Dans la description, indiquez :
+
+- ce qui a été modifié ;
+- pourquoi ;
+- comment vous avez testé ;
+- s'il y a une migration de base de données ;
+- des captures d'écran si l'interface change.
+
+Exemple :
+
+```text
+Correction de l'affichage des priorités dans ticket.php.
+
+Testé avec :
+- Administrateur
+- Support IT
+- thème clair
+- thème sombre
+
+Aucune migration SQL.
+```
+
+# Messages de commit
+
+Utilisez un message court qui explique le changement.
 
 Exemples :
 
 ```text
-feat: add ticket saved views
-fix: enforce ticket ownership check
-ui: improve ticket conversation layout
+fix: repair ticket priority selector
+ui: improve settings page
+docs: simplify installation guide
 security: harden session validation
-docs: update Debian installation guide
+feat: add user import
 ```
 
-Préfixes recommandés :
+Préfixes utiles :
 
 ```text
-feat:
-fix:
-security:
-ui:
-docs:
-refactor:
-test:
-chore:
+feat:      nouvelle fonction
+fix:       correction de bug
+ui:        interface
+security:  sécurité
+docs:      documentation
+refactor:  réorganisation du code
+test:      tests
+chore:     maintenance du projet
 ```
 
-## Pull Requests
+# Ne jamais envoyer sur GitHub
 
-Une Pull Request doit contenir :
+Ne publiez jamais :
 
-- une description claire du changement ;
-- le problème résolu ou l'Issue associée ;
-- les étapes de test ;
-- les éventuelles migrations SQL ;
-- des captures d'écran pour un changement visuel important ;
-- l'impact éventuel sur les rôles et permissions.
+- `config/config.php` réel ;
+- un fichier `.env` avec des secrets ;
+- un mot de passe ;
+- un jeton ;
+- une clé API ;
+- un dump de base de données de production ;
+- les fichiers réels de `storage/uploads/` ;
+- des logs contenant des informations sensibles.
 
-Avant l'envoi, vérifiez que :
+Si vous pensez avoir trouvé une faille de sécurité, **ne créez pas une Issue publique avec les détails permettant de l'exploiter**.
 
-- aucun secret n'est présent ;
-- `config/config.php` n'est pas ajouté ;
-- aucun log ou upload réel n'est ajouté ;
-- les tests utiles passent ;
-- la documentation est mise à jour si nécessaire.
+Consultez [SECURITY.md](SECURITY.md).
 
-## Compatibilité
+# Compatibilité des mises à jour
 
-La branche `main` correspond à la version stable courante de TicketFlow.
+Une contribution ne doit pas obliger les utilisateurs à réinstaller TicketFlow depuis zéro.
 
-Les changements destinés à une future version doivent éviter de casser :
+Lorsqu'une modification touche la base de données ou la configuration, pensez aux utilisateurs qui possèdent déjà :
 
-- l'installation automatique ;
-- les mises à jour depuis une version stable ;
-- la base existante ;
-- les permissions par rôle ;
-- les URLs publiques documentées.
+- v1.0.0 ;
+- v1.1.0 ;
+- une version stable récente.
 
-## Licence et droits
+L'objectif est de conserver autant que possible :
 
-En proposant une contribution, vous confirmez disposer du droit de soumettre le code, la documentation ou les ressources concernés au projet TicketFlow.
+- leurs comptes ;
+- leurs tickets ;
+- leurs groupes ;
+- leur configuration ;
+- leurs pièces jointes.
+
+# Besoin d'aide ?
+
+Si vous débutez, ce n'est pas un problème.
+
+Expliquez simplement :
+
+- ce que vous voulez modifier ;
+- où vous êtes bloqué ;
+- ce que vous avez déjà essayé.
+
+Une contribution claire, même petite, peut être utile au projet.
