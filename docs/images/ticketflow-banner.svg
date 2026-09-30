@@ -1,123 +1,158 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="2172" height="724" viewBox="0 0 2172 724" role="img" aria-labelledby="title desc">
   <title id="title">TicketFlow v1.2.0 Stable</title>
-  <desc id="desc">Bannière TicketFlow modernisée présentant le parcours Collaborateur, Support IT, Manager et Administrateur.</desc>
+  <desc id="desc">Bannière TicketFlow avec les rôles Collaborateur, Support IT, Manager et Administrateur.</desc>
 
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#07183f"/>
-      <stop offset="48%" stop-color="#123fb8"/>
-      <stop offset="100%" stop-color="#5b3df3"/>
+      <stop offset="0%" stop-color="#06235f"/>
+      <stop offset="45%" stop-color="#0b49d9"/>
+      <stop offset="100%" stop-color="#6638ff"/>
     </linearGradient>
     <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="58%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#38bdf8"/>
+      <stop offset="55%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#4fd7ff"/>
     </linearGradient>
     <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#eef4ff"/>
+      <stop offset="100%" stop-color="#edf4ff"/>
     </linearGradient>
-    <linearGradient id="iconBg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#eaf2ff"/>
-      <stop offset="100%" stop-color="#d9e8ff"/>
+    <linearGradient id="iconbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eef5ff"/>
+      <stop offset="100%" stop-color="#d9e9ff"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-30%" width="140%" height="160%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#020617" flood-opacity=".20"/>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#061744" flood-opacity=".22"/>
     </filter>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="24"/>
+    <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="35"/>
     </filter>
   </defs>
 
-  <rect width="1400" height="420" rx="28" fill="url(#bg)"/>
+  <rect x="0" y="0" width="2172" height="724" rx="48" fill="url(#bg)"/>
 
-  <g opacity=".16" fill="none" stroke="#93c5fd" stroke-width="2">
-    <circle cx="1260" cy="30" r="150"/>
-    <circle cx="1360" cy="90" r="180"/>
-    <circle cx="1265" cy="360" r="170"/>
+  <g fill="none" stroke="#9db7ff" stroke-width="3" opacity=".23">
+    <circle cx="1940" cy="64" r="210"/>
+    <circle cx="2070" cy="125" r="235"/>
+    <circle cx="2020" cy="660" r="225"/>
   </g>
-  <circle cx="1115" cy="90" r="95" fill="#2563eb" opacity=".18" filter="url(#glow)"/>
-  <circle cx="1300" cy="310" r="120" fill="#8b5cf6" opacity=".18" filter="url(#glow)"/>
+  <circle cx="1630" cy="120" r="145" fill="#1d4ed8" opacity=".13" filter="url(#softGlow)"/>
+  <circle cx="1920" cy="610" r="185" fill="#8b5cf6" opacity=".16" filter="url(#softGlow)"/>
 
-  <g opacity=".22" fill="#60a5fa">
-    <circle cx="1030" cy="72" r="3"/><circle cx="1052" cy="72" r="3"/><circle cx="1074" cy="72" r="3"/><circle cx="1096" cy="72" r="3"/>
-    <circle cx="1030" cy="94" r="3"/><circle cx="1052" cy="94" r="3"/><circle cx="1074" cy="94" r="3"/><circle cx="1096" cy="94" r="3"/>
-  </g>
-
-  <g transform="translate(72 58)">
-    <rect width="96" height="96" rx="26" fill="#ffffff" opacity=".12" stroke="#60a5fa" stroke-width="2"/>
-    <rect x="20" y="24" width="56" height="42" rx="9" fill="none" stroke="#ffffff" stroke-width="6"/>
-    <path d="M31 66v13l14-13" fill="none" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
-    <circle cx="36" cy="45" r="4" fill="#ffffff"/>
-    <circle cx="48" cy="45" r="4" fill="#ffffff"/>
-    <circle cx="60" cy="45" r="4" fill="#ffffff"/>
+  <g opacity=".34" fill="#4ea6ff">
+    <circle cx="1490" cy="108" r="5"/><circle cx="1524" cy="108" r="5"/><circle cx="1558" cy="108" r="5"/><circle cx="1592" cy="108" r="5"/>
+    <circle cx="1490" cy="142" r="5"/><circle cx="1524" cy="142" r="5"/><circle cx="1558" cy="142" r="5"/><circle cx="1592" cy="142" r="5"/>
   </g>
 
-  <text x="198" y="112" fill="url(#brand)" font-family="Arial,Helvetica,sans-serif" font-size="60" font-weight="800">TicketFlow</text>
-  <text x="201" y="152" fill="#bfdbfe" font-family="Arial,Helvetica,sans-serif" font-size="23" font-weight="500">Plateforme interne de gestion des tickets IT</text>
-
-  <g transform="translate(1110 55)">
-    <rect width="220" height="70" rx="22" fill="#ffffff" opacity=".13" stroke="#93c5fd" stroke-width="1.5"/>
-    <circle cx="34" cy="35" r="8" fill="#34d399"/>
-    <text x="58" y="43" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="800">v1.2.0 Stable</text>
+  <!-- Logo -->
+  <g transform="translate(110 104)">
+    <rect width="156" height="156" rx="34" fill="#ffffff" opacity=".12" stroke="#70a5ff" stroke-width="3"/>
+    <rect x="38" y="42" width="80" height="60" rx="13" fill="none" stroke="#ffffff" stroke-width="9"/>
+    <path d="M54 102v23l24-23" fill="none" stroke="#ffffff" stroke-width="9" stroke-linejoin="round"/>
+    <circle cx="62" cy="72" r="6" fill="#ffffff"/>
+    <circle cx="78" cy="72" r="6" fill="#ffffff"/>
+    <circle cx="94" cy="72" r="6" fill="#ffffff"/>
   </g>
 
-  <g font-family="Arial,Helvetica,sans-serif" filter="url(#shadow)">
-    <g transform="translate(62 224)">
-      <rect width="286" height="112" rx="22" fill="url(#card)"/>
-      <circle cx="55" cy="56" r="31" fill="url(#iconBg)"/>
-      <circle cx="55" cy="46" r="10" fill="#2563eb"/>
-      <path d="M38 78c2-13 9-20 17-20s15 7 17 20" fill="#2563eb"/>
-      <text x="104" y="49" fill="#0f285f" font-size="22" font-weight="800">Collaborateur</text>
-      <text x="104" y="78" fill="#52627f" font-size="15">Crée et suit la demande</text>
+  <text x="318" y="190" fill="url(#brand)" font-family="Arial,Helvetica,sans-serif" font-size="112" font-weight="800">TicketFlow</text>
+  <text x="324" y="254" fill="#dbeafe" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="500">Plateforme interne de gestion des tickets IT</text>
+
+  <!-- Version badge -->
+  <g transform="translate(1690 104)">
+    <rect width="370" height="104" rx="52" fill="#ffffff" opacity=".12" stroke="#91afff" stroke-width="2"/>
+    <circle cx="58" cy="52" r="16" fill="#35e67a"/>
+    <text x="96" y="65" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="800">v1.2.0 Stable</text>
+  </g>
+
+  <!-- Cards -->
+  <g font-family="Arial,Helvetica,sans-serif" filter="url(#cardShadow)">
+    <!-- Collaborateur -->
+    <g transform="translate(96 333)">
+      <rect width="458" height="184" rx="32" fill="url(#card)"/>
+      <circle cx="92" cy="92" r="58" fill="url(#iconbg)"/>
+      <circle cx="92" cy="76" r="17" fill="#2563eb"/>
+      <path d="M61 133c4-27 16-42 31-42s27 15 31 42" fill="#2563eb"/>
+      <text x="176" y="82" fill="#081a55" font-size="39" font-weight="800">Collaborateur</text>
+      <text x="176" y="126" fill="#52627f" font-size="25">Crée et suit la demande</text>
     </g>
 
-    <g transform="translate(385 224)">
-      <rect width="286" height="112" rx="22" fill="url(#card)"/>
-      <circle cx="55" cy="56" r="31" fill="url(#iconBg)"/>
-      <path d="M37 58v-5c0-11 8-20 18-20s18 9 18 20v5" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
-      <rect x="32" y="55" width="8" height="16" rx="4" fill="#2563eb"/>
-      <rect x="70" y="55" width="8" height="16" rx="4" fill="#2563eb"/>
-      <path d="M73 70c-3 7-8 10-17 10" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="54" cy="80" r="3.5" fill="#2563eb"/>
-      <text x="104" y="49" fill="#0f285f" font-size="22" font-weight="800">Support IT</text>
-      <text x="104" y="78" fill="#52627f" font-size="15">Traite et communique</text>
+    <!-- Support IT -->
+    <g transform="translate(604 333)">
+      <rect width="458" height="184" rx="32" fill="url(#card)"/>
+      <circle cx="92" cy="92" r="58" fill="url(#iconbg)"/>
+      <path d="M58 96V82c0-30 15-49 34-49s34 19 34 49v14" fill="none" stroke="#2563eb" stroke-width="11" stroke-linecap="round"/>
+      <rect x="52" y="91" width="14" height="30" rx="7" fill="#2563eb"/>
+      <rect x="118" y="91" width="14" height="30" rx="7" fill="#2563eb"/>
+      <path d="M121 119c-7 13-17 18-34 18" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="84" cy="138" r="7" fill="#2563eb"/>
+      <text x="176" y="82" fill="#081a55" font-size="39" font-weight="800">Support IT</text>
+      <text x="176" y="126" fill="#52627f" font-size="25">Traite et communique</text>
     </g>
 
-    <g transform="translate(708 224)">
-      <rect width="286" height="112" rx="22" fill="url(#card)"/>
-      <circle cx="55" cy="56" r="31" fill="url(#iconBg)"/>
-      <path d="M55 28l20 9v15c0 15-9 25-20 32-11-7-20-17-20-32V37z" fill="#2563eb"/>
-      <path d="M45 55l7 7 14-15" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="104" y="49" fill="#0f285f" font-size="22" font-weight="800">Manager</text>
-      <text x="104" y="78" fill="#52627f" font-size="15">Valide si nécessaire</text>
+    <!-- Manager -->
+    <g transform="translate(1112 333)">
+      <rect width="458" height="184" rx="32" fill="url(#card)"/>
+      <circle cx="92" cy="92" r="58" fill="url(#iconbg)"/>
+      <path d="M92 39l38 17v29c0 31-17 51-38 66-21-15-38-35-38-66V56z" fill="#2563eb"/>
+      <path d="M72 91l14 14 28-31" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="176" y="82" fill="#081a55" font-size="39" font-weight="800">Manager</text>
+      <text x="176" y="126" fill="#52627f" font-size="25">Valide si nécessaire</text>
     </g>
 
-    <g transform="translate(1031 224)">
-      <rect width="307" height="112" rx="22" fill="url(#card)"/>
-      <circle cx="55" cy="56" r="31" fill="url(#iconBg)"/>
-      <circle cx="55" cy="56" r="13" fill="none" stroke="#2563eb" stroke-width="6"/>
+    <!-- Administrateur -->
+    <g transform="translate(1620 333)">
+      <rect width="458" height="184" rx="32" fill="url(#card)"/>
+      <circle cx="92" cy="92" r="58" fill="url(#iconbg)"/>
+      <circle cx="92" cy="92" r="25" fill="none" stroke="#2563eb" stroke-width="10"/>
       <g fill="#2563eb">
-        <rect x="52" y="27" width="6" height="12" rx="3"/>
-        <rect x="52" y="73" width="6" height="12" rx="3"/>
-        <rect x="26" y="53" width="12" height="6" rx="3"/>
-        <rect x="72" y="53" width="12" height="6" rx="3"/>
+        <rect x="87" y="42" width="10" height="25" rx="5"/>
+        <rect x="87" y="117" width="10" height="25" rx="5"/>
+        <rect x="42" y="87" width="25" height="10" rx="5"/>
+        <rect x="117" y="87" width="25" height="10" rx="5"/>
       </g>
-      <text x="104" y="49" fill="#0f285f" font-size="22" font-weight="800">Administrateur</text>
-      <text x="104" y="78" fill="#52627f" font-size="15">Supervise et configure</text>
+      <text x="176" y="82" fill="#081a55" font-size="39" font-weight="800">Administrateur</text>
+      <text x="176" y="126" fill="#52627f" font-size="25">Supervise et configure</text>
     </g>
   </g>
 
-  <g fill="none" stroke="#dbeafe" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M350 280h25l-10-10m10 10l-10 10"/>
-    <path d="M673 280h25l-10-10m10 10l-10 10"/>
-    <path d="M996 280h25l-10-10m10 10l-10 10"/>
+  <!-- Arrows -->
+  <g fill="none" stroke="#dbeafe" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M560 425h30l-17-17m17 17l-17 17"/>
+    <path d="M1068 425h30l-17-17m17 17l-17 17"/>
+    <path d="M1576 425h30l-17-17m17 17l-17 17"/>
   </g>
 
-  <g transform="translate(78 365)" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700">
-    <g><rect width="128" height="28" rx="14" fill="#ffffff" opacity=".12"/><text x="64" y="19" text-anchor="middle" fill="#dbeafe">Thèmes clair/sombre</text></g>
-    <g transform="translate(140 0)"><rect width="104" height="28" rx="14" fill="#ffffff" opacity=".12"/><text x="52" y="19" text-anchor="middle" fill="#dbeafe">FR / EN Beta</text></g>
-    <g transform="translate(256 0)"><rect width="146" height="28" rx="14" fill="#ffffff" opacity=".12"/><text x="73" y="19" text-anchor="middle" fill="#dbeafe">Import CSV / XLSX</text></g>
-    <g transform="translate(414 0)"><rect width="176" height="28" rx="14" fill="#ffffff" opacity=".12"/><text x="88" y="19" text-anchor="middle" fill="#dbeafe">Validation Manager N+1</text></g>
+  <!-- Feature pills -->
+  <g font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700">
+    <g transform="translate(104 575)">
+      <rect width="380" height="76" rx="38" fill="#ffffff" opacity=".11" stroke="#87a9ff" stroke-width="2"/>
+      <circle cx="52" cy="38" r="17" fill="none" stroke="#dbeafe" stroke-width="5"/>
+      <path d="M52 11v10M52 55v10M25 38h10M69 38h10M33 19l7 7M64 50l7 7M71 19l-7 7M40 50l-7 7" stroke="#dbeafe" stroke-width="4" stroke-linecap="round"/>
+      <path d="M87 26c-12 3-18 16-13 27 5 11 18 15 28 9-12-1-20-13-15-26z" fill="#dbeafe"/>
+      <text x="130" y="46" fill="#ffffff">Thèmes clair/sombre</text>
+    </g>
+
+    <g transform="translate(506 575)">
+      <rect width="290" height="76" rx="38" fill="#ffffff" opacity=".11" stroke="#87a9ff" stroke-width="2"/>
+      <circle cx="54" cy="38" r="20" fill="none" stroke="#dbeafe" stroke-width="5"/>
+      <path d="M34 38h40M54 18c8 11 8 29 0 40M54 18c-8 11-8 29 0 40" fill="none" stroke="#dbeafe" stroke-width="4"/>
+      <text x="94" y="46" fill="#ffffff">FR / EN Beta</text>
+    </g>
+
+    <g transform="translate(818 575)">
+      <rect width="350" height="76" rx="38" fill="#ffffff" opacity=".11" stroke="#87a9ff" stroke-width="2"/>
+      <rect x="35" y="18" width="34" height="42" rx="4" fill="none" stroke="#dbeafe" stroke-width="5"/>
+      <path d="M43 30h18M43 40h18M43 50h18" stroke="#dbeafe" stroke-width="4" stroke-linecap="round"/>
+      <text x="92" y="46" fill="#ffffff">Import CSV / XLSX</text>
+    </g>
+
+    <g transform="translate(1190 575)">
+      <rect width="430" height="76" rx="38" fill="#ffffff" opacity=".11" stroke="#87a9ff" stroke-width="2"/>
+      <circle cx="49" cy="31" r="10" fill="#dbeafe"/>
+      <circle cx="75" cy="31" r="10" fill="#dbeafe"/>
+      <circle cx="62" cy="23" r="11" fill="#dbeafe"/>
+      <path d="M31 57c2-14 11-22 18-22M93 57c-2-14-11-22-18-22M43 60c2-18 10-29 19-29s17 11 19 29" fill="none" stroke="#dbeafe" stroke-width="6" stroke-linecap="round"/>
+      <text x="116" y="46" fill="#ffffff">Validation Manager N+1</text>
+    </g>
   </g>
 </svg>
