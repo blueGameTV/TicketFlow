@@ -1,30 +1,45 @@
-# V10 — Notifications internes
+# Notifications TicketFlow
 
-TicketFlow possède maintenant un centre de notifications interne pour chaque utilisateur.
+TicketFlow possède un centre de notifications par utilisateur.
 
-## Événements couverts
+## Événements principaux
 
-- nouveau ticket : alerte les comptes IT actifs ;
-- prise en charge : alerte le demandeur ;
-- modification d'importance ou de statut : alerte le demandeur ;
-- transfert : alerte le nouvel IT assigné ;
-- message public : alerte le demandeur ou l'IT assigné selon l'auteur ;
-- note interne : alerte l'IT assigné lorsqu'elle vient d'un autre intervenant ;
-- validation Manager demandée : alerte le Manager concerné ;
-- réponse du Manager : alerte l'IT demandeur / assigné ;
-- résolution proposée : alerte le demandeur ;
-- résolution confirmée ou refusée : alerte l'IT assigné.
+Les notifications peuvent être générées lors de :
 
-## Non-lues
+- la création d'un nouveau ticket ;
+- la prise en charge d'un ticket ;
+- la modification du statut ou de l'importance ;
+- un transfert ou une assignation ;
+- un nouveau message ;
+- une note interne pour les destinataires autorisés ;
+- une demande de validation Manager ;
+- une réponse du Manager ;
+- le passage de la validation N+1 à la validation finale ;
+- une proposition de résolution ;
+- une confirmation ou un refus de résolution ;
+- certains événements SLA ;
+- certaines opérations de service.
 
-Le bandeau supérieur affiche un compteur. La page `notifications.php` permet de filtrer les notifications non lues et de les marquer comme lues individuellement ou toutes en une fois.
+## Lecture
 
-## Migration V9 -> V10
+Le compteur de la barre supérieure indique les notifications non lues.
 
-Une nouvelle table est requise :
+La page `notifications.php` permet notamment :
 
-```bash
-mysql -u root -p < database/migrations/v10_notifications.sql
-```
+- d'afficher toutes les notifications ;
+- de filtrer les non lues ;
+- d'ouvrir une notification ;
+- de la marquer comme lue ;
+- de supprimer les notifications autorisées.
 
-ou importer `database/migrations/v10_notifications.sql` dans phpMyAdmin.
+Ouvrir une notification associée à un ticket la marque comme lue.
+
+## Nettoyage automatique
+
+Les notifications lues peuvent être purgées automatiquement après le délai prévu par TicketFlow. Cette tâche est exécutée par le cron principal.
+
+## E-mails
+
+Selon les préférences utilisateur et la configuration du serveur, certains événements peuvent également créer un e-mail dans la file TicketFlow.
+
+Le transport peut être désactivé, journalisé en mode `log` ou configuré en SMTP.

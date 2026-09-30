@@ -1,37 +1,72 @@
 # Rôles et permissions
 
+TicketFlow possède quatre rôles fonctionnels.
+
 ## Administrateur
 
-- utilisateurs et groupes ;
-- tickets globaux et archives ;
-- exports et statistiques ;
-- audit ;
-- configuration ;
-- SLA et supervision ;
-- actions administratives sensibles.
+L'Administrateur peut notamment :
 
-## IT
+- gérer les utilisateurs ;
+- créer, modifier, désactiver et supprimer les groupes selon les règles applicables ;
+- consulter tous les tickets ;
+- accéder aux archives ;
+- importer des utilisateurs CSV / Excel ;
+- générer les extractions ;
+- consulter les statistiques ;
+- consulter et vider le journal d'audit ;
+- gérer la configuration ;
+- gérer les alertes de service ;
+- gérer les maintenances ;
+- consulter les informations SLA.
 
-- file de tickets autorisée ;
-- prise en charge et suivi ;
-- conversation ;
-- assignation/transfert selon les règles ;
-- demande de validation Manager ;
-- proposition de résolution ;
-- vues enregistrées et actions multiples autorisées.
+Les SLA sont réservés à l'Administrateur dans l'interface.
+
+## Support IT
+
+Le Support IT peut :
+
+- consulter les tickets autorisés ;
+- prendre en charge un ticket ;
+- modifier son statut et son importance ;
+- communiquer avec le demandeur ;
+- ajouter des notes internes ;
+- transférer ou assigner selon les règles ;
+- demander une validation Manager ;
+- sélectionner le Manager de validation finale ;
+- proposer une résolution ;
+- suivre les tickets des autres membres Support IT lorsque nécessaire.
+
+Le rôle est affiché **Support IT**, mais sa clé interne historique reste `IT`.
 
 ## Manager
 
-- création de ses propres tickets ;
-- consultation de ses propres tickets ;
-- traitement des validations qui lui sont adressées ;
-- décision : valider, demander des informations ou refuser.
+Le Manager peut :
+
+- créer ses propres tickets ;
+- consulter ses tickets actifs ;
+- intervenir lorsqu'une validation lui est adressée ;
+- valider ;
+- demander des informations ;
+- refuser.
+
+Dans le workflow à deux niveaux, le Manager N+1 du demandeur intervient avant le Manager sélectionné pour la décision finale.
+
+Les restrictions de message et de pièces jointes pendant une phase de validation sont appliquées côté serveur.
 
 ## Collaborateur
 
-- création de tickets ;
-- consultation de ses tickets actifs ;
-- conversation avec le support ;
-- confirmation ou refus d'une proposition de résolution.
+Le Collaborateur peut :
 
-Les contrôles de rôle sont toujours effectués côté serveur. Masquer un bouton dans l'interface ne constitue jamais une autorisation.
+- créer un ticket ;
+- consulter ses tickets actifs ;
+- échanger avec le Support IT ;
+- ajouter les pièces jointes autorisées ;
+- confirmer ou refuser une proposition de résolution.
+
+## Archives
+
+Les tickets résolus, fermés ou annulés ne restent pas dans les files actives des Collaborateurs et Managers. Ils restent accessibles aux rôles autorisés dans les archives.
+
+## Principe de sécurité
+
+Masquer un bouton ne constitue jamais une permission. Les contrôles de rôle et de propriété du ticket sont toujours exécutés côté serveur.

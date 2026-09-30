@@ -1,160 +1,77 @@
 # Installation de TicketFlow
 
-Ce guide décrit une installation neuve sur Debian avec Apache, PHP et MariaDB/MySQL.
+Ce guide concerne une **nouvelle installation** de TicketFlow v1.2.0 sur Debian / Ubuntu.
 
-## Installation automatique recommandée
+Pour mettre à jour une installation existante, utilisez [upgrade.md](upgrade.md).
 
-Sur une Debian/Ubuntu neuve, utilisez l'installateur officiel TicketFlow v1.1.0 :
+## 1. Préparer le serveur
+
+```bash
+apt update
+apt install apache2 mariadb-server php php-mysql php-mbstring php-zip php-xml php-curl curl sudo
+```
+
+## 2. Installation automatique recommandée
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
 ```
 
-Cette commande installe et configure automatiquement les dépendances, Apache, MariaDB, PHP, TicketFlow, les permissions et le cron. Les étapes ci-dessous restent utiles pour une installation manuelle.
+L'installateur configure automatiquement :
 
-## 1. Paquets nécessaires
+- Apache ;
+- MariaDB ;
+- PHP ;
+- la base de données TicketFlow ;
+- le compte SQL applicatif ;
+- `config/config.php` ;
+- le VirtualHost Apache ;
+- les permissions ;
+- les limites PHP utiles aux pièces jointes ;
+- le cron TicketFlow ;
+- l'assistant sécurisé du premier Administrateur.
+
+## 3. Premier Administrateur
+
+À la fin de l'installation, une URL unique est affichée :
+
+```text
+http://IP_DU_SERVEUR/setup.php?token=...
+```
+
+Ouvrez cette adresse depuis votre navigateur, complétez l'assistant puis créez le premier compte Administrateur.
+
+Après validation :
+
+- le jeton d'installation est invalidé ;
+- `storage/installed.lock` est créé ;
+- l'assistant ne peut plus être utilisé comme lors d'une première installation.
+
+## 4. Connexion
+
+```text
+http://IP_DU_SERVEUR/login.php
+```
+
+## 5. Vérifications
 
 ```bash
-sudo apt update
-sudo apt install apache2 mariadb-server php php-cli php-mysql php-mbstring php-zip
-```
-
-Vérification :
-
-```bash
-php -v
-php -m | grep -E 'pdo_mysql|mbstring|fileinfo|zip'
-```
-
-## 2. Copier le projet
-
-Exemple :
-
-```bash
-sudo mkdir -p /var/www/ticketflow
-sudo chown "$USER":"$USER" /var/www/ticketflow
-```
-
-Copiez ou clonez ensuite TicketFlow dans ce dossier.
-
-## 3. Base MySQL/MariaDB
-
-```sql
-CREATE DATABASE ticketflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'ticketflow_user'@'localhost' IDENTIFIED BY 'CHANGE_ME';
-GRANT ALL PRIVILEGES ON ticketflow.* TO 'ticketflow_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-Import :
-
-```bash
-mysql -u ticketflow_user -p ticketflow < database/schema.sql
-```
-
-## 4. Configuration TicketFlow
-
-```bash
-cp config/config.example.php config/config.php
-nano config/config.php
-```
-
-Renseignez au minimum :
-
-```php
-'database' => [
-    'host' => '127.0.0.1',
-    'port' => 3306,
-    'name' => 'ticketflow',
-    'user' => 'ticketflow_user',
-    'password' => 'VOTRE_MOT_DE_PASSE',
-    'charset' => 'utf8mb4',
-],
-```
-
-En développement, gardez :
-
-```php
-'environment' => 'development',
-```
-
-En production :
-
-```php
-'environment' => 'production',
-```
-
-## 5. Permissions
-
-```bash
-sudo chown -R www-data:www-data storage
-sudo chmod -R 770 storage
-sudo chown root:www-data config/config.php
-sudo chmod 640 config/config.php
-```
-
-Ne rendez jamais `config/config.php` accessible publiquement.
-
-## 6. Apache
-
-Copiez l'exemple fourni :
-
-```bash
-sudo cp deploy/apache/ticketflow.conf.example /etc/apache2/sites-available/ticketflow.conf
-sudo nano /etc/apache2/sites-available/ticketflow.conf
-```
-
-Puis :
-
-```bash
-sudo a2enmod rewrite headers
-sudo a2ensite ticketflow.conf
-sudo apache2ctl configtest
-sudo systemctl reload apache2
-```
-
-Le DocumentRoot doit être `/var/www/ticketflow/public`.
-
-## 7. PHP uploads
-
-Pour les pièces jointes de 10 Mo :
-
-```ini
-upload_max_filesize = 10M
-post_max_size = 52M
-max_file_uploads = 10
-```
-
-Redémarrez Apache :
-
-```bash
-sudo systemctl restart apache2
-```
-
-## 8. Premier Administrateur
-
-```bash
-php scripts/create_admin.php
-```
-
-## 9. Cron
-
-```bash
-crontab -e
-```
-
-Ajoutez :
-
-```cron
-*/5 * * * * /usr/bin/php /var/www/ticketflow/scripts/cron/run.php >> /var/www/ticketflow/storage/logs/cron.log 2>&1
-```
-
-## 10. Validation de l'installation
-
-```bash
+cd /var/www/ticketflow
 php scripts/healthcheck.php
 php scripts/security_audit.php
+php scripts/route_check.php
 php scripts/release_check.php
 ```
 
-Aucune erreur bloquante ne doit être signalée.
+## 6. Installation manuelle
+
+L'installation manuelle reste possible mais n'est pas recommandée pour un déploiement standard. Elle nécessite au minimum :
+
+1. création de la base MariaDB/MySQL ;
+2. import de `database/schema.sql` ;
+3. création de `config/config.php` à partir de `config/config.example.php` ;
+4. permissions sur `storage/` ;
+5. VirtualHost Apache pointant vers `public/` ;
+6. mise en place du cron.
+
+Utilisez de préférence `install.sh` afin d'éviter une divergence de configuration avec les installations supportées.

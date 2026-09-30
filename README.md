@@ -262,19 +262,17 @@ Consultez [SECURITY.md](SECURITY.md) pour les informations de sécurité.
 
 ## Documentation
 
+La documentation complète est organisée dans [docs/README.md](docs/README.md).
+
+Principaux guides :
+
 - [Installation](docs/installation.md)
-- [Déploiement Apache](docs/deployment-apache.md)
-- [Mise à niveau](docs/upgrade.md)
+- [Mise à jour](docs/upgrade.md)
 - [Rôles et permissions](docs/roles-permissions.md)
 - [Workflow des tickets](docs/ticket-workflow.md)
-- [E-mails et automatisations](docs/v014-mail-automation.md)
-- [SLA](docs/sla.md)
-- [Exports](docs/exports.md)
-- [Notifications](docs/notifications.md)
-- [Statistiques](docs/statistics.md)
-- [Architecture](docs/architecture.md)
+- [Import utilisateurs CSV / Excel](docs/user-import.md)
+- [Alertes de service et maintenance](docs/service-alerts-maintenance.md)
 - [Notes de version v1.2.0](docs/release-notes-v120.md)
-- [Notes de version v1.1.0](docs/release-notes-v110.md)
 
 ## Contribution
 

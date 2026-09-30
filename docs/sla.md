@@ -1,6 +1,6 @@
-# SLA TicketFlow — V11
+# SLA TicketFlow
 
-La V11 ajoute des objectifs de prise en charge et de résolution selon l'importance du ticket.
+TicketFlow définit des objectifs de prise en charge et de résolution selon l'importance du ticket.
 
 | Importance | Prise en charge | Résolution |
 |---|---:|---:|
@@ -9,16 +9,28 @@ La V11 ajoute des objectifs de prise en charge et de résolution selon l'importa
 | Haute | 1 h | 8 h |
 | Critique | 15 min | 4 h |
 
-Les délais sont actuellement calculés en temps calendaire continu. Les horaires ouvrés pourront être ajoutés dans une évolution ultérieure.
+Les délais sont actuellement calculés en temps calendaire continu.
 
-La prise en charge est considérée comme effectuée lors de la première attribution du ticket à un technicien IT. Le délai de résolution s'arrête lorsque le demandeur confirme la solution et que le ticket passe à `Résolu`.
+## Prise en charge
 
-## Alertes automatiques
+La prise en charge est considérée comme effectuée lors de la première attribution du ticket à un membre du Support IT.
 
-Le script `scripts/check_sla.php` contrôle les dépassements et crée des notifications internes. Pour un contrôle toutes les 5 minutes :
+## Résolution
 
-```cron
-*/5 * * * * /usr/bin/php /var/www/ticketflow/scripts/check_sla.php >/dev/null 2>&1
+Le délai de résolution s'arrête lorsque le workflow de résolution atteint l'état prévu après confirmation du demandeur.
+
+## Alertes SLA
+
+Les tâches automatiques vérifient régulièrement les dépassements et peuvent créer des notifications pour les personnes concernées.
+
+Le cron principal est :
+
+```bash
+php scripts/cron/run.php
 ```
 
-Les alertes sont envoyées au technicien assigné (ou à l'équipe IT si le ticket n'est pas attribué) ainsi qu'aux Administrateurs.
+Il est normalement installé automatiquement et exécuté toutes les cinq minutes.
+
+## Visibilité
+
+Les informations SLA détaillées sont réservées aux Administrateurs dans l'interface TicketFlow.

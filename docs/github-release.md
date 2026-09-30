@@ -1,37 +1,59 @@
 # Préparer une release GitHub
 
-## Avant le commit
+Ce document est destiné aux mainteneurs de TicketFlow.
+
+## 1. Contrôles avant publication
+
+Depuis la racine du projet :
 
 ```bash
 php scripts/healthcheck.php
 php scripts/security_audit.php
+php scripts/route_check.php
 php scripts/release_check.php
 ```
 
-Vérifiez ensuite `git status`. Les fichiers suivants ne doivent pas être suivis : `config/config.php`, `.env`, les logs, les uploads utilisateurs et les dumps contenant des données réelles.
+Vérifiez également `git status`.
 
-## Tag de version
+Ne publiez jamais :
 
-Pour TicketFlow v1.2.0 :
+- `config/config.php` réel ;
+- fichiers `.env` ;
+- logs ;
+- uploads utilisateurs ;
+- dumps contenant des données réelles ;
+- secrets SMTP ou mots de passe.
+
+## 2. Version
+
+Mettez à jour au minimum :
+
+- `VERSION` ;
+- `CHANGELOG.md` ;
+- le README si nécessaire ;
+- les notes de version sous `docs/`.
+
+## 3. Tag
+
+Exemple pour v1.2.0 :
 
 ```bash
 git tag -a v1.2.0 -m "TicketFlow v1.2.0"
 git push origin v1.2.0
 ```
 
-## Contenu recommandé de la release
+## 4. Release GitHub
 
-- titre : `TicketFlow v1.2.0` ;
-- notes : `docs/release-notes-v120.md` ;
-- archive : `TicketFlow-v1.2.0.zip` ;
-- somme SHA-256 de l'archive ;
-- rappel de la commande de mise à jour automatique.
+Recommandations :
 
-## Ne pas joindre
+- titre : `TicketFlow vX.Y.Z Stable` ;
+- tag : `vX.Y.Z` ;
+- cible : `main` ;
+- ne pas marquer en pré-release pour une version stable ;
+- joindre l'archive `TicketFlow-vX.Y.Z.zip` ;
+- publier la somme SHA-256 ;
+- rappeler les commandes `install.sh` et `update.sh` appropriées.
 
-- `config/config.php` réel ;
-- base de données réelle ;
-- logs ;
-- uploads utilisateurs ;
-- secrets SMTP ;
-- mots de passe.
+## 5. Notes de version
+
+Conservez dans `docs/` uniquement les notes des versions stables encore utiles à la compréhension du projet. Les documents de développement intermédiaires n'ont pas besoin de rester dans la documentation principale.
