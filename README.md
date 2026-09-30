@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/ticketflow-banner.svg" alt="TicketFlow v1.2.0" width="100%">
+  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.2.0" width="100%">
 </p>
 
 <p align="center">
