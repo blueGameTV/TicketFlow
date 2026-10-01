@@ -45,18 +45,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Vous ne pouvez pas supprimer votre propre compte Administrateur.';
         } else {
             $referenceQueries = [
-                'managed_groups' => 'SELECT COUNT(*) FROM groups_company WHERE manager_id = :id',
-                'tickets' => 'SELECT COUNT(*) FROM tickets WHERE requester_id = :id',
-                'messages' => 'SELECT COUNT(*) FROM ticket_messages WHERE author_id = :id',
-                'approvals' => 'SELECT COUNT(*) FROM manager_approvals WHERE manager_id = :id OR requested_by = :id OR target_manager_id = :id',
-                'attachments' => 'SELECT COUNT(*) FROM ticket_attachments WHERE uploaded_by = :id',
-                'alerts' => 'SELECT COUNT(*) FROM service_alerts WHERE created_by = :id',
-                'maintenance' => 'SELECT COUNT(*) FROM maintenance_windows WHERE created_by = :id',
+                [
+                    'sql' => 'SELECT COUNT(*) FROM groups_company WHERE manager_id = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
+                [
+                    'sql' => 'SELECT COUNT(*) FROM tickets WHERE requester_id = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
+                [
+                    'sql' => 'SELECT COUNT(*) FROM ticket_messages WHERE author_id = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
+                [
+                    // PDO MySQL/MariaDB n'autorise pas de façon fiable la réutilisation
+                    // d'un même paramètre nommé plusieurs fois avec les requêtes préparées natives.
+                    'sql' => 'SELECT COUNT(*) FROM manager_approvals
+                              WHERE manager_id = :manager_id
+                                 OR requested_by = :requested_by
+                                 OR target_manager_id = :target_manager_id',
+                    'params' => [
+                        'manager_id' => $id,
+                        'requested_by' => $id,
+                        'target_manager_id' => $id,
+                    ],
+                ],
+                [
+                    'sql' => 'SELECT COUNT(*) FROM ticket_attachments WHERE uploaded_by = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
+                [
+                    'sql' => 'SELECT COUNT(*) FROM service_alerts WHERE created_by = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
+                [
+                    'sql' => 'SELECT COUNT(*) FROM maintenance_windows WHERE created_by = :user_id',
+                    'params' => ['user_id' => $id],
+                ],
             ];
             $references = 0;
-            foreach ($referenceQueries as $sql) {
-                $referenceStmt = $pdo->prepare($sql);
-                $referenceStmt->execute(['id' => $id]);
+            foreach ($referenceQueries as $referenceQuery) {
+                $referenceStmt = $pdo->prepare($referenceQuery['sql']);
+                $referenceStmt->execute($referenceQuery['params']);
                 $references += (int)$referenceStmt->fetchColumn();
             }
             if ($references > 0) {
@@ -72,11 +102,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $avatar = __DIR__ . '/../storage/uploads/avatars/' . basename((string)$target['profile_photo']);
                         if (is_file($avatar)) @unlink($avatar);
                     }
-                    $pdo->prepare('DELETE FROM users WHERE id=:id')->execute(['id'=>$id]);
-                    $auditService->log((int)$user['id'], 'user_deleted', 'user', $id, ['username'=>$target['username'], 'name'=>trim($target['firstname'].' '.$target['lastname'])]);
-                    $_SESSION['flash_success'] = 'Utilisateur supprimé avec succès.';
-                    header('Location: admin-users.php');
-                    exit;
+                    try {
+                        $pdo->beginTransaction();
+
+                        $deleteStmt = $pdo->prepare('DELETE FROM users WHERE id = :id');
+                        $deleteStmt->execute(['id' => $id]);
+
+                        if ($deleteStmt->rowCount() !== 1) {
+                            throw new RuntimeException('La suppression du compte n’a pas été effectuée.');
+                        }
+
+                        $auditService->log(
+                            (int)$user['id'],
+                            'user_deleted',
+                            'user',
+                            $id,
+                            [
+                                'username' => $target['username'],
+                                'name' => trim($target['firstname'] . ' ' . $target['lastname']),
+                            ]
+                        );
+
+                        $pdo->commit();
+
+                        if (!empty($target['profile_photo'])) {
+                            $avatar = __DIR__ . '/../storage/uploads/avatars/' . basename((string)$target['profile_photo']);
+                            if (is_file($avatar)) {
+                                @unlink($avatar);
+                            }
+                        }
+
+                        $_SESSION['flash_success'] = 'Utilisateur supprimé avec succès.';
+                        header('Location: admin-users.php');
+                        exit;
+                    } catch (Throwable $deleteException) {
+                        if ($pdo->inTransaction()) {
+                            $pdo->rollBack();
+                        }
+
+                        error_log(
+                            '[TicketFlow] Échec suppression utilisateur #' . $id . ': ' .
+                            $deleteException->getMessage()
+                        );
+
+                        $errors[] = 'La suppression de cet utilisateur a échoué. Vérifiez qu’il ne possède plus de données liées, puis réessayez.';
+                    }
                 }
             }
         }
