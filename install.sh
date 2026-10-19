@@ -3,10 +3,11 @@ set -Eeuo pipefail
 
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
+REPO_BRANCH="${TICKETFLOW_BRANCH:-v1.3.0-dev}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
-INSTALLER_BUILD="1.2.0-r1"
+INSTALLER_BUILD="1.3.0-dev-test1"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -26,14 +27,16 @@ ok "Apache, MariaDB et PHP sont prêts."
 
 say "Récupération de TicketFlow"
 if [[ -d "$APP_DIR/.git" ]]; then
-  git -C "$APP_DIR" pull --ff-only
+  ACTIVE_BRANCH="$(git -C "$APP_DIR" branch --show-current)"
+  [[ "$ACTIVE_BRANCH" == "$REPO_BRANCH" ]] || fail "Branche locale $ACTIVE_BRANCH au lieu de $REPO_BRANCH. Ne pas mettre à jour automatiquement une autre branche."
+  git -C "$APP_DIR" pull --ff-only origin "$REPO_BRANCH"
 elif [[ -e "$APP_DIR" && -n "$(ls -A "$APP_DIR" 2>/dev/null || true)" ]]; then
   fail "$APP_DIR existe déjà et n'est pas un dépôt Git vide. Déplacez/supprimez ce dossier puis relancez l'installation."
 else
   rm -rf "$APP_DIR"
-  git clone "$REPO_URL" "$APP_DIR"
+  git clone --branch "$REPO_BRANCH" --single-branch "$REPO_URL" "$APP_DIR"
 fi
-ok "Code installé dans $APP_DIR."
+ok "Code installé dans $APP_DIR (branche $REPO_BRANCH)."
 
 DB_PASSWORD="$(openssl rand -hex 24)"
 SETUP_TOKEN="$(openssl rand -hex 24)"
