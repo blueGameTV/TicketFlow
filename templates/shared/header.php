@@ -42,10 +42,7 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> - <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v013.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v110.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v120.css?v=1.2.0">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev">
 </head>
 <body class="app-body<?= !empty($user['must_change_password']) ? ' tf-forced-password-lock' : '' ?> role-<?= htmlspecialchars(strtolower(str_replace(['é','è','ê','à','ù','ç',' '], ['e','e','e','a','u','c','-'], $role))) ?> sidebar-<?= htmlspecialchars((string) $uiPreferences['sidebar_mode']) ?>">
 <div class="app-shell">
@@ -55,35 +52,87 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
             <button class="sidebar-close" type="button" data-sidebar-close aria-label="<?= htmlspecialchars(t('common.close_menu')) ?>"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <nav class="sidebar-nav">
+                <nav class="sidebar-nav">
             <a class="nav-item<?= $isActive(['dashboard.php']) ?>" href="dashboard.php"><i class="fa-solid fa-house"></i><span><?= htmlspecialchars(t('nav.dashboard')) ?></span></a>
 
             <?php if ($role === 'Administrateur'): ?>
-                <div class="nav-section-label"><?= htmlspecialchars(t('nav.administration')) ?></div>
-                <a class="nav-item<?= $isActive(['admin-users.php','admin-user-form.php']) ?>" href="admin-users.php"><i class="fa-solid fa-users"></i><span><?= htmlspecialchars(t('nav.users')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-groups.php','admin-group-form.php']) ?>" href="admin-groups.php"><i class="fa-solid fa-people-group"></i><span><?= htmlspecialchars(t('nav.groups')) ?></span></a>
-                <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.tickets')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-maintenance.php']) ?>" href="admin-maintenance.php"><i class="fa-solid fa-screwdriver-wrench"></i><span><?= htmlspecialchars(t('nav.maintenance')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-statistics.php']) ?>" href="admin-statistics.php"><i class="fa-solid fa-chart-line"></i><span><?= htmlspecialchars(t('nav.statistics')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-exports.php']) ?>" href="admin-exports.php"><i class="fa-solid fa-file-export"></i><span><?= htmlspecialchars(t('nav.exports')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-audit.php']) ?>" href="admin-audit.php"><i class="fa-solid fa-shield-halved"></i><span><?= htmlspecialchars(t('nav.audit')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-configuration.php']) ?>" href="admin-configuration.php"><i class="fa-solid fa-sliders"></i><span><?= htmlspecialchars(t('nav.configuration')) ?></span><span class="v12061-nav-beta">BETA</span></a>
+                <details class="sidebar-group" data-sidebar-group="administration" <?= in_array($currentPage, ['admin-users.php','admin-user-form.php','admin-user-import.php','admin-groups.php','admin-group-form.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-shield-halved"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.administration')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-users.php','admin-user-form.php','admin-user-import.php']) ?>" href="admin-users.php"><i class="fa-solid fa-users"></i><span><?= htmlspecialchars(t('nav.users')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-groups.php','admin-group-form.php']) ?>" href="admin-groups.php"><i class="fa-solid fa-people-group"></i><span><?= htmlspecialchars(t('nav.groups')) ?></span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="support" <?= in_array($currentPage, ['it-tickets.php','ticket.php','support-recovery.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-headset"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.support')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket"></i><span><?= htmlspecialchars(t('nav.ticket_list')) ?></span></a>
+                        <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['support-recovery.php']) ?>" href="support-recovery.php"><i class="fa-solid fa-key"></i><span><?= htmlspecialchars(t('nav.recovery_requests')) ?></span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="monitoring" <?= in_array($currentPage, ['admin-maintenance.php','admin-statistics.php','admin-exports.php','admin-audit.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-chart-line"></i><span class="sidebar-group-title">Supervision</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-maintenance.php']) ?>" href="admin-maintenance.php"><i class="fa-solid fa-screwdriver-wrench"></i><span><?= htmlspecialchars(t('nav.maintenance')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-statistics.php']) ?>" href="admin-statistics.php"><i class="fa-solid fa-chart-line"></i><span><?= htmlspecialchars(t('nav.statistics')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-exports.php']) ?>" href="admin-exports.php"><i class="fa-solid fa-file-export"></i><span><?= htmlspecialchars(t('nav.exports')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-audit.php']) ?>" href="admin-audit.php"><i class="fa-solid fa-shield-halved"></i><span><?= htmlspecialchars(t('nav.audit')) ?></span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="configuration" <?= $isActive(['admin-configuration.php']) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-gears"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.configuration_section')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-configuration.php']) ?>" href="admin-configuration.php"><i class="fa-solid fa-envelope-circle-check"></i><span><?= htmlspecialchars(t('nav.email_system')) ?></span><span class="email-config-beta">BETA</span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="help" <?= in_array($currentPage, ['error-codes.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-circle-question"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.help')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['error-codes.php']) ?>" href="error-codes.php"><i class="fa-solid fa-triangle-exclamation"></i><span><?= htmlspecialchars(t('nav.error_codes')) ?></span></a>
+                    </div>
+                </details>
+
             <?php elseif ($role === 'IT'): ?>
-                <div class="nav-section-label"><?= htmlspecialchars(t('nav.support')) ?></div>
-                <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-inbox"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=unassigned"><i class="fa-solid fa-box-open"></i><span><?= htmlspecialchars(t('nav.unassigned')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=team"><i class="fa-solid fa-user-group"></i><span><?= htmlspecialchars(t('nav.support_team')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="support" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-headset"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.support')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-ticket"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket"></i><span><?= htmlspecialchars(t('nav.ticket_list')) ?></span></a>
+                        <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['support-recovery.php']) ?>" href="support-recovery.php"><i class="fa-solid fa-key"></i><span><?= htmlspecialchars(t('nav.recovery_requests')) ?></span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="help" <?= in_array($currentPage, ['error-codes.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-circle-question"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.help')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['error-codes.php']) ?>" href="error-codes.php"><i class="fa-solid fa-triangle-exclamation"></i><span><?= htmlspecialchars(t('nav.error_codes')) ?></span></a>
+                    </div>
+                </details>
+
             <?php elseif ($role === 'Manager'): ?>
-                <div class="nav-section-label">Tickets</div>
-                <a class="nav-item<?= $isActive(['manager-approvals.php']) ?>" href="manager-approvals.php"><i class="fa-solid fa-circle-check"></i><span><?= htmlspecialchars(t('nav.validations')) ?></span></a>
-                <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="tickets" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-ticket"></i><span class="sidebar-group-title">Tickets</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['manager-approvals.php']) ?>" href="manager-approvals.php"><i class="fa-solid fa-circle-check"></i><span><?= htmlspecialchars(t('nav.validations')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                    </div>
+                </details>
+
             <?php else: ?>
-                <div class="nav-section-label">Tickets</div>
-                <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="tickets" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-ticket"></i><span class="sidebar-group-title">Tickets</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                    </div>
+                </details>
             <?php endif; ?>
         </nav>
 
