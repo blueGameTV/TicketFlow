@@ -417,3 +417,74 @@ button:disabled { cursor:not-allowed; opacity:.6; }
 /* V12 - Live UI & audit */
 .live-toast{position:fixed;right:24px;bottom:24px;z-index:9999;padding:12px 16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.16);background:#fff;font-weight:700}
 .live-toast.success{border-left:4px solid #16a34a}.live-toast.error{border-left:4px solid #dc2626}.audit-details{max-width:420px;white-space:normal;word-break:break-word}.alert.warning{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 16px;border-radius:10px}
+
+/* === TicketFlow v1.3.0-dev login-test START === */
+.tf-login17-page{min-height:100dvh;margin:0;overflow:hidden;background:radial-gradient(circle at 12% 12%,rgba(63,97,216,.10),transparent 28%),radial-gradient(circle at 90% 90%,rgba(91,71,223,.08),transparent 30%),#eaf0f7;color:#162033;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.tf-login17-page*,.tf-login17-page *::before,.tf-login17-page *::after{box-sizing:border-box}
+.tf-login17-stage{min-height:100dvh;display:grid;place-items:center;padding:30px}
+.tf-login17-card{width:min(1260px,calc(100vw - 48px));height:min(720px,calc(100dvh - 60px));min-height:620px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(430px,.95fr);overflow:hidden;border:1px solid rgba(131,149,176,.28);border-radius:28px;background:#f7f9fc;box-shadow:0 32px 90px rgba(24,39,75,.18)}
+.tf-login17-brand-panel{min-width:0;display:flex;flex-direction:column;overflow:hidden;padding:42px 46px 46px;color:#fff;background:radial-gradient(circle at 92% 8%,rgba(112,91,238,.26),transparent 30%),linear-gradient(150deg,#22427d 0%,#1b3768 48%,#172a50 100%)}
+.tf-login17-brand{display:flex;align-items:center;gap:13px}
+.tf-login17-logo{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#3d68eb;box-shadow:0 10px 30px rgba(7,24,67,.30)}
+.tf-login17-brand>div{display:grid;gap:2px}
+.tf-login17-brand small{color:#b9cbff!important;font-size:.7rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.tf-login17-brand strong{color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:1.38rem}
+.tf-login17-brand-copy{max-width:620px;margin-top:54px}
+.tf-login17-env{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font-size:.8rem;font-weight:800}
+.tf-login17-brand-copy h1{margin:20px 0 14px;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:clamp(2.7rem,4vw,4.4rem);line-height:1;letter-spacing:-.05em}
+.tf-login17-brand-copy p{margin:0;max-width:590px;color:#e1e9f8;font-size:1rem;line-height:1.65}
+.tf-login17-feature-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:30px}
+.tf-login17-feature-list>div{min-width:0;display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;font-size:.76rem;font-weight:750}
+.tf-login17-feature-icon{width:28px;height:28px;flex:0 0 auto;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.10)}
+.tf-login17-brand-panel::after{content:"";display:block;flex:1 1 auto;min-height:40px}
+.tf-login17-auth-panel{min-width:0;display:flex;flex-direction:column;background:#f7f9fc}
+.tf-login17-toolbar{display:flex;justify-content:flex-end;align-items:flex-start;gap:8px;min-height:72px;padding:22px 24px 0}
+.tf-login17-language{position:relative}
+.tf-login17-language-trigger,.tf-login17-theme{height:40px;border:1px solid #d5dfeb;border-radius:11px;background:#fff;color:#263247;box-shadow:0 6px 18px rgba(24,39,75,.06)}
+.tf-login17-language-trigger{min-width:138px;display:flex;align-items:center;gap:8px;padding:0 10px;font:inherit;font-size:.82rem;font-weight:750;cursor:pointer}
+.tf-login17-language-trigger>span{flex:1 1 auto;text-align:left}
+.tf-login17-language-arrow{font-size:.65rem;transition:transform .16s ease}
+.tf-login17-language.open .tf-login17-language-arrow{transform:rotate(180deg)}
+.tf-login17-theme{width:40px;display:grid;place-items:center;cursor:pointer}
+.tf-login17-language-menu{position:absolute;z-index:30;top:48px;right:0;width:190px;padding:6px;border:1px solid #d5dfeb;border-radius:12px;background:#fff;box-shadow:0 16px 42px rgba(24,39,75,.16)}
+.tf-login17-language-menu[hidden]{display:none!important}
+.tf-login17-language-menu button{width:100%;min-height:42px;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;gap:8px;padding:0 9px;border:0;border-radius:8px;background:transparent;color:#243149;text-align:left;font:inherit;cursor:pointer}
+.tf-login17-language-menu button:hover{background:#eef3f9}
+.tf-login17-language-menu button.active{background:#e9efff;color:#2f5bd8}
+.tf-login17-language-code{height:25px;display:grid;place-items:center;border-radius:7px;background:#eef3f9;font-size:.67rem;font-weight:900}
+.tf-login17-auth-content{width:min(100%,470px);margin:auto;padding:26px 34px 50px}
+.tf-login17-kicker{display:block;margin-bottom:8px;color:#315fe6;font-size:.72rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.tf-login17-heading h2{margin:0;color:#111827;font-size:2.35rem;line-height:1.08;letter-spacing:-.04em}
+.tf-login17-heading p{margin:10px 0 0;color:#64748b;font-size:.98rem;line-height:1.6}
+.tf-login17-error{display:flex;align-items:flex-start;gap:10px;margin-top:22px;padding:13px 14px;border:1px solid #f2b8b8;border-radius:12px;background:#fff0f0;color:#b42318}
+.tf-login17-form{display:grid;gap:20px;margin-top:28px}
+.tf-login17-field{display:grid;gap:8px}
+.tf-login17-field>label,.tf-login17-label-row label{color:#172033;font-size:.9rem;font-weight:800}
+.tf-login17-label-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tf-login17-label-row a{color:#315fe6;font-size:.83rem;font-weight:750;text-decoration:none}
+.tf-login17-input{min-height:50px;display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:10px;padding:0 14px;border:1px solid #cad6e5;border-radius:12px;background:#fff;overflow:hidden;transition:border-color .16s ease,box-shadow .16s ease}
+.tf-login17-input:focus-within{border-color:#5d7fe8;box-shadow:0 0 0 3px rgba(49,95,230,.11)}
+.tf-login17-input>i{color:#748398}
+.tf-login17-input input,.tf-login17-input input[type="text"],.tf-login17-input input[type="email"],.tf-login17-input input[type="password"]{display:block;width:100%;min-width:0;height:48px;margin:0;padding:0;border:0;border-radius:0;outline:0;background:transparent!important;background-color:transparent!important;background-image:none!important;box-shadow:none!important;color:inherit;font:inherit;-webkit-appearance:none;appearance:none}
+.tf-login17-input input::placeholder{color:#95a3b6}
+.tf-login17-password-toggle{width:36px;height:36px;display:grid;place-items:center;margin-right:-7px;border:0;border-radius:9px;background:transparent;color:#65758b;cursor:pointer}
+.tf-login17-password-toggle:hover{background:#eef3f8;color:#315fe6}
+.tf-login17-submit{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:2px;border:0;border-radius:12px;background:linear-gradient(135deg,#4168df,#3157d5);color:#fff;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(49,87,213,.22)}
+html[data-theme="dark"] .tf-login17-page{background:#091019}
+html[data-theme="dark"] .tf-login17-card{border-color:#26364a;background:#0f1722;box-shadow:0 32px 90px rgba(0,0,0,.36)}
+html[data-theme="dark"] .tf-login17-auth-panel{background:#0f1722}
+html[data-theme="dark"] .tf-login17-language-trigger,html[data-theme="dark"] .tf-login17-theme,html[data-theme="dark"] .tf-login17-language-menu{border-color:#2f4056;background:#131e2b;color:#edf3fb}
+html[data-theme="dark"] .tf-login17-language-menu button{color:#edf3fb}
+html[data-theme="dark"] .tf-login17-language-menu button:hover{background:#1a2838}
+html[data-theme="dark"] .tf-login17-language-menu button.active{background:#1b3477;color:#fff}
+html[data-theme="dark"] .tf-login17-heading h2,html[data-theme="dark"] .tf-login17-field>label,html[data-theme="dark"] .tf-login17-label-row label{color:#f4f7fb}
+html[data-theme="dark"] .tf-login17-heading p{color:#9caabd}
+html[data-theme="dark"] .tf-login17-input{background:#131e2b!important;border-color:#304157!important;color:#edf3fb!important;box-shadow:none!important}
+html[data-theme="dark"] .tf-login17-input:focus-within{background:#131e2b!important;border-color:#6886ea!important;box-shadow:0 0 0 3px rgba(80,113,224,.15)!important}
+html[data-theme="dark"] .tf-login17-input input{background:transparent!important;color:#edf3fb!important;box-shadow:none!important}
+html[data-theme="dark"] .tf-login17-input input::placeholder{color:#7f8fa5!important}
+html[data-theme="dark"] .tf-login17-input>i,html[data-theme="dark"] .tf-login17-password-toggle{color:#8fa0b7!important}
+html[data-theme="dark"] .tf-login17-password-toggle:hover{background:#1a2838!important;color:#8eabff!important}
+@media(max-width:980px){.tf-login17-page{overflow:auto}.tf-login17-stage{min-height:100dvh;padding:20px}.tf-login17-card{width:100%;height:auto;min-height:0;grid-template-columns:1fr}.tf-login17-brand-panel{min-height:480px;padding:34px}.tf-login17-brand-copy{margin-top:36px}.tf-login17-feature-list{margin-top:24px}.tf-login17-auth-panel{min-height:520px}}
+@media(max-width:620px){.tf-login17-stage{padding:0;place-items:stretch}.tf-login17-card{width:100%;border:0;border-radius:0;box-shadow:none}.tf-login17-brand-panel{min-height:auto;padding:28px 20px 30px}.tf-login17-brand-copy{margin-top:30px}.tf-login17-brand-copy h1{font-size:2.35rem}.tf-login17-feature-list{grid-template-columns:1fr}.tf-login17-toolbar{padding:18px 18px 0}.tf-login17-auth-content{width:100%;padding:30px 20px 38px}.tf-login17-heading h2{font-size:2rem}}
+/* === TicketFlow v1.3.0-dev login-test END === */
