@@ -458,4 +458,12 @@ return [
 'error.te104.title' => 'Support recovery not allowed for this role',
 'error.te104.user' => 'This recovery method is not available for this account type.',
 'error.te104.diagnostic' => 'Support-code recovery is limited to Employees and Managers.',
+'nav.configuration_section' => 'Configuration',
+'nav.email_system' => 'Email system',
+'config.email_title' => 'Email configuration',
+'config.email_subtitle' => 'Configure email transport, automated notifications and monitor TicketFlow delivery status.',
+'login.language' => 'Language',
+'login.theme.light' => 'Light',
+'login.theme.dark' => 'Dark',
+'login.theme.system' => 'System',
 ];
