@@ -458,4 +458,12 @@ return [
 'error.te104.title' => 'Récupération Support non autorisée pour ce rôle',
 'error.te104.user' => 'Cette méthode de récupération n’est pas disponible pour ce type de compte.',
 'error.te104.diagnostic' => 'La récupération par code Support est réservée aux Collaborateurs et Managers.',
+'nav.configuration_section' => 'Configuration',
+'nav.email_system' => 'Système e-mail',
+'config.email_title' => 'Configuration e-mail',
+'config.email_subtitle' => 'Configurez le transport e-mail, les notifications automatiques et contrôlez l’état des envois TicketFlow.',
+'login.language' => 'Langue',
+'login.theme.light' => 'Clair',
+'login.theme.dark' => 'Sombre',
+'login.theme.system' => 'Système',
 ];
