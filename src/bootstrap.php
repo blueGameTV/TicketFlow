@@ -109,6 +109,23 @@ $userImportService = new UserImportService($pdo, $auditService);
 
 $defaultLanguage = $appSettingService->get('default_language', 'fr');
 $currentLanguage = in_array($defaultLanguage, ['fr','en'], true) ? $defaultLanguage : 'fr';
+
+// v1.3.0-dev: public language preference for login / unauthenticated pages.
+if (!$auth->check()) {
+    $requestedPublicLanguage = (string)($_GET['lang'] ?? $_COOKIE['ticketflow_language'] ?? '');
+    if (in_array($requestedPublicLanguage, ['fr','en'], true)) {
+        $currentLanguage = $requestedPublicLanguage;
+        if (isset($_GET['lang'])) {
+            setcookie('ticketflow_language', $currentLanguage, [
+                'expires' => time() + 31536000,
+                'path' => '/',
+                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                'httponly' => false,
+                'samesite' => 'Lax',
+            ]);
+        }
+    }
+}
 if ($auth->check()) {
     try {
         $langStmt = $pdo->prepare('SELECT language FROM user_preferences WHERE user_id = :uid');
