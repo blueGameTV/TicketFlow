@@ -19,9 +19,6 @@ final class MaintenanceService
             return false;
         }
 
-        // Les valeurs datetime-local sont stockées comme heure locale TicketFlow.
-        // La comparaison utilise le fuseau configuré dans bootstrap.php, et non
-        // le fuseau système implicite de PHP/MariaDB.
         $expectedEnd = trim($this->settings->get('maintenance_expected_end', ''));
         if ($expectedEnd !== '') {
             $endTs = strtotime($expectedEnd);
@@ -42,6 +39,27 @@ final class MaintenanceService
         return $this->settings->bool('maintenance_allow_it', true);
     }
 
+    public function activeWindow(): ?array
+    {
+        $now = date('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare(
+            "SELECT mw.*, u.firstname creator_firstname, u.lastname creator_lastname,
+                    cu.firstname canceller_firstname, cu.lastname canceller_lastname
+             FROM maintenance_windows mw
+             INNER JOIN users u ON u.id=mw.created_by
+             LEFT JOIN users cu ON cu.id=mw.cancelled_by
+             WHERE mw.cancelled_at IS NULL
+               AND mw.starts_at <= :now_start
+               AND mw.ends_at > :now_end
+             ORDER BY mw.block_access DESC, mw.starts_at ASC
+             LIMIT 1"
+        );
+        $stmt->execute(['now_start' => $now, 'now_end' => $now]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
     public function activeBlockingWindow(): ?array
     {
         $now = date('Y-m-d H:i:s');
@@ -58,7 +76,54 @@ final class MaintenanceService
         );
         $stmt->execute(['now_start' => $now, 'now_end' => $now]);
         $row = $stmt->fetch();
+
         return $row ?: null;
+    }
+
+    public function activeState(): array
+    {
+        if ($this->manualEnabled()) {
+            return [
+                'active' => true,
+                'source' => 'manual',
+                'id' => null,
+                'title' => 'TicketFlow',
+                'message' => $this->settings->get('maintenance_message', ''),
+                'starts_at' => '',
+                'ends_at' => $this->settings->get('maintenance_expected_end', ''),
+                'block_access' => true,
+                'allow_it' => $this->allowIt(),
+            ];
+        }
+
+        $window = $this->activeWindow();
+        if ($window) {
+            return [
+                'active' => true,
+                'source' => 'scheduled',
+                'id' => (int)$window['id'],
+                'title' => (string)$window['title'],
+                'message' => (string)$window['message'],
+                'starts_at' => (string)$window['starts_at'],
+                'ends_at' => (string)$window['ends_at'],
+                'block_access' => !empty($window['block_access']),
+                'allow_it' => $this->allowIt(),
+                'creator_firstname' => (string)($window['creator_firstname'] ?? ''),
+                'creator_lastname' => (string)($window['creator_lastname'] ?? ''),
+            ];
+        }
+
+        return [
+            'active' => false,
+            'source' => 'none',
+            'id' => null,
+            'title' => '',
+            'message' => '',
+            'starts_at' => '',
+            'ends_at' => '',
+            'block_access' => false,
+            'allow_it' => $this->allowIt(),
+        ];
     }
 
     public function upcoming(int $hours = 24): array
@@ -66,6 +131,7 @@ final class MaintenanceService
         $hours = max(1, min(168, $hours));
         $now = date('Y-m-d H:i:s');
         $future = date('Y-m-d H:i:s', time() + ($hours * 3600));
+
         $stmt = $this->pdo->prepare(
             "SELECT mw.*, u.firstname creator_firstname, u.lastname creator_lastname
              FROM maintenance_windows mw
@@ -76,12 +142,14 @@ final class MaintenanceService
              ORDER BY mw.starts_at ASC"
         );
         $stmt->execute(['now' => $now, 'future' => $future]);
+
         return $stmt->fetchAll();
     }
 
     public function all(int $limit = 100): array
     {
         $limit = max(1, min(500, $limit));
+
         $stmt = $this->pdo->query(
             "SELECT mw.*, u.firstname creator_firstname, u.lastname creator_lastname,
                     cu.firstname canceller_firstname, cu.lastname canceller_lastname
@@ -91,6 +159,7 @@ final class MaintenanceService
              ORDER BY mw.starts_at DESC
              LIMIT {$limit}"
         );
+
         return $stmt->fetchAll();
     }
 
@@ -104,6 +173,7 @@ final class MaintenanceService
         if ($role === 'Administrateur') {
             return true;
         }
+
         return $role === 'IT' && $this->allowIt();
     }
 
@@ -117,6 +187,7 @@ final class MaintenanceService
                 'source' => 'manual',
             ];
         }
+
         $window = $this->activeBlockingWindow();
         if ($window) {
             return [
@@ -126,6 +197,7 @@ final class MaintenanceService
                 'source' => 'scheduled',
             ];
         }
+
         return ['title' => 'TicketFlow', 'message' => '', 'ends_at' => '', 'source' => 'none'];
     }
 
@@ -135,6 +207,7 @@ final class MaintenanceService
         if ($message === '') {
             $message = 'TicketFlow est actuellement en maintenance.';
         }
+
         if (mb_strlen($message) > 1200) {
             throw new RuntimeException('Le message de maintenance est trop long.');
         }
@@ -145,9 +218,11 @@ final class MaintenanceService
             if ($endTs === false) {
                 throw new RuntimeException('La fin estimée de maintenance est invalide.');
             }
+
             if ($enabled && $endTs <= time()) {
                 throw new RuntimeException('La fin estimée doit être située dans le futur.');
             }
+
             $expectedEnd = date('Y-m-d H:i:s', $endTs);
         }
 
@@ -159,7 +234,93 @@ final class MaintenanceService
         ]);
     }
 
+    public function stopManual(): void
+    {
+        $this->settings->setMany([
+            'maintenance_mode_enabled' => '0',
+            'maintenance_expected_end' => '',
+        ]);
+    }
+
     public function schedule(int $userId, array $data): int
+    {
+        [$title, $message, $startsAt, $endsAt, $block] = $this->validateWindowData($data);
+
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO maintenance_windows (created_by,title,message,starts_at,ends_at,block_access)
+             VALUES (:uid,:title,:message,:starts_at,:ends_at,:block_access)'
+        );
+
+        $stmt->execute([
+            'uid' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+            'block_access' => $block ? 1 : 0,
+        ]);
+
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    public function updateWindow(int $id, array $data): void
+    {
+        if ($id <= 0) {
+            throw new RuntimeException('Maintenance invalide.');
+        }
+
+        [$title, $message, $startsAt, $endsAt, $block] = $this->validateWindowData($data);
+
+        if (strtotime($endsAt) <= time()) {
+            throw new RuntimeException('La fin prévue doit être située dans le futur.');
+        }
+
+        $stmt = $this->pdo->prepare(
+            'UPDATE maintenance_windows
+             SET title=:title,
+                 message=:message,
+                 starts_at=:starts_at,
+                 ends_at=:ends_at,
+                 block_access=:block_access
+             WHERE id=:id
+               AND cancelled_at IS NULL'
+        );
+
+        $stmt->execute([
+            'id' => $id,
+            'title' => $title,
+            'message' => $message,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+            'block_access' => $block ? 1 : 0,
+        ]);
+
+        if ($stmt->rowCount() === 0) {
+            $check = $this->pdo->prepare('SELECT id FROM maintenance_windows WHERE id=:id AND cancelled_at IS NULL');
+            $check->execute(['id' => $id]);
+
+            if (!$check->fetchColumn()) {
+                throw new RuntimeException('Cette maintenance n’existe plus ou a déjà été annulée.');
+            }
+        }
+    }
+
+    public function cancel(int $id, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE maintenance_windows
+             SET cancelled_at=:cancelled_at, cancelled_by=:uid
+             WHERE id=:id AND cancelled_at IS NULL'
+        );
+
+        $stmt->execute([
+            'cancelled_at' => date('Y-m-d H:i:s'),
+            'uid' => $userId,
+            'id' => $id,
+        ]);
+    }
+
+    private function validateWindowData(array $data): array
     {
         $title = trim((string)($data['title'] ?? ''));
         $message = trim((string)($data['message'] ?? ''));
@@ -170,33 +331,24 @@ final class MaintenanceService
         if ($title === '' || mb_strlen($title) > 160) {
             throw new RuntimeException('Le titre de la maintenance est obligatoire.');
         }
+
         if ($message === '' || mb_strlen($message) > 1200) {
             throw new RuntimeException('Le message de maintenance est obligatoire.');
         }
+
         $startTs = strtotime($startsAt);
         $endTs = strtotime($endsAt);
-        if (!$startTs || !$endTs || $endTs <= $startTs) {
+
+        if ($startTs === false || $endTs === false || $endTs <= $startTs) {
             throw new RuntimeException('La période de maintenance est invalide.');
         }
 
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO maintenance_windows (created_by,title,message,starts_at,ends_at,block_access)
-             VALUES (:uid,:title,:message,:starts_at,:ends_at,:block_access)'
-        );
-        $stmt->execute([
-            'uid' => $userId,
-            'title' => $title,
-            'message' => $message,
-            'starts_at' => date('Y-m-d H:i:s', $startTs),
-            'ends_at' => date('Y-m-d H:i:s', $endTs),
-            'block_access' => $block ? 1 : 0,
-        ]);
-        return (int)$this->pdo->lastInsertId();
-    }
-
-    public function cancel(int $id, int $userId): void
-    {
-        $stmt = $this->pdo->prepare('UPDATE maintenance_windows SET cancelled_at=:cancelled_at, cancelled_by=:uid WHERE id=:id AND cancelled_at IS NULL');
-        $stmt->execute(['cancelled_at' => date('Y-m-d H:i:s'), 'uid' => $userId, 'id' => $id]);
+        return [
+            $title,
+            $message,
+            date('Y-m-d H:i:s', $startTs),
+            date('Y-m-d H:i:s', $endTs),
+            $block,
+        ];
     }
 }
