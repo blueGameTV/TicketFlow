@@ -1,3 +1,14 @@
+> [!WARNING]
+> **Branche de test TicketFlow v1.3.0-dev** : destinée aux installations sur machines vierges. Ne pas utiliser en production avant validation.
+>
+> Installation Debian/Ubuntu sur une VM de test neuve :
+>
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/v1.3.0-dev/install.sh | sudo bash
+> ```
+>
+> L'installateur de cette branche récupère **v1.3.0-dev** et non `main`. L'installation crée une base MariaDB locale et modifie la configuration Apache de la machine ; prévoir une VM dédiée.
+
 <p align="center">
   <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.2.0" width="100%">
 </p>
