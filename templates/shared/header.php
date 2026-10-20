@@ -42,7 +42,7 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> - <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev-errors-fix1">
 </head>
 <body class="app-body<?= !empty($user['must_change_password']) ? ' tf-forced-password-lock' : '' ?> role-<?= htmlspecialchars(strtolower(str_replace(['é','è','ê','à','ù','ç',' '], ['e','e','e','a','u','c','-'], $role))) ?> sidebar-<?= htmlspecialchars((string) $uiPreferences['sidebar_mode']) ?>">
 <div class="app-shell">
