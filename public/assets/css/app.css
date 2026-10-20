@@ -3603,3 +3603,25 @@ html[data-theme="dark"] .te-code-id{background:#1c2942}
 html[data-theme="dark"] .te-search-form input,html[data-theme="dark"] .te-code-grid>div{background:#15202d;color:#e9eef7}
 @media(max-width:700px){.te-code-card{grid-template-columns:1fr}.te-code-id{min-height:unset;justify-content:flex-start;padding:14px 18px;border-right:0;border-bottom:1px solid var(--border,#dbe3ee)}.te-code-copy{padding:17px}.te-code-grid{grid-template-columns:1fr}.te-search-form>.btn{flex:1 1 auto}}
 /* === End technical error catalog === */
+
+/* TicketFlow v1.3.0-dev — restore technical-errors catalogue layout, isolated */
+body.app-body .te-heading{margin-bottom:22px!important}
+body.app-body .te-search-panel{padding:18px 20px!important;margin-bottom:22px!important}
+body.app-body .te-search-form{display:flex!important;gap:12px!important;align-items:center!important;flex-wrap:wrap!important}
+body.app-body .te-search-form .search-field{position:relative!important;display:flex!important;flex:1 1 320px!important;min-width:0!important;align-items:center!important}
+body.app-body .te-search-form .search-field i{position:absolute!important;left:15px!important;pointer-events:none!important}
+body.app-body .te-search-form input{min-height:46px!important;padding:0 14px 0 42px!important;width:100%!important;border-radius:11px!important;border:1px solid var(--border,#dbe3ee)!important;background:var(--soft,#f8faff)!important;color:var(--text,#122340)!important}
+body.app-body .te-code-list{display:grid!important;gap:16px!important;margin-bottom:24px!important}
+body.app-body .te-code-card{display:grid!important;grid-template-columns:150px minmax(0,1fr)!important;gap:0!important;align-items:stretch!important;padding:0!important;overflow:hidden!important;border-radius:16px!important}
+body.app-body .te-code-card .te-code-id{display:flex!important;align-items:center!important;justify-content:center!important;padding:20px 12px!important;min-height:142px!important;background:#ebefff!important;color:#2447b3!important;font-size:1.48rem!important;font-weight:900!important;border-right:1px solid #dbe3ee!important}
+body.app-body .te-code-card .te-code-copy{padding:20px 22px!important;min-width:0!important}
+body.app-body .te-code-card .te-area{display:inline-flex!important;align-items:center!important;padding:4px 9px!important;border:1px solid var(--border,#dbe3ee)!important;border-radius:999px!important;font-size:.73rem!important;font-weight:800!important;line-height:1.4!important}
+body.app-body .te-code-card h2{margin:8px 0 12px!important;font-size:1.12rem!important;line-height:1.4!important}
+body.app-body .te-code-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+body.app-body .te-code-grid>div{padding:12px 14px!important;background:var(--soft,#f7f9fd)!important;border:1px solid var(--border,#dbe3ee)!important;border-radius:11px!important;min-width:0!important}
+body.app-body .te-code-grid>div>span{display:block!important;margin-bottom:7px!important;font-size:.7rem!important;font-weight:900!important;text-transform:uppercase!important}
+body.app-body .te-code-grid p{margin:0!important;line-height:1.5!important;overflow-wrap:anywhere!important}
+html[data-theme="dark"] body.app-body .te-code-card .te-code-id{background:#1c2942!important;color:#b7c7ff!important;border-color:#304156!important}
+html[data-theme="dark"] body.app-body .te-code-grid>div{background:#15202d!important;color:#e9eef7!important;border-color:#304156!important}
+@media(max-width:750px){body.app-body .te-code-card{grid-template-columns:1fr!important}body.app-body .te-code-card .te-code-id{min-height:0!important;justify-content:flex-start!important;padding:15px 18px!important;border-right:0!important;border-bottom:1px solid #dbe3ee!important}body.app-body .te-code-grid{grid-template-columns:1fr!important}}
+/* END technical-errors catalogue restoration */
