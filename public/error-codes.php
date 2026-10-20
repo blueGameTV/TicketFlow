@@ -47,7 +47,7 @@ $englishErrors = [
  'TE-802'=>['Update','Update failed','The TicketFlow update could not be completed.','Check update.sh, migrations and backups.'],
  'TE-999'=>['System','Unexpected technical error','An unexpected technical error occurred.','Search for TE-999 and its reference in technical-errors.log.'],
 ];
-if ($translator->locale() === 'en') {
+if (str_starts_with(strtolower((string)$translator->locale()), 'en')) {
     foreach ($catalog as $code => &$row) {
         if (!isset($englishErrors[$code])) continue;
         [$row['area'], $row['title'], $row['public'], $row['admin']] = $englishErrors[$code];
