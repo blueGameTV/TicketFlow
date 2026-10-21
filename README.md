@@ -12,7 +12,7 @@
   <img alt="PHP" src="https://img.shields.io/badge/PHP-8.4%2B-777BB4">
   <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
   <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
-  <img alt="Status" src="https://img.shields.io/badge/status-validation%20en%20cours-f59e0b">
+  <img alt="Status" src="https://img.shields.io/badge/status-stable-16a34a">
 </p>
 
 ---
