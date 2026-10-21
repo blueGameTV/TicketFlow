@@ -81,7 +81,7 @@ apt install apache2 mariadb-server php php-mysql php-mbstring php-zip php-xml ph
 Pour une **nouvelle installation** :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/v1.3.0-dev/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/v1.3.0/install.sh | sudo bash
 ```
 
 Le script s'occupe automatiquement de la majorité de la configuration :
@@ -286,6 +286,8 @@ Guides principaux :
 - [Workflow des tickets](docs/ticket-workflow.md)
 - [Import CSV / Excel](docs/user-import.md)
 - [Alertes et maintenance](docs/service-alerts-maintenance.md)
+- [Notes de version v1.3.0](docs/release-notes-v130.md)
+- [Récupération de mot de passe](docs/password-recovery.md)
 - [Notes de version v1.2.0](docs/release-notes-v120.md)
 
 # Contribuer
@@ -296,7 +298,9 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md).
 
 # Version actuelle
 
-**TicketFlow v1.2.0 Stable**
+**Code de TicketFlow v1.3.0 — validation de la publication stable en cours.**
+
+> Avant déploiement en production, consulter les [notes v1.3.0](docs/release-notes-v130.md) : `VERSION` et l'intégration de la nouvelle migration SQL aux scripts d'installation/mise à jour nécessitent vérification.
 
 ---
 
