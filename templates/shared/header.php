@@ -4,7 +4,7 @@ $role = (string) ($user['role'] ?? '');
 $headerUnreadNotifications = isset($notificationService) ? $notificationService->unreadCount((int) ($user['id'] ?? 0)) : 0;
 $headerServiceAlerts = isset($serviceAlertService) ? $serviceAlertService->active() : [];
 $headerUpcomingMaintenance = isset($maintenanceService) ? $maintenanceService->upcoming(24) : [];
-$headerCurrentVersion = isset($releaseNoteService) ? $releaseNoteService->currentVersion() : '1.2.0';
+$headerCurrentVersion = isset($releaseNoteService) ? $releaseNoteService->currentVersion() : '1.3.0-dev.4';
 $headerHasSeenRelease = isset($releaseNoteService) && !empty($user['id']) ? $releaseNoteService->hasSeen((int)$user['id']) : true;
 $headerActiveServiceAlertCount = count($headerServiceAlerts);
 $roleLabel = t('role.' . $role);
@@ -42,10 +42,8 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> - <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v013.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v110.css?v=1.2.0">
-    <link rel="stylesheet" href="assets/css/v120.css?v=1.2.0">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev.8-fix20">
+
 </head>
 <body class="app-body<?= !empty($user['must_change_password']) ? ' tf-forced-password-lock' : '' ?> role-<?= htmlspecialchars(strtolower(str_replace(['é','è','ê','à','ù','ç',' '], ['e','e','e','a','u','c','-'], $role))) ?> sidebar-<?= htmlspecialchars((string) $uiPreferences['sidebar_mode']) ?>">
 <div class="app-shell">
@@ -59,36 +57,131 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
             <a class="nav-item<?= $isActive(['dashboard.php']) ?>" href="dashboard.php"><i class="fa-solid fa-house"></i><span><?= htmlspecialchars(t('nav.dashboard')) ?></span></a>
 
             <?php if ($role === 'Administrateur'): ?>
-                <div class="nav-section-label"><?= htmlspecialchars(t('nav.administration')) ?></div>
-                <a class="nav-item<?= $isActive(['admin-users.php','admin-user-form.php']) ?>" href="admin-users.php"><i class="fa-solid fa-users"></i><span><?= htmlspecialchars(t('nav.users')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-groups.php','admin-group-form.php']) ?>" href="admin-groups.php"><i class="fa-solid fa-people-group"></i><span><?= htmlspecialchars(t('nav.groups')) ?></span></a>
-                <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.tickets')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="administration" <?= in_array($currentPage, ['admin-users.php','admin-user-form.php','admin-user-import.php','admin-groups.php','admin-group-form.php','admin-configuration.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-shield-halved"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.administration')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-users.php','admin-user-form.php','admin-user-import.php']) ?>" href="admin-users.php"><i class="fa-solid fa-users"></i><span><?= htmlspecialchars(t('nav.users')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-groups.php','admin-group-form.php']) ?>" href="admin-groups.php"><i class="fa-solid fa-people-group"></i><span><?= htmlspecialchars(t('nav.groups')) ?></span></a>
+                        
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="tickets" <?= in_array($currentPage, ['it-tickets.php','ticket.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-headset"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.tickets')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-ticket"></i><span><?= htmlspecialchars(t('nav.ticket_list')) ?></span></a>
+                        <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
+                <a class="nav-item<?= $isActive(['support-recovery.php']) ?>" href="support-recovery.php">
+                    <i class="fa-solid fa-key"></i>
+                    <span><?= htmlspecialchars(t('nav.recovery_requests')) ?></span>
+                </a>
+
+                
+
+                
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="monitoring" <?= in_array($currentPage, ['admin-maintenance.php','admin-statistics.php','admin-exports.php','admin-audit.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-chart-line"></i><span class="sidebar-group-title">Supervision</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-maintenance.php']) ?>" href="admin-maintenance.php"><i class="fa-solid fa-screwdriver-wrench"></i><span><?= htmlspecialchars(t('nav.maintenance')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-statistics.php']) ?>" href="admin-statistics.php"><i class="fa-solid fa-chart-line"></i><span><?= htmlspecialchars(t('nav.statistics')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-exports.php']) ?>" href="admin-exports.php"><i class="fa-solid fa-file-export"></i><span><?= htmlspecialchars(t('nav.exports')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['admin-audit.php']) ?>" href="admin-audit.php"><i class="fa-solid fa-shield-halved"></i><span><?= htmlspecialchars(t('nav.audit')) ?></span></a>
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="configuration" <?= $isActive(['admin-configuration.php']) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle">
+                        <i class="fa-solid fa-gears"></i>
+                        <span class="sidebar-group-title"><?= htmlspecialchars(t('nav.configuration_section')) ?></span>
+                        <i class="fa-solid fa-chevron-down sidebar-group-chevron"></i>
+                    </summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['admin-configuration.php']) ?>" href="admin-configuration.php">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                            <span><?= htmlspecialchars(t('nav.email_system')) ?></span>
+                            <span class="email-config-beta">BETA</span>
+                        </a>
+                    </div>
+                </details>
+
+
+                <details class="sidebar-group" data-sidebar-group="help" <?= in_array($currentPage, ['error-codes.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <span class="sidebar-group-title"><?= htmlspecialchars(
+
+t('nav.help')) ?></span>
+                        <i class="fa-solid fa-chevron-down sidebar-group-chevron"></i>
+                    </summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['error-codes.php']) ?>" href="error-codes.php">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span><?= htmlspecialchars(t('nav.error_codes')) ?></span>
+                        </a>
+                    </div>
+                </details>
+<?php elseif ($role === 'IT'): ?>
+                <details class="sidebar-group" data-sidebar-group="support" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-headset sidebar-group-icon"></i><span class="sidebar-group-title"><?= htmlspecialchars(t('nav.support')) ?></span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-ticket"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+<a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=all">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span><?= htmlspecialchars(t('nav.ticket_list')) ?></span>
+                </a>
                 <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-maintenance.php']) ?>" href="admin-maintenance.php"><i class="fa-solid fa-screwdriver-wrench"></i><span><?= htmlspecialchars(t('nav.maintenance')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-statistics.php']) ?>" href="admin-statistics.php"><i class="fa-solid fa-chart-line"></i><span><?= htmlspecialchars(t('nav.statistics')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-exports.php']) ?>" href="admin-exports.php"><i class="fa-solid fa-file-export"></i><span><?= htmlspecialchars(t('nav.exports')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-audit.php']) ?>" href="admin-audit.php"><i class="fa-solid fa-shield-halved"></i><span><?= htmlspecialchars(t('nav.audit')) ?></span></a>
-                <a class="nav-item<?= $isActive(['admin-configuration.php']) ?>" href="admin-configuration.php"><i class="fa-solid fa-sliders"></i><span><?= htmlspecialchars(t('nav.configuration')) ?></span><span class="v12061-nav-beta">BETA</span></a>
-            <?php elseif ($role === 'IT'): ?>
-                <div class="nav-section-label"><?= htmlspecialchars(t('nav.support')) ?></div>
-                <a class="nav-item<?= $isActive(['it-tickets.php','ticket.php']) ?>" href="it-tickets.php?scope=mine"><i class="fa-solid fa-inbox"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=unassigned"><i class="fa-solid fa-box-open"></i><span><?= htmlspecialchars(t('nav.unassigned')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=team"><i class="fa-solid fa-user-group"></i><span><?= htmlspecialchars(t('nav.support_team')) ?></span></a>
-                <a class="nav-item" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i><span><?= htmlspecialchars(t('nav.archives')) ?></span></a>
+                <a class="nav-item<?= $isActive(['support-recovery.php']) ?>" href="support-recovery.php">
+                    <i class="fa-solid fa-key"></i>
+                    <span><?= htmlspecialchars(t('nav.recovery_requests')) ?></span>
+                </a>
+
+                
+
+                
+                    </div>
+                </details>
+
+                <details class="sidebar-group" data-sidebar-group="help" <?= in_array($currentPage, ['error-codes.php'], true) ? 'open' : '' ?>>
+                    <summary class="sidebar-group-toggle">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <span class="sidebar-group-title"><?= htmlspecialchars(t('nav.help')) ?></span>
+                        <i class="fa-solid fa-chevron-down sidebar-group-chevron"></i>
+                    </summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['error-codes.php']) ?>" href="error-codes.php">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span><?= htmlspecialchars(t('nav.error_codes')) ?></span>
+                        </a>
+                    </div>
+                </details>
+
             <?php elseif ($role === 'Manager'): ?>
-                <div class="nav-section-label">Tickets</div>
-                <a class="nav-item<?= $isActive(['manager-approvals.php']) ?>" href="manager-approvals.php"><i class="fa-solid fa-circle-check"></i><span><?= htmlspecialchars(t('nav.validations')) ?></span></a>
-                <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="tickets" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-ticket"></i><span class="sidebar-group-title">Tickets</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['manager-approvals.php']) ?>" href="manager-approvals.php"><i class="fa-solid fa-circle-check"></i><span><?= htmlspecialchars(t('nav.validations')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                    </div>
+                </details>
+
             <?php else: ?>
-                <div class="nav-section-label">Tickets</div>
-                <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
-                <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                <details class="sidebar-group" data-sidebar-group="tickets" open>
+                    <summary class="sidebar-group-toggle"><i class="fa-solid fa-ticket"></i><span class="sidebar-group-title">Tickets</span><i class="fa-solid fa-chevron-down sidebar-group-chevron"></i></summary>
+                    <div class="sidebar-group-links">
+                        <a class="nav-item<?= $isActive(['my-tickets.php','ticket.php']) ?>" href="my-tickets.php"><i class="fa-solid fa-ticket-simple"></i><span><?= htmlspecialchars(t('nav.my_tickets')) ?></span></a>
+                        <a class="nav-item<?= $isActive(['ticket-create.php']) ?>" href="ticket-create.php"><i class="fa-solid fa-plus"></i><span><?= htmlspecialchars(t('nav.new_ticket')) ?></span></a>
+                    </div>
+                </details>
             <?php endif; ?>
         </nav>
 
         <div class="sidebar-footer">
-            <a class="nav-item<?= $isActive(['about.php']) ?>" href="about.php"><i class="fa-solid fa-circle-info"></i><span><?= htmlspecialchars(t('nav.about')) ?></span><?php if (!$headerHasSeenRelease): ?><span class="v110-new-dot" title="Nouveautés disponibles"></span><?php endif; ?></a>
+
+            <a class="nav-item<?= $isActive(['about.php']) ?>" href="about.php"><i class="fa-solid fa-circle-info"></i><span><?= htmlspecialchars(t('nav.about')) ?></span><?php if (!$headerHasSeenRelease): ?><span class="tf-new-dot" title="Nouveautés disponibles"></span><?php endif; ?></a>
             <a class="nav-item<?= $isActive(['settings.php','change-password.php']) ?>" href="settings.php"><i class="fa-solid fa-gear"></i><span><?= htmlspecialchars(t('nav.settings')) ?></span></a>
             <div class="sidebar-profile">
                 <div class="avatar avatar-sm">
@@ -104,63 +197,59 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
     <div class="sidebar-overlay" data-sidebar-overlay></div>
 
     <div class="app-main">
-        <header class="app-topbar app-topbar-v015">
-            <div class="topbar-left-v013"><button class="mobile-menu-button" type="button" data-sidebar-open aria-label="<?= htmlspecialchars(t('common.open_menu')) ?>"><i class="fa-solid fa-bars"></i></button><div class="topbar-page-copy"><span><?= htmlspecialchars($roleLabel) ?></span><strong><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></strong></div></div>
-
-            <div class="global-search-v015" data-global-search>
-                <button class="global-search-mobile-toggle-v015" type="button" data-global-search-toggle aria-label="Ouvrir la recherche"><i class="fa-solid fa-magnifying-glass"></i></button>
-                <div class="global-search-box-v015">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="search" id="global-search-input" autocomplete="off" placeholder="<?= htmlspecialchars(t('common.search_placeholder')) ?>" aria-label="Recherche globale TicketFlow">
-                    <kbd>Ctrl K</kbd>
-                </div>
-                <div class="global-search-results-v015" id="global-search-results" hidden></div>
+        <header class="app-topbar app-topbar app-topbar-v1302">
+            <div class="topbar-left-v013 topbar-context-v1302">
+                <button class="mobile-menu-button" type="button" data-sidebar-open aria-label="<?= htmlspecialchars(t('common.open_menu')) ?>"><i class="fa-solid fa-bars"></i></button>
+                <div class="topbar-page-copy topbar-page-copy-v1302"><span><?= htmlspecialchars($roleLabel) ?></span><strong><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?></strong></div>
             </div>
-
-            <div class="topbar-actions-v013">
-                <?php if (in_array($role, ['Administrateur','IT'], true)): ?><a class="icon-button v110-service-alert-button<?= $headerActiveServiceAlertCount > 0 ? ' has-active-alerts' : '' ?>" href="admin-service-alerts.php" aria-label="<?= htmlspecialchars(t('common.service_alerts')) ?>" title="<?= htmlspecialchars(t('common.service_alerts')) ?>"><i class="fa-solid fa-triangle-exclamation"></i><?php if ($headerActiveServiceAlertCount > 0): ?><span class="v110-service-alert-count"><?= $headerActiveServiceAlertCount > 99 ? '99+' : (int)$headerActiveServiceAlertCount ?></span><?php endif; ?></a><?php endif; ?>
-                <a class="icon-button notification-button" href="notifications.php" aria-label="Notifications"><i class="fa-regular fa-bell"></i><?php if ($headerUnreadNotifications > 0): ?><span id="live-notification-count" class="notification-count"><?= $headerUnreadNotifications > 99 ? '99+' : (int) $headerUnreadNotifications ?></span><?php else: ?><span id="live-notification-count" class="notification-count is-hidden">0</span><?php endif; ?></a>
+            <div class="global-search" data-global-search>
+                <button class="global-search-mobile-toggle" type="button" data-global-search-toggle aria-label="Ouvrir la recherche"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <div class="global-search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="global-search-input" autocomplete="off" placeholder="<?= htmlspecialchars(t('common.search_placeholder')) ?>" aria-label="Recherche globale TicketFlow"><kbd>Ctrl K</kbd></div>
+                <div class="global-search-results" id="global-search-results" hidden></div>
+            </div>
+                <?php if (in_array($role, ['Administrateur','IT'], true)): ?><a class="icon-button tf-service-alert-button<?= $headerActiveServiceAlertCount > 0 ? ' has-active-alerts' : '' ?>" href="admin-service-alerts.php" aria-label="<?= htmlspecialchars(t('common.service_alerts')) ?>" title="<?= htmlspecialchars(t('common.service_alerts')) ?>"><i class="fa-solid fa-triangle-exclamation"></i><?php if ($headerActiveServiceAlertCount > 0): ?><span class="tf-service-alert-count"><?= $headerActiveServiceAlertCount > 99 ? '99+' : (int)$headerActiveServiceAlertCount ?></span><?php endif; ?></a><?php endif; ?>
+                <a class="icon-button notification-button" href="notifications.php" aria-label="Notifications"><i class="fa-regular fa-bell"></i><?php if ($headerUnreadNotifications > 0): ?><span id="live-notification-count" class="notification-count"><?= $headerUnreadNotifications > 99 ? '99+' : (int)$headerUnreadNotifications ?></span><?php else: ?><span id="live-notification-count" class="notification-count is-hidden">0</span><?php endif; ?></a>
             </div>
         </header>
 
-        <div id="global-service-banners" class="v110-global-banners" aria-live="polite">
+        <div id="global-service-banners" class="tf-global-banners" aria-live="polite">
             <?php foreach ($headerServiceAlerts as $globalAlert): ?>
-                <button type="button" class="v110-service-banner v110-service-banner-button severity-<?= htmlspecialchars((string)$globalAlert['severity']) ?>"
+                <button type="button" class="tf-service-banner tf-service-banner-button severity-<?= htmlspecialchars((string)$globalAlert['severity']) ?>"
                         data-system-detail
                         data-detail-kind="Alerte de service"
                         data-detail-title="<?= htmlspecialchars((string)$globalAlert['title']) ?>"
                         data-detail-service="<?= htmlspecialchars((string)$globalAlert['service_name']) ?>"
                         data-detail-message="<?= htmlspecialchars((string)$globalAlert['message']) ?>"
                         data-detail-meta="<?= htmlspecialchars($serviceAlertService->severityLabel((string)$globalAlert['severity'])) ?> · Début <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$globalAlert['starts_at']))) ?>">
-                    <div class="v110-service-banner-icon"><i class="fa-solid <?= $globalAlert['severity'] === 'critical' ? 'fa-triangle-exclamation' : 'fa-circle-info' ?>"></i></div>
-                    <div class="v110-service-banner-copy"><span><?= htmlspecialchars((string)$globalAlert['service_name']) ?></span><strong><?= htmlspecialchars((string)$globalAlert['title']) ?></strong></div>
-                    <span class="v110-service-banner-meta"><?= htmlspecialchars($serviceAlertService->severityLabel((string)$globalAlert['severity'])) ?> <i class="fa-solid fa-chevron-right"></i></span>
+                    <div class="tf-service-banner-icon"><i class="fa-solid <?= $globalAlert['severity'] === 'critical' ? 'fa-triangle-exclamation' : 'fa-circle-info' ?>"></i></div>
+                    <div class="tf-service-banner-copy"><span><?= htmlspecialchars((string)$globalAlert['service_name']) ?></span><strong><?= htmlspecialchars((string)$globalAlert['title']) ?></strong></div>
+                    <span class="tf-service-banner-meta"><?= htmlspecialchars($serviceAlertService->severityLabel((string)$globalAlert['severity'])) ?> <i class="fa-solid fa-chevron-right"></i></span>
                 </button>
             <?php endforeach; ?>
             <?php foreach ($headerUpcomingMaintenance as $maintenanceWindow): ?>
-                <button type="button" class="v110-service-banner v110-service-banner-button severity-maintenance"
+                <button type="button" class="tf-service-banner tf-service-banner-button severity-maintenance"
                         data-system-detail
                         data-detail-kind="Maintenance planifiée"
                         data-detail-title="<?= htmlspecialchars((string)$maintenanceWindow['title']) ?>"
                         data-detail-service="TicketFlow"
                         data-detail-message="<?= htmlspecialchars((string)$maintenanceWindow['message']) ?>"
                         data-detail-meta="<?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$maintenanceWindow['starts_at']))) ?> → <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$maintenanceWindow['ends_at']))) ?>">
-                    <div class="v110-service-banner-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                    <div class="v110-service-banner-copy"><span>Maintenance planifiée</span><strong><?= htmlspecialchars((string)$maintenanceWindow['title']) ?></strong></div>
-                    <span class="v110-service-banner-meta"><?= htmlspecialchars(date('d/m H:i', strtotime((string)$maintenanceWindow['starts_at']))) ?> <i class="fa-solid fa-chevron-right"></i></span>
+                    <div class="tf-service-banner-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <div class="tf-service-banner-copy"><span>Maintenance planifiée</span><strong><?= htmlspecialchars((string)$maintenanceWindow['title']) ?></strong></div>
+                    <span class="tf-service-banner-meta"><?= htmlspecialchars(date('d/m H:i', strtotime((string)$maintenanceWindow['starts_at']))) ?> <i class="fa-solid fa-chevron-right"></i></span>
                 </button>
             <?php endforeach; ?>
         </div>
 
-        <div class="v110-system-modal" id="v110-system-modal" hidden>
-            <button class="v110-system-modal-backdrop" type="button" data-system-modal-close aria-label="Fermer"></button>
-            <section class="v110-system-modal-card" role="dialog" aria-modal="true" aria-labelledby="v110-system-modal-title">
-                <button class="v110-system-modal-close" type="button" data-system-modal-close aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
-                <span class="v110-system-modal-kind" id="v110-system-modal-kind">Alerte de service</span>
-                <h2 id="v110-system-modal-title"></h2>
-                <div class="v110-system-modal-service" id="v110-system-modal-service"></div>
-                <p id="v110-system-modal-message"></p>
-                <div class="v110-system-modal-meta" id="v110-system-modal-meta"></div>
+        <div class="tf-system-modal" id="tf-system-modal" hidden>
+            <button class="tf-system-modal-backdrop" type="button" data-system-modal-close aria-label="Fermer"></button>
+            <section class="tf-system-modal-card" role="dialog" aria-modal="true" aria-labelledby="tf-system-modal-title">
+                <button class="tf-system-modal-close" type="button" data-system-modal-close aria-label="Fermer"><i class="fa-solid fa-xmark"></i></button>
+                <span class="tf-system-modal-kind" id="tf-system-modal-kind">Alerte de service</span>
+                <h2 id="tf-system-modal-title"></h2>
+                <div class="tf-system-modal-service" id="tf-system-modal-service"></div>
+                <p id="tf-system-modal-message"></p>
+                <div class="tf-system-modal-meta" id="tf-system-modal-meta"></div>
             </section>
         </div>
 

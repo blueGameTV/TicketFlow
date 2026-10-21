@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>TicketFlow v1.2.0 — Stable</strong><br>
+  <strong>TicketFlow v1.3.0 — Stable</strong><br>
   Une plateforme simple pour créer, suivre et gérer les demandes informatiques d'une entreprise.
 </p>
 
@@ -81,7 +81,7 @@ apt install apache2 mariadb-server php php-mysql php-mbstring php-zip php-xml ph
 Pour une **nouvelle installation** :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/v1.3.0-dev/install.sh | sudo bash
 ```
 
 Le script s'occupe automatiquement de la majorité de la configuration :

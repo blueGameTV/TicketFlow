@@ -10,7 +10,7 @@ $appName = $config['app']['name'] ?? 'TicketFlow';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($_POST['id'] ?? 0);
 $isEdit = $id > 0;
-$pageTitle = $isEdit ? 'Modifier un utilisateur' : 'Ajouter un utilisateur';
+$pageTitle = $isEdit ? t('user_form.edit') : t('user_form.add');
 
 $roles = $pdo->query('SELECT id, name FROM roles ORDER BY id')->fetchAll();
 $groups = $pdo->query('SELECT id, name, active FROM groups_company ORDER BY active DESC, name')->fetchAll();
@@ -241,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require __DIR__ . '/../templates/shared/header.php';
 ?>
 <section class="page-heading user-form-heading">
-    <div><span class="badge">Administration</span><h1><?= $isEdit ? 'Modifier un utilisateur' : 'Ajouter un utilisateur' ?></h1><p>Gérez l’identité, l’organisation et la sécurité du compte depuis un formulaire structuré.</p></div>
+    <div><span class="badge">Administration</span><h1><?= htmlspecialchars($isEdit ? t('user_form.edit') : t('user_form.add')) ?></h1><p><?= htmlspecialchars(t('user_form.subtitle')) ?></p></div>
     <a class="btn secondary" href="admin-users.php"><i class="fa-solid fa-arrow-left"></i> Retour</a>
 </section>
 <?php if ($errors): ?><div class="alert error"><strong>Le formulaire contient des erreurs :</strong><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
@@ -250,7 +250,7 @@ require __DIR__ . '/../templates/shared/header.php';
     <?php if ($isEdit): ?><input type="hidden" name="id" value="<?= $id ?>"><?php endif; ?>
 
     <section class="panel user-form-section">
-        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-address-card"></i></span><div><h2>Identité</h2><p>Informations utilisées pour identifier l’utilisateur dans TicketFlow.</p></div></div>
+        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-address-card"></i></span><div><h2><?= htmlspecialchars(t('user_form.identity')) ?></h2><p><?= htmlspecialchars(t('user_form.identity_help')) ?></p></div></div>
         <div class="form-grid user-form-grid">
             <div class="field"><label for="firstname">Prénom *</label><input id="firstname" name="firstname" maxlength="80" required value="<?= htmlspecialchars((string)$form['firstname']) ?>"></div>
             <div class="field"><label for="lastname">Nom *</label><input id="lastname" name="lastname" maxlength="80" required value="<?= htmlspecialchars((string)$form['lastname']) ?>"></div>
@@ -260,7 +260,7 @@ require __DIR__ . '/../templates/shared/header.php';
     </section>
 
     <section class="panel user-form-section">
-        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-sitemap"></i></span><div><h2>Organisation</h2><p>Rôle, groupe et informations d’arrivée dans l’entreprise.</p></div></div>
+        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-sitemap"></i></span><div><h2><?= htmlspecialchars(t('user_form.organization')) ?></h2><p><?= htmlspecialchars(t('user_form.organization_help')) ?></p></div></div>
         <div class="form-grid user-form-grid">
             <div class="field"><label for="role_id">Rôle *</label><select id="role_id" name="role_id" required><option value="">Choisir…</option><?php foreach($roles as $role):?><option value="<?=(int)$role['id']?>" <?=(int)$form['role_id']===(int)$role['id']?'selected':''?>><?=htmlspecialchars($role['name'] === 'IT' ? 'Support IT' : $role['name'])?></option><?php endforeach;?></select></div>
             <div class="field"><label for="group_id">Groupe</label><select id="group_id" name="group_id"><option value="">Non attribué</option><?php foreach($groups as $group):?><option value="<?=(int)$group['id']?>" <?=(int)($form['group_id']??0)===(int)$group['id']?'selected':''?>><?=htmlspecialchars($group['name'])?><?=!$group['active']?' (désactivé)':''?></option><?php endforeach;?></select></div>
@@ -270,7 +270,7 @@ require __DIR__ . '/../templates/shared/header.php';
     </section>
 
     <section class="panel user-form-section">
-        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-shield-halved"></i></span><div><h2>Sécurité</h2><p>Mot de passe et obligations de sécurité lors de la prochaine connexion.</p></div></div>
+        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-shield-halved"></i></span><div><h2><?= htmlspecialchars(t('user_form.security')) ?></h2><p><?= htmlspecialchars(t('user_form.security_help')) ?></p></div></div>
         <div class="form-grid user-form-grid">
             <div class="field"><label for="password"><?= $isEdit ? 'Nouveau mot de passe' : 'Mot de passe *' ?></label><input id="password" name="password" type="password" minlength="12" <?=$isEdit?'':'required'?>> <small><?= $isEdit ? 'Laisser vide pour conserver le mot de passe actuel.' : '12 caractères minimum.' ?></small></div>
             <div class="field"><label for="password_confirm">Confirmation<?= $isEdit ? '' : ' *' ?></label><input id="password_confirm" name="password_confirm" type="password" minlength="12" <?=$isEdit?'':'required'?>></div>
