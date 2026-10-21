@@ -1,6 +1,6 @@
 # Installation de TicketFlow
 
-Ce guide concerne une **nouvelle installation** de TicketFlow v1.2.0 sur Debian / Ubuntu.
+Ce guide concerne une **nouvelle installation** de TicketFlow sur Debian / Ubuntu. Pour la v1.3.0, consulter aussi les [points de vérification](release-notes-v130.md).
 
 Pour mettre à jour une installation existante, utilisez [upgrade.md](upgrade.md).
 
@@ -30,6 +30,8 @@ L'installateur configure automatiquement :
 - les limites PHP utiles aux pièces jointes ;
 - le cron TicketFlow ;
 - l'assistant sécurisé du premier Administrateur.
+
+**Point de contrôle v1.3.0 :** vérifier sur une machine vierge que la table `password_recovery_requests` est créée avant d'activer la récupération assistée. Le simple fait de cloner la branche ne démontre pas que toutes les migrations sont exécutées.
 
 ## 3. Premier Administrateur
 
