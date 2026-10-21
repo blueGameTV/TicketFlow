@@ -19,6 +19,18 @@ $version = $releaseNoteService->currentVersion();
 $releases = $releaseNoteService->releases();
 if ($translator->locale() === 'en') {
     $releaseTranslations = [
+        'TicketFlow v1.3.0 — Interface, sécurité et assistance' => 'TicketFlow v1.3.0 — Interface, security and support',
+        'Nouvelle interface de connexion, adaptée aux thèmes clair et sombre.' => 'New login interface adapted to light and dark themes.',
+        'Harmonisation des styles et amélioration des pages, formulaires et menus.' => 'Unified styles and improved pages, forms and menus.',
+        'Récupération de mot de passe par e-mail ou avec un code validé par le Support IT.' => 'Password recovery by email or with an IT Support-approved code.',
+        'Catalogue des codes d’erreur techniques accessible aux Administrateurs et au Support IT.' => 'Technical error code catalog for Administrators and IT Support.',
+        'Amélioration de la gestion et de l’affichage des maintenances.' => 'Improved maintenance management and display.',
+        'Améliorations des traductions françaises et anglaises.' => 'Improved French and English translations.',
+        'Alertes de service et suivi des incidents.' => 'Service alerts and incident tracking.',
+        'Mode maintenance immédiat et maintenances planifiées.' => 'Immediate maintenance mode and scheduled maintenance windows.',
+        'Historique des nouveautés et suivi de lecture par utilisateur.' => 'Release history and per-user read tracking.',
+        'Export des alertes et maintenances.' => 'Export of alerts and maintenance windows.',
+        'Améliorations de la navigation et des formulaires.' => 'Navigation and form improvements.',
         'Thèmes, import, validation Manager et langues' => 'Themes, import, Manager approval and languages',
         'Thème clair, sombre ou système mémorisé par utilisateur.' => 'Light, dark or system theme saved per user.',
         'Interface Français / English avec langue enregistrée par compte.' => 'French / English interface with language saved per account.',
@@ -91,8 +103,8 @@ require __DIR__ . '/../templates/shared/header.php';
 <section class="tf-about-facts">
     <article><i class="fa-solid fa-user-gear"></i><div><span><?= htmlspecialchars(t('about.creator')) ?></span><strong>blueGameTV</strong></div></article>
     <article><i class="fa-solid fa-code"></i><div><span><?= htmlspecialchars(t('about.technologies')) ?></span><strong>PHP · MariaDB · Apache · JavaScript</strong></div></article>
-    <article><i class="fa-solid fa-shield-halved"></i><div><span><?= htmlspecialchars(t('about.previous_version')) ?></span><strong>v1.1.0</strong></div></article>
-    <article><i class="fa-solid fa-circle-check"></i><div><span><?= htmlspecialchars(t('about.current_status')) ?></span><strong>Stable v1.2.0</strong></div></article>
+    <article><i class="fa-solid fa-shield-halved"></i><div><span><?= htmlspecialchars(t('about.previous_version')) ?></span><strong>v1.2.0</strong></div></article>
+    <article><i class="fa-solid fa-circle-check"></i><div><span><?= htmlspecialchars(t('about.current_status')) ?></span><strong>Stable v1.3.0</strong></div></article>
 </section>
 
 <section class="panel tf-about-journal" id="nouveautes">
