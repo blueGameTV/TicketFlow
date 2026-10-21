@@ -42,6 +42,10 @@ Un Administrateur peut forcer le renouvellement du mot de passe d'un utilisateur
 
 À la prochaine connexion, TicketFlow bloque l'utilisation normale de l'interface jusqu'à la définition du nouveau mot de passe. Dans ce scénario imposé, l'ancien mot de passe n'est pas redemandé.
 
+## Récupération de mot de passe (v1.3.0)
+
+La V1.3.0 ajoute deux parcours : réinitialisation par e-mail et récupération par code avec validation du Support IT (pour les Collaborateurs et Managers). Voir [Récupération de mot de passe](password-recovery.md). L'utilisation sur une installation mise à jour nécessite la migration SQL correspondante.
+
 ## Sessions
 
 TicketFlow utilise notamment :
