@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>TicketFlow v1.3.0 — Stable</strong><br>
+  <strong>TicketFlow v1.3.0 — Préparation de publication</strong><br>
   Une plateforme simple pour créer, suivre et gérer les demandes informatiques d'une entreprise.
 </p>
 
@@ -12,7 +12,7 @@
   <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4">
   <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
   <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
-  <img alt="Status" src="https://img.shields.io/badge/status-stable-16a34a">
+  <img alt="Status" src="https://img.shields.io/badge/status-validation%20en%20cours-f59e0b">
 </p>
 
 ---
@@ -117,7 +117,7 @@ Utilisez simplement :
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
 ```
 
-Cette commande peut mettre à jour les installations suivantes vers la version actuelle :
+Le script de mise à jour de la branche `main` prend en charge les parcours historiques ci-dessous jusqu'à v1.2.0. **La migration v1.3.0 n'est pas encore confirmée comme intégrée au script :**
 
 - v1.0.0 ;
 - v1.1.0 ;
