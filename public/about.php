@@ -70,16 +70,16 @@ if ($translator->locale() === 'en') {
 $seen = $releaseNoteService->hasSeen((int)$user['id']);
 require __DIR__ . '/../templates/shared/header.php';
 ?>
-<section class="v110-about-hero">
-    <div class="v110-about-hero-main">
-        <div class="v110-about-logo"><i class="fa-solid fa-ticket"></i></div>
+<section class="tf-about-hero">
+    <div class="tf-about-hero-main">
+        <div class="tf-about-logo"><i class="fa-solid fa-ticket"></i></div>
         <div>
-            <span class="v110-about-eyebrow">TicketFlow</span>
+            <span class="tf-about-eyebrow">TicketFlow</span>
             <h1><?= htmlspecialchars(t('about.title')) ?></h1>
             <p><?= htmlspecialchars(t('about.subtitle')) ?></p>
         </div>
     </div>
-    <div class="v110-about-version-card">
+    <div class="tf-about-version-card">
         <span><?= htmlspecialchars(t('about.installed_version')) ?></span>
         <strong><?= htmlspecialchars($version) ?></strong>
         <small><?= htmlspecialchars(t('about.current_stable')) ?></small>
@@ -88,16 +88,16 @@ require __DIR__ . '/../templates/shared/header.php';
 
 <?php if ($success): ?><div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-<section class="v110-about-facts">
+<section class="tf-about-facts">
     <article><i class="fa-solid fa-user-gear"></i><div><span><?= htmlspecialchars(t('about.creator')) ?></span><strong>blueGameTV</strong></div></article>
     <article><i class="fa-solid fa-code"></i><div><span><?= htmlspecialchars(t('about.technologies')) ?></span><strong>PHP · MariaDB · Apache · JavaScript</strong></div></article>
     <article><i class="fa-solid fa-shield-halved"></i><div><span><?= htmlspecialchars(t('about.previous_version')) ?></span><strong>v1.1.0</strong></div></article>
     <article><i class="fa-solid fa-circle-check"></i><div><span><?= htmlspecialchars(t('about.current_status')) ?></span><strong>Stable v1.2.0</strong></div></article>
 </section>
 
-<section class="panel v110-about-journal" id="nouveautes">
-    <div class="v110-about-journal-top">
-        <div class="v110-about-journal-title">
+<section class="panel tf-about-journal" id="nouveautes">
+    <div class="tf-about-journal-top">
+        <div class="tf-about-journal-title">
             <span class="panel-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
             <div><h2><?= htmlspecialchars(t('about.journal')) ?></h2><p><?= htmlspecialchars(t('about.journal_help')) ?></p></div>
         </div>
@@ -107,21 +107,21 @@ require __DIR__ . '/../templates/shared/header.php';
                 <button class="btn primary" type="submit"><i class="fa-solid fa-check"></i> <?= htmlspecialchars(t('about.seen_button')) ?></button>
             </form>
         <?php else: ?>
-            <span class="v110-about-seen"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars(t('about.seen')) ?></span>
+            <span class="tf-about-seen"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars(t('about.seen')) ?></span>
         <?php endif; ?>
     </div>
 
-    <div class="v110-release-list">
+    <div class="tf-release-list">
         <?php foreach ($releases as $release): $current = $release['version'] === $version; ?>
-            <article class="v110-release-row <?= $current ? 'is-current' : '' ?>">
-                <div class="v110-release-rail"><span><i class="fa-solid <?= $current ? 'fa-star' : 'fa-code-commit' ?>"></i></span></div>
-                <div class="v110-release-row-body">
-                    <div class="v110-release-row-head">
+            <article class="tf-release-row <?= $current ? 'is-current' : '' ?>">
+                <div class="tf-release-rail"><span><i class="fa-solid <?= $current ? 'fa-star' : 'fa-code-commit' ?>"></i></span></div>
+                <div class="tf-release-row-body">
+                    <div class="tf-release-row-head">
                         <div>
-                            <div class="v110-release-kicker">v<?= htmlspecialchars((string)$release['version']) ?></div>
+                            <div class="tf-release-kicker">v<?= htmlspecialchars((string)$release['version']) ?></div>
                             <h3><?= htmlspecialchars((string)$release['title']) ?></h3>
                         </div>
-                        <div class="v110-release-tags">
+                        <div class="tf-release-tags">
                             <span><?= htmlspecialchars((string)$release['date']) ?></span>
                             <?php if ($current): ?><span class="current"><?= htmlspecialchars(t('common.current_version')) ?></span><?php endif; ?>
                         </div>

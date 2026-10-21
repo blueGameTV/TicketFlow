@@ -19,23 +19,23 @@
 
   const section = (title, icon, items, renderer) => {
     if (!items.length) return '';
-    return `<section class="global-search-section-v015"><header><i class="fa-solid ${icon}"></i><span>${title}</span><small>${items.length}</small></header>${items.map(renderer).join('')}</section>`;
+    return `<section class="global-search-section"><header><i class="fa-solid ${icon}"></i><span>${title}</span><small>${items.length}</small></header>${items.map(renderer).join('')}</section>`;
   };
 
   const render = (data) => {
     const ticketHtml = section('Tickets', 'fa-ticket', data.tickets || [], (item) => `
-      <a class="global-search-item-v015" href="${esc(item.url)}">
-        <span class="global-search-item-icon-v015"><i class="fa-solid fa-ticket-simple"></i></span>
-        <span class="global-search-item-copy-v015"><strong>${esc(item.number)} — ${esc(item.title)}</strong><small>${esc(item.requester)} · ${esc(item.status)} · ${esc(item.priority)}</small></span>
+      <a class="global-search-item" href="${esc(item.url)}">
+        <span class="global-search-item-icon"><i class="fa-solid fa-ticket-simple"></i></span>
+        <span class="global-search-item-copy"><strong>${esc(item.number)} — ${esc(item.title)}</strong><small>${esc(item.requester)} · ${esc(item.status)} · ${esc(item.priority)}</small></span>
         <i class="fa-solid fa-chevron-right"></i>
       </a>`);
 
     const userHtml = section('Utilisateurs', 'fa-users', data.users || [], (item) => {
       const tag = item.url ? 'a' : 'div';
       const href = item.url ? ` href="${esc(item.url)}"` : '';
-      return `<${tag} class="global-search-item-v015"${href}>
-        <span class="global-search-item-icon-v015"><i class="fa-solid fa-user"></i></span>
-        <span class="global-search-item-copy-v015"><strong>${esc(item.name)}</strong><small>@${esc(item.username)} · ${esc(item.role)} · ${esc(item.email)}</small></span>
+      return `<${tag} class="global-search-item"${href}>
+        <span class="global-search-item-icon"><i class="fa-solid fa-user"></i></span>
+        <span class="global-search-item-copy"><strong>${esc(item.name)}</strong><small>@${esc(item.username)} · ${esc(item.role)} · ${esc(item.email)}</small></span>
         ${item.url ? '<i class="fa-solid fa-chevron-right"></i>' : ''}
       </${tag}>`;
     });
@@ -43,15 +43,15 @@
     const groupHtml = section('Groupes', 'fa-people-group', data.groups || [], (item) => {
       const tag = item.url ? 'a' : 'div';
       const href = item.url ? ` href="${esc(item.url)}"` : '';
-      return `<${tag} class="global-search-item-v015"${href}>
-        <span class="global-search-item-icon-v015"><i class="fa-solid fa-people-group"></i></span>
-        <span class="global-search-item-copy-v015"><strong>${esc(item.name)}</strong><small>${esc(item.manager)} · ${Number(item.members)} membre${Number(item.members) > 1 ? 's' : ''}</small></span>
+      return `<${tag} class="global-search-item"${href}>
+        <span class="global-search-item-icon"><i class="fa-solid fa-people-group"></i></span>
+        <span class="global-search-item-copy"><strong>${esc(item.name)}</strong><small>${esc(item.manager)} · ${Number(item.members)} membre${Number(item.members) > 1 ? 's' : ''}</small></span>
         ${item.url ? '<i class="fa-solid fa-chevron-right"></i>' : ''}
       </${tag}>`;
     });
 
     const html = ticketHtml + userHtml + groupHtml;
-    results.innerHTML = html || '<div class="global-search-empty-v015"><i class="fa-regular fa-face-frown"></i><strong>Aucun résultat</strong><span>Essayez un numéro de ticket, un nom ou un groupe.</span></div>';
+    results.innerHTML = html || '<div class="global-search-empty"><i class="fa-regular fa-face-frown"></i><strong>Aucun résultat</strong><span>Essayez un numéro de ticket, un nom ou un groupe.</span></div>';
     results.hidden = false;
   };
 
@@ -64,7 +64,7 @@
     controller?.abort();
     controller = new AbortController();
     results.hidden = false;
-    results.innerHTML = '<div class="global-search-loading-v015"><i class="fa-solid fa-spinner fa-spin"></i> Recherche…</div>';
+    results.innerHTML = '<div class="global-search-loading"><i class="fa-solid fa-spinner fa-spin"></i> Recherche…</div>';
     try {
       const response = await fetch(`api/global-search.php?q=${encodeURIComponent(q)}&_=${Date.now()}`, {
         cache: 'no-store',
@@ -77,7 +77,7 @@
       render(data);
     } catch (error) {
       if (error.name === 'AbortError') return;
-      results.innerHTML = '<div class="global-search-empty-v015"><i class="fa-solid fa-triangle-exclamation"></i><strong>Recherche indisponible</strong><span>Réessayez dans quelques instants.</span></div>';
+      results.innerHTML = '<div class="global-search-empty"><i class="fa-solid fa-triangle-exclamation"></i><strong>Recherche indisponible</strong><span>Réessayez dans quelques instants.</span></div>';
       results.hidden = false;
     }
   };

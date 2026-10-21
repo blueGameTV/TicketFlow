@@ -6,6 +6,34 @@ require_once __DIR__ . '/../src/bootstrap.php';
 
 $auth->requireLogin();
 $user = $auth->user();
+function tfTicketHistoryText(string $value): string
+{
+    $map = [
+        'Ticket créé' => 'history.ticket_created',
+        'Statut modifié' => 'history.status_changed',
+        'Importance modifiée' => 'history.priority_changed',
+        'Ticket attribué' => 'history.assigned',
+        'Ticket transféré' => 'history.transferred',
+    ];
+    return isset($map[$value]) ? t($map[$value]) : $value;
+}
+
+function tfTicketHistoryValue(string $value): string
+{
+    $statuses = [
+        'Nouveau'=>'new','Attribué'=>'assigned','En attente utilisateur'=>'waiting_user',
+        'En cours'=>'in_progress','En attente Manager'=>'waiting_manager',
+        'Attente validation Manager'=>'waiting_manager','En attente confirmation utilisateur'=>'waiting_confirmation',
+        'Résolu'=>'resolved','Fermé'=>'closed','Annulé'=>'cancelled',
+    ];
+    if (isset($statuses[$value])) return t('status.'.$statuses[$value]);
+
+    $priorities = ['Faible'=>'faible','Normale'=>'normale','Haute'=>'haute','Critique'=>'critique'];
+    if (isset($priorities[$value])) return t('priority.'.$priorities[$value]);
+
+    return $value;
+}
+
 $appName = $config['app']['name'] ?? 'TicketFlow';
 $number = trim((string) ($_GET['number'] ?? $_POST['number'] ?? ''));
 
@@ -79,43 +107,43 @@ $errors = [];
 $isAjax = strtolower((string)($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'fetch';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$csrf->validate($_POST['csrf_token'] ?? null)) {
-        $errors[] = 'La session du formulaire a expiré. Rechargez la page puis réessayez.';
+        $errors[] = t('ticket.form_expired');
     } else {
         $action = (string) ($_POST['action'] ?? '');
         try {
             if ($action === 'take') {
                 $ticketService->takeOwnership((int) $ticket['id'], $user);
-                $_SESSION['flash_success'] = 'Le ticket vous est maintenant attribué.';
+                $_SESSION['flash_success'] = t('ticket.assigned_success');
             } elseif ($action === 'message') {
                 $isTerminal = in_array($ticket['status_code'], ['resolved', 'closed', 'cancelled'], true);
                 if ($isTerminal) {
-                    throw new RuntimeException('Vous ne pouvez pas participer à la conversation d’un ticket terminé.');
+                    throw new RuntimeException(t('ticket.message_terminal'));
                 }
                 if ($isApprovalManagerContext) {
-                    throw new RuntimeException('Dans le cadre d’une validation, le Manager ne peut pas envoyer de message depuis ce ticket.');
+                    throw new RuntimeException(t('ticket.manager_message_forbidden'));
                 }
                 $internal = !empty($_POST['internal']);
                 if ($internal && !in_array($user['role'], ['IT', 'Administrateur'], true)) {
-                    throw new RuntimeException('Vous ne pouvez pas créer de note interne.');
+                    throw new RuntimeException(t('ticket.internal_forbidden'));
                 }
                 $ticketService->addMessage((int) $ticket['id'], (int) $user['id'], (string) ($_POST['message'] ?? ''), $internal);
-                $_SESSION['flash_success'] = $internal ? 'Note interne ajoutée.' : 'Message envoyé.';
+                $_SESSION['flash_success'] = $internal ? t('ticket.internal_added') : t('ticket.message_sent');
             } elseif ($action === 'priority') {
                 $ticketService->updatePriority((int) $ticket['id'], (int) ($_POST['priority_id'] ?? 0), $user);
-                $_SESSION['flash_success'] = 'Importance mise à jour.';
+                $_SESSION['flash_success'] = t('ticket.priority_updated');
             } elseif ($action === 'status') {
                 $ticketService->updateStatus((int) $ticket['id'], (string) ($_POST['status_code'] ?? ''), $user);
-                $_SESSION['flash_success'] = 'Statut mis à jour.';
+                $_SESSION['flash_success'] = t('ticket.status_updated');
             } elseif ($action === 'transfer') {
                 $ticketService->transfer((int) $ticket['id'], (int) ($_POST['it_id'] ?? 0), $user);
-                $_SESSION['flash_success'] = 'Ticket transféré.';
+                $_SESSION['flash_success'] = t('ticket.transferred');
             } elseif ($action === 'manager_request') {
                 $ticketService->requestManagerApproval(
                     (int) $ticket['id'],
                     (int) ($_POST['target_manager_id'] ?? 0),
                     $user
                 );
-                $_SESSION['flash_success'] = 'La validation a été envoyée au Manager N+1. Après son accord, elle sera transmise au Manager sélectionné.';
+                $_SESSION['flash_success'] = t('ticket.manager_requested');
             } elseif ($action === 'manager_response') {
                 $ticketService->respondManagerApproval(
                     (int) ($_POST['approval_id'] ?? 0),
@@ -123,31 +151,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     (string) ($_POST['comment'] ?? ''),
                     $user
                 );
-                $_SESSION['flash_success'] = 'Votre réponse a été enregistrée.';
+                $_SESSION['flash_success'] = t('ticket.manager_response_saved');
             } elseif ($action === 'resolution') {
                 $ticketService->proposeResolution((int) $ticket['id'], (string) ($_POST['resolution'] ?? ''), $user);
-                $_SESSION['flash_success'] = 'La résolution a été proposée au demandeur.';
+                $_SESSION['flash_success'] = t('ticket.resolution_sent');
             } elseif ($action === 'confirm_resolution') {
                 $ticketService->confirmResolution((int) $ticket['id'], $user);
-                $_SESSION['flash_success'] = 'Merci. Le ticket est maintenant marqué comme résolu.';
+                $_SESSION['flash_success'] = t('ticket.resolution_confirmed');
             } elseif ($action === 'reject_resolution') {
                 $ticketService->rejectResolution((int) $ticket['id'], (string) ($_POST['comment'] ?? ''), $user);
-                $_SESSION['flash_success'] = 'Le ticket a été rouvert et renvoyé au Support IT.';
+                $_SESSION['flash_success'] = t('ticket.resolution_rejected');
             } elseif ($action === 'attachment_upload') {
                 $count = $attachmentService->uploadMany($ticket, $user, $_FILES['attachments'] ?? []);
                 $_SESSION['flash_success'] = $count > 1
                     ? $count . ' pièces jointes ajoutées.'
                     : 'Pièce jointe ajoutée.';
             } else {
-                throw new RuntimeException('Action inconnue.');
+                throw new RuntimeException(t('ticket.unknown_action'));
             }
 
             if ($isAjax) {
-                $msg=(string)($_SESSION['flash_success'] ?? 'Action enregistrée.'); unset($_SESSION['flash_success']);
+                $msg=(string)($_SESSION['flash_success'] ?? t('ticket.action_saved')); unset($_SESSION['flash_success']);
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['ok'=>true,'message'=>$msg], JSON_UNESCAPED_UNICODE); exit;
             }
-            header('Location: ticket.php?number=' . urlencode($number));
+            header('Location: ticket.php?number=' . urlencode($number) . '&lang=' . urlencode((string)($currentLanguage ?? 'fr')));
             exit;
         } catch (Throwable $e) {
             if ($isAjax) { header('Content-Type: application/json; charset=utf-8'); http_response_code(422); echo json_encode(['ok'=>false,'message'=>$e->getMessage()], JSON_UNESCAPED_UNICODE); exit; }
@@ -315,14 +343,14 @@ if (!$isFragmentRequest) {
     <div>
         <span class="badge"><?= htmlspecialchars($ticket['ticket_number']) ?></span>
         <h1><?= htmlspecialchars($ticket['title']) ?></h1>
-        <p>Créé le <?= htmlspecialchars(date('d/m/Y à H:i', strtotime($ticket['created_at']))) ?> par <?= htmlspecialchars($ticket['requester_name']) ?>.</p>
+        <p><?= htmlspecialchars(t('ticket.created_by',['date'=>date('d/m/Y H:i', strtotime($ticket['created_at'])),'name'=>$ticket['requester_name']])) ?></p>
     </div>
     <?php if ($user['role'] === 'Manager' && (int) $ticket['requester_id'] !== (int) $user['id']): ?>
-        <a class="btn secondary" href="manager-approvals.php">← Validations</a>
+        <a class="btn secondary" href="manager-approvals.php">← <?= htmlspecialchars(t('ticket.back_approvals')) ?></a>
     <?php elseif (in_array($user['role'], ['Collaborateur', 'Manager'], true)): ?>
-        <a class="btn secondary" href="my-tickets.php">← Mes tickets</a>
+        <a class="btn secondary" href="my-tickets.php">← <?= htmlspecialchars(t('ticket.back_my_tickets')) ?></a>
     <?php elseif ($user['role'] === 'IT'): ?>
-        <a class="btn secondary" href="it-tickets.php?scope=mine">← Tickets Support IT</a>
+        <a class="btn secondary" href="it-tickets.php?scope=mine">← <?= htmlspecialchars(t('ticket.back_it_tickets')) ?></a>
     <?php else: ?>
         <a class="btn secondary" href="dashboard.php">← Dashboard</a>
     <?php endif; ?>
@@ -334,21 +362,21 @@ if (!$isFragmentRequest) {
 <div class="ticket-layout ticket-layout-wide">
     <div>
         <section class="panel ticket-description ticket-description-enhanced">
-            <div class="ticket-section-title"><h2>Description</h2><span id="live-ticket-status" class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></span></div>
+            <div class="ticket-section-title"><h2><?= htmlspecialchars(t('ticket.description')) ?></h2><span id="live-ticket-status" class="ticket-status status-<?= htmlspecialchars($ticket['status_code']) ?>"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></span></div>
             <div class="description-text"><?= nl2br(htmlspecialchars($ticket['description'])) ?></div>
         </section>
 
         <?php if ($ticket['resolution']): ?>
             <section class="panel resolution-panel">
-                <div class="ticket-section-title"><h2>Résolution proposée</h2><?php if ($ticket['status_code'] === 'waiting_confirmation'): ?><span class="status-pill active">À confirmer</span><?php endif; ?></div>
+                <div class="ticket-section-title"><h2><?= htmlspecialchars(t('ticket.resolution_proposed')) ?></h2><?php if ($ticket['status_code'] === 'waiting_confirmation'): ?><span class="status-pill active"><?= htmlspecialchars(t('ticket.to_confirm')) ?></span><?php endif; ?></div>
                 <div class="description-text"><?= nl2br(htmlspecialchars($ticket['resolution'])) ?></div>
             </section>
         <?php endif; ?>
 
         <?php if ((int) $ticket['requester_id'] === (int) $user['id'] && $ticket['status_code'] === 'waiting_confirmation'): ?>
             <section class="panel confirmation-panel">
-                <h2>Votre problème est-il résolu ?</h2>
-                <p class="muted">Si vous confirmez, le ticket sera marqué comme résolu.</p>
+                <h2><?= htmlspecialchars(t('ticket.problem_resolved')) ?></h2>
+                <p class="muted"><?= htmlspecialchars(t('ticket.problem_resolved_help')) ?></p>
                 <div class="confirmation-actions">
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
@@ -399,7 +427,7 @@ if (!$isFragmentRequest) {
         <section class="panel conversation-panel-v0136">
             <div class="ticket-section-title"><h2><i class="fa-solid fa-comments"></i> Conversation</h2><span id="live-message-count" class="muted"><?= count($messages) ?> message<?= count($messages) > 1 ? 's' : '' ?></span></div>
             <div id="live-conversation" class="conversation conversation-chat-v0136">
-                <?php if (!$messages): ?><p class="empty-state">Aucun message pour le moment.</p><?php endif; ?>
+                <?php if (!$messages): ?><p class="empty-state"><?= htmlspecialchars(t('ticket.no_messages')) ?></p><?php endif; ?>
                 <?php foreach ($messages as $message): $isOwnMessage = (int) $message['author_id'] === (int) $user['id']; ?>
                     <article class="chat-message-v0136 <?= $isOwnMessage ? 'is-own' : 'is-other' ?> <?= $message['internal'] ? 'internal-note' : '' ?>">
                         <div class="chat-message-avatar-v0136" aria-hidden="true"><i class="fa-solid <?= $isOwnMessage ? 'fa-user' : ($message['author_role'] === 'Manager' ? 'fa-user-tie' : (in_array($message['author_role'], ['IT', 'Administrateur'], true) ? 'fa-headset' : 'fa-user')) ?>"></i></div>
@@ -418,21 +446,21 @@ if (!$isFragmentRequest) {
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                     <input type="hidden" name="action" value="message">
-                    <div class="composer-header-v0136"><strong><i class="fa-regular fa-pen-to-square"></i> Nouveau message</strong><span>Ajoutez une réponse pour poursuivre les échanges.</span></div>
-                    <div class="field"><textarea id="message" name="message" maxlength="4000" required placeholder="Écrivez votre message…"></textarea></div>
+                    <div class="composer-header-v0136"><strong><i class="fa-regular fa-pen-to-square"></i> <?= htmlspecialchars(t('ticket.new_message')) ?></strong><span><?= htmlspecialchars(t('ticket.new_message_help')) ?></span></div>
+                    <div class="field"><textarea id="message" name="message" maxlength="4000" required placeholder="<?= htmlspecialchars(t('ticket.message_placeholder')) ?>"></textarea></div>
                     <div class="message-actions">
                         <?php if (in_array($user['role'], ['IT', 'Administrateur'], true)): ?>
-                            <label class="internal-checkbox"><input type="checkbox" name="internal" value="1"> Note interne, invisible pour le demandeur</label>
+                            <label class="internal-checkbox"><input type="checkbox" name="internal" value="1"> <?= htmlspecialchars(t('ticket.internal_note')) ?></label>
                         <?php endif; ?>
-                        <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
+                        <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> <?= htmlspecialchars(t('ticket.send')) ?></button>
                     </div>
                 </form>
             <?php elseif ($isApprovalManager && !$isTerminalTicket): ?>
                 <div class="conversation-restricted-note conversation-restricted-note-v0136">
                     <i class="fa-solid fa-lock"></i>
                     <div>
-                        <strong>Réponse désactivée dans ce contexte</strong>
-                        <span>Le Manager peut lire l’historique mais la décision doit être prise depuis le bloc “Validation demandée”.</span>
+                        <strong><?= htmlspecialchars(t('ticket.reply_disabled')) ?></strong>
+                        <span><?= htmlspecialchars(t('ticket.reply_disabled_help')) ?></span>
                     </div>
                 </div>
             <?php endif; ?>
@@ -441,7 +469,7 @@ if (!$isFragmentRequest) {
         <?php if (!$isApprovalManagerContext && in_array($user['role'], ['Administrateur','IT'], true)): ?>
         <section class="panel attachment-panel">
             <div class="ticket-section-title">
-                <h2>Pièces jointes</h2>
+                <h2><?= htmlspecialchars(t('ticket.attachments')) ?></h2>
                 <span class="muted"><?= count($attachments) ?> fichier<?= count($attachments) > 1 ? 's' : '' ?></span>
             </div>
 
@@ -454,12 +482,12 @@ if (!$isFragmentRequest) {
                                 <strong><?= htmlspecialchars($attachment['original_name']) ?></strong>
                                 <small><?= htmlspecialchars($formatAttachmentSize((int) $attachment['size_bytes'])) ?> · ajouté par <?= htmlspecialchars($attachment['uploader_name']) ?> le <?= htmlspecialchars(date('d/m/Y H:i', strtotime($attachment['created_at']))) ?></small>
                             </span>
-                            <span class="attachment-download">Télécharger</span>
+                            <span class="attachment-download"><?= htmlspecialchars(t('ticket.download')) ?></span>
                         </a>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <p class="empty-state">Aucune pièce jointe pour ce ticket.</p>
+                <p class="empty-state"><?= htmlspecialchars(t('ticket.no_attachment')) ?></p>
             <?php endif; ?>
 
             <?php if ($canAttachments): ?>
@@ -468,11 +496,11 @@ if (!$isFragmentRequest) {
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                     <input type="hidden" name="action" value="attachment_upload">
                     <div class="field">
-                        <label for="attachments">Ajouter des fichiers</label>
+                        <label for="attachments"><?= htmlspecialchars(t('ticket.add_files')) ?></label>
                         <input id="attachments" class="file-input" type="file" name="attachments[]" multiple required accept=".png,.jpg,.jpeg,.pdf,.txt,.log,.csv">
                         <small class="field-hint">PNG, JPG/JPEG, PDF, TXT, LOG ou CSV · <?= (int) $uploadMaxFiles ?> fichiers maximum · <?= htmlspecialchars($formatAttachmentSize($uploadMaxBytes)) ?> maximum par fichier.</small>
                     </div>
-                    <button class="btn secondary" type="submit">Ajouter les pièces jointes</button>
+                    <button class="btn secondary" type="submit"> <?= htmlspecialchars(t('ticket.upload_attachments')) ?></button>
                 </form>
             <?php endif; ?>
         </section>
@@ -480,17 +508,17 @@ if (!$isFragmentRequest) {
 
         <?php if (in_array($user['role'], ['Administrateur', 'IT'], true)): ?>
             <section class="panel ticket-history">
-                <h2>Historique</h2>
+                <h2><?= htmlspecialchars(t("ticket.history")) ?></h2>
                 <div class="timeline">
                     <?php foreach ($history as $item): ?>
                         <div class="timeline-item">
                             <div class="timeline-dot"></div>
                             <div>
-                                <strong><?= htmlspecialchars($item['action']) ?></strong>
+                                <strong><?= htmlspecialchars(tfTicketHistoryText((string)$item['action'])) ?></strong>
                                 <?php if ($item['old_value'] || $item['new_value']): ?>
-                                    <p><?php if ($item['old_value']): ?><?= htmlspecialchars($item['old_value']) ?> → <?php endif; ?><?= htmlspecialchars($item['new_value'] ?? '') ?></p>
+                                    <p><?php if ($item['old_value']): ?><?= htmlspecialchars(tfTicketHistoryValue((string)$item['old_value'])) ?> → <?php endif; ?><?= htmlspecialchars(tfTicketHistoryValue((string)($item['new_value'] ?? ''))) ?></p>
                                 <?php endif; ?>
-                                <small><?= htmlspecialchars($item['user_name'] ?: 'Système') ?> · <?= htmlspecialchars(date('d/m/Y H:i', strtotime($item['created_at']))) ?></small>
+                                <small><?= htmlspecialchars($item['user_name'] ?: t('ticket.system')) ?> · <?= htmlspecialchars(date('d/m/Y H:i', strtotime($item['created_at']))) ?></small>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -501,35 +529,35 @@ if (!$isFragmentRequest) {
 
     <aside class="ticket-sidebar-wrap">
         <section class="panel ticket-sidebar">
-            <h2>Informations</h2>
+            <h2><?= htmlspecialchars(t("ticket.information")) ?></h2>
             <dl class="ticket-info-list">
-                <div><dt>Type</dt><dd><?= htmlspecialchars($ticket['type_name']) ?></dd></div>
-                <div><dt>Catégorie</dt><dd><?= htmlspecialchars($ticket['category_name'] ?? 'Non définie') ?></dd></div>
-                <div><dt>Importance</dt><dd><span id="live-ticket-priority" class="priority-pill priority-level-<?= (int) $ticket['priority_level'] ?>"><?= htmlspecialchars(t('priority.'.strtolower($ticket['priority_name']))) ?></span></dd></div>
-                <div><dt>Statut</dt><dd id="live-ticket-status-text"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></dd></div>
-                <div><dt>Demandeur</dt><dd><?= htmlspecialchars($ticket['requester_name']) ?><small><?= htmlspecialchars($ticket['requester_email']) ?></small></dd></div>
+                <div><dt><?= htmlspecialchars(t('ticket.type')) ?></dt><dd><?= htmlspecialchars($ticket['type_name']) ?></dd></div>
+                <div><dt><?= htmlspecialchars(t('ticket.category')) ?></dt><dd><?= htmlspecialchars($ticket['category_name'] ?? t('ticket.undefined_f')) ?></dd></div>
+                <div><dt><?= htmlspecialchars(t("ticket.priority")) ?></dt><dd><span id="live-ticket-priority" class="priority-pill priority-level-<?= (int) $ticket['priority_level'] ?>"><?= htmlspecialchars(t('priority.'.strtolower($ticket['priority_name']))) ?></span></dd></div>
+                <div><dt><?= htmlspecialchars(t("ticket.status")) ?></dt><dd id="live-ticket-status-text"><?= htmlspecialchars(t('status.'.$ticket['status_code'])) ?></dd></div>
+                <div><dt><?= htmlspecialchars(t("ticket.requester")) ?></dt><dd><?= htmlspecialchars($ticket['requester_name']) ?><small><?= htmlspecialchars($ticket['requester_email']) ?></small></dd></div>
                 <?php if (in_array($user['role'], ['Administrateur', 'IT'], true)): ?>
-                    <div><dt>Groupe</dt><dd><?= htmlspecialchars($ticket['requester_group_name'] ?: 'Non défini') ?></dd></div>
-                    <div><dt>Manager</dt><dd><?= htmlspecialchars($ticket['requester_manager_name'] ?: 'Non défini') ?></dd></div>
+                    <div><dt><?= htmlspecialchars(t("ticket.group")) ?></dt><dd><?= htmlspecialchars($ticket['requester_group_name'] ?: t('ticket.undefined')) ?></dd></div>
+                    <div><dt><?= htmlspecialchars(t("ticket.manager")) ?></dt><dd><?= htmlspecialchars($ticket['requester_manager_name'] ?: t('ticket.undefined')) ?></dd></div>
                 <?php endif; ?>
-                <div><dt>Support IT assigné</dt><dd id="live-ticket-assignee"><?= htmlspecialchars($ticket['assigned_it_name'] ?: 'Non assigné') ?></dd></div>
+                <div><dt><?= htmlspecialchars(t("ticket.assigned_it")) ?></dt><dd id="live-ticket-assignee"><?= htmlspecialchars($ticket['assigned_it_name'] ?: t('ticket.unassigned')) ?></dd></div>
                 <?php if ($user['role'] === 'Administrateur'): ?>
-                    <div><dt>Prise en charge SLA</dt><dd>
-                        <?php if ($responseMet === true): ?><span class="sla-pill sla-ok">Respecté</span>
-                        <?php elseif ($responseMet === false || $responseOver): ?><span class="sla-pill sla-breached">Dépassé</span>
-                        <?php else: ?><span class="sla-pill sla-pending">En cours</span><?php endif; ?>
-                        <small>Échéance : <?= htmlspecialchars($formatSlaDate($responseDue)) ?></small>
+                    <div><dt><?= htmlspecialchars(t('ticket.response_sla')) ?></dt><dd>
+                        <?php if ($responseMet === true): ?><span class="sla-pill sla-ok"><?= htmlspecialchars(t('ticket.sla_met')) ?></span>
+                        <?php elseif ($responseMet === false || $responseOver): ?><span class="sla-pill sla-breached"><?= htmlspecialchars(t('ticket.sla_breached')) ?></span>
+                        <?php else: ?><span class="sla-pill sla-pending"><?= htmlspecialchars(t('ticket.sla_progress')) ?></span><?php endif; ?>
+                        <small><?= htmlspecialchars(t('ticket.due',['date'=>$formatSlaDate($responseDue)])) ?></small>
                     </dd></div>
-                    <div><dt>Résolution SLA</dt><dd>
-                        <?php if ($resolutionMet === true): ?><span class="sla-pill sla-ok">Respecté</span>
-                        <?php elseif ($resolutionMet === false || $resolutionOver): ?><span class="sla-pill sla-breached">Dépassé</span>
-                        <?php elseif (in_array($ticket['status_code'], ['resolved','closed','cancelled'], true)): ?><span class="sla-pill sla-neutral">Terminé</span>
-                        <?php else: ?><span class="sla-pill sla-pending">En cours</span><?php endif; ?>
-                        <small>Échéance : <?= htmlspecialchars($formatSlaDate($resolutionDue)) ?></small>
+                    <div><dt><?= htmlspecialchars(t('ticket.resolution_sla')) ?></dt><dd>
+                        <?php if ($resolutionMet === true): ?><span class="sla-pill sla-ok"><?= htmlspecialchars(t('ticket.sla_met')) ?></span>
+                        <?php elseif ($resolutionMet === false || $resolutionOver): ?><span class="sla-pill sla-breached"><?= htmlspecialchars(t('ticket.sla_breached')) ?></span>
+                        <?php elseif (in_array($ticket['status_code'], ['resolved','closed','cancelled'], true)): ?><span class="sla-pill sla-neutral"><?= htmlspecialchars(t('ticket.sla_finished')) ?></span>
+                        <?php else: ?><span class="sla-pill sla-pending"><?= htmlspecialchars(t('ticket.sla_progress')) ?></span><?php endif; ?>
+                        <small><?= htmlspecialchars(t('ticket.due',['date'=>$formatSlaDate($resolutionDue)])) ?></small>
                     </dd></div>
-                    <div><dt>Première prise en charge</dt><dd><?= htmlspecialchars($formatSlaDate($ticket['assigned_at'] ?? null)) ?></dd></div>
+                    <div><dt><?= htmlspecialchars(t('ticket.first_response')) ?></dt><dd><?= htmlspecialchars($formatSlaDate($ticket['assigned_at'] ?? null)) ?></dd></div>
                 <?php endif; ?>
-                <div><dt>Dernière mise à jour</dt><dd><?= htmlspecialchars(date('d/m/Y H:i', strtotime($ticket['updated_at']))) ?></dd></div>
+                <div><dt><?= htmlspecialchars(t('ticket.last_update')) ?></dt><dd><?= htmlspecialchars(date('d/m/Y H:i', strtotime($ticket['updated_at']))) ?></dd></div>
             </dl>
         </section>
 
@@ -549,7 +577,7 @@ if (!$isFragmentRequest) {
                             </a>
                         <?php endforeach; ?>
                     </div>
-                <?php else: ?><p class="empty-state">Aucune pièce jointe pour ce ticket.</p><?php endif; ?>
+                <?php else: ?><p class="empty-state"><?= htmlspecialchars(t('ticket.no_attachment')) ?></p><?php endif; ?>
                 <?php if ($canAttachments): ?>
                     <form class="attachment-upload-form ticket-attachment-composer" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
@@ -587,14 +615,14 @@ if (!$isFragmentRequest) {
 
         <?php if (in_array($user['role'], ['IT', 'Administrateur'], true) && !($user['role'] === 'IT' && in_array($ticket['status_code'], ['resolved','closed','cancelled'], true))): ?>
             <section class="panel it-actions-panel it-actions-panel-enhanced">
-                <h2>Actions Support IT</h2>
+                <h2><?= htmlspecialchars(t("ticket.it_actions")) ?></h2>
 
                 <?php if ($user['role'] === 'IT' && $ticket['assigned_it_id'] === null): ?>
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="take">
-                        <button class="btn primary full" type="submit">Prendre en charge</button>
+                        <button class="btn primary full" type="submit"> <?= htmlspecialchars(t('ticket.take')) ?></button>
                     </form>
                 <?php endif; ?>
 
@@ -602,7 +630,7 @@ if (!$isFragmentRequest) {
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                     <input type="hidden" name="action" value="status">
-                    <label>Statut</label>
+                    <label><?= htmlspecialchars(t('ticket.status')) ?></label>
                     <div class="inline-control"><select name="status_code">
                         <?php $manualCodes = array_column($allowedStatuses, 'code'); ?>
                         <?php if (!in_array($ticket['status_code'], $manualCodes, true)): ?>
@@ -611,15 +639,15 @@ if (!$isFragmentRequest) {
                         <?php foreach ($allowedStatuses as $item): ?>
                             <option value="<?= htmlspecialchars($item['code']) ?>" <?= $ticket['status_code'] === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars(t('status.'.(string)$item['code'])) ?></option>
                         <?php endforeach; ?>
-                    </select><button class="btn secondary small" type="submit">Modifier</button></div>
+                    </select><button class="btn secondary small" type="submit"> <?= htmlspecialchars(t('ticket.edit')) ?></button></div>
                 </form>
 
                 <form method="post" class="compact-form">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                     <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                     <input type="hidden" name="action" value="priority">
-                    <label>Importance</label>
-                    <div class="inline-control"><select name="priority_id"><?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>" <?= (int) $ticket['priority_id'] === (int) $item['id'] ? 'selected' : '' ?>><?= htmlspecialchars(t('priority.'.strtolower((string)$item['name']))) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Modifier</button></div>
+                    <label><?= htmlspecialchars(t('ticket.priority')) ?></label>
+                    <div class="inline-control"><select name="priority_id"><?php foreach ($priorities as $item): ?><option value="<?= (int) $item['id'] ?>" <?= (int) $ticket['priority_id'] === (int) $item['id'] ? 'selected' : '' ?>><?= htmlspecialchars(t('priority.'.strtolower((string)$item['name']))) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit"> <?= htmlspecialchars(t('ticket.edit')) ?></button></div>
                 </form>
 
                 <?php if ($transferIts): ?>
@@ -627,8 +655,8 @@ if (!$isFragmentRequest) {
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="transfer">
-                        <label>Transférer à</label>
-                        <div class="inline-control"><select name="it_id" required><option value="">Choisir un technicien Support IT</option><?php foreach ($transferIts as $it): ?><option value="<?= (int) $it['id'] ?>" <?= (int) $ticket['assigned_it_id'] === (int) $it['id'] ? 'selected' : '' ?>><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit">Transférer</button></div>
+                        <label><?= htmlspecialchars(t('ticket.transfer_to')) ?></label>
+                        <div class="inline-control"><select name="it_id" required><option value=""><?= htmlspecialchars(t('ticket.choose_it')) ?></option><?php foreach ($transferIts as $it): ?><option value="<?= (int) $it['id'] ?>" <?= (int) $ticket['assigned_it_id'] === (int) $it['id'] ? 'selected' : '' ?>><?= htmlspecialchars($it['firstname'] . ' ' . $it['lastname']) ?></option><?php endforeach; ?></select><button class="btn secondary small" type="submit"> <?= htmlspecialchars(t('ticket.transfer')) ?></button></div>
                     </form>
                 <?php endif; ?>
 
@@ -637,23 +665,23 @@ if (!$isFragmentRequest) {
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="manager_request">
-                        <label>Validation Manager à deux niveaux</label>
+                        <label><?= htmlspecialchars(t('ticket.two_level_validation')) ?></label>
                         <?php if (!$ticket['requester_manager_id']): ?>
-                            <p class="inline-warning">Aucun Manager N+1 n’est défini pour le groupe du demandeur.</p>
+                            <p class="inline-warning"><?= htmlspecialchars(t('ticket.no_n1')) ?></p>
                         <?php elseif ($pendingManagerApproval): ?>
                             <p class="inline-warning">Une validation est déjà en attente auprès de <?= htmlspecialchars($pendingManagerApproval['manager_name']) ?>.</p>
                         <?php elseif (!$availableManagers): ?>
-                            <p class="inline-warning">Aucun autre Manager actif n’est disponible pour la validation finale.</p>
+                            <p class="inline-warning"><?= htmlspecialchars(t('ticket.no_manager')) ?></p>
                         <?php else: ?>
                             <div class="v120-manager-chain-preview">
-                                <span><i class="fa-solid fa-user-tie"></i> Étape 1</span>
+                                <span><i class="fa-solid fa-user-tie"></i> <?= htmlspecialchars(t('ticket.step1')) ?></span>
                                 <strong><?= htmlspecialchars($ticket['requester_manager_name']) ?></strong>
-                                <small>Manager N+1 du demandeur</small>
+                                <small><?= htmlspecialchars(t('ticket.requester_n1')) ?></small>
                             </div>
                             <div class="field">
-                                <label for="target_manager_id">Manager pour la validation finale *</label>
+                                <label for="target_manager_id"><?= htmlspecialchars(t('ticket.final_manager')) ?></label>
                                 <select id="target_manager_id" name="target_manager_id" required>
-                                    <option value="">Sélectionner un Manager</option>
+                                    <option value=""><?= htmlspecialchars(t('ticket.select_manager')) ?></option>
                                     <?php foreach ($availableManagers as $manager): ?>
                                         <option value="<?= (int) $manager['id'] ?>">
                                             <?= htmlspecialchars($manager['firstname'] . ' ' . $manager['lastname'] . ($manager['managed_groups'] ? ' — ' . $manager['managed_groups'] : '')) ?>
@@ -670,14 +698,14 @@ if (!$isFragmentRequest) {
 
             <?php if (!in_array($ticket['status_code'], ['resolved','closed','cancelled','waiting_manager','waiting_confirmation'], true)): ?>
                 <section class="panel resolution-form-panel resolution-form-panel-enhanced">
-                    <h2>Proposer la résolution</h2>
-                    <p class="muted">Le ticket passera en attente de confirmation du demandeur.</p>
+                    <h2><?= htmlspecialchars(t('ticket.propose_resolution')) ?></h2>
+                    <p class="muted"><?= htmlspecialchars(t('ticket.propose_resolution_help')) ?></p>
                     <form method="post">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
                         <input type="hidden" name="number" value="<?= htmlspecialchars($ticket['ticket_number']) ?>">
                         <input type="hidden" name="action" value="resolution">
-                        <div class="field"><textarea name="resolution" minlength="5" maxlength="4000" required placeholder="Expliquez la solution appliquée…"><?= htmlspecialchars($ticket['resolution'] ?? '') ?></textarea></div>
-                        <button class="btn primary full" type="submit">Proposer au demandeur</button>
+                        <div class="field"><textarea name="resolution" minlength="5" maxlength="4000" required placeholder="<?= htmlspecialchars(t('ticket.solution_placeholder')) ?>"><?= htmlspecialchars($ticket['resolution'] ?? '') ?></textarea></div>
+                        <button class="btn primary full" type="submit"> <?= htmlspecialchars(t('ticket.propose_requester')) ?></button>
                     </form>
                 </section>
             <?php endif; ?>

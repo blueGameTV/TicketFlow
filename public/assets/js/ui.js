@@ -46,3 +46,34 @@
         table.setAttribute('data-responsive-table', 'true');
     });
 })();
+
+// === TicketFlow v1.3.0-dev.2 sidebar START ===
+(() => {
+    'use strict';
+
+    const groups = Array.from(document.querySelectorAll('.sidebar-group'));
+
+    groups.forEach((group) => {
+        const key = group.getAttribute('data-sidebar-group');
+        if (!key) return;
+
+        const active = group.querySelector('.nav-item.active');
+        const stored = window.localStorage.getItem(`ticketflow.sidebar.group.${key}`);
+
+        if (active) {
+            group.open = true;
+        } else if (stored === 'open') {
+            group.open = true;
+        } else if (stored === 'closed') {
+            group.open = false;
+        }
+
+        group.addEventListener('toggle', () => {
+            window.localStorage.setItem(
+                `ticketflow.sidebar.group.${key}`,
+                group.open ? 'open' : 'closed'
+            );
+        });
+    });
+})();
+// === TicketFlow v1.3.0-dev.2 sidebar END ===

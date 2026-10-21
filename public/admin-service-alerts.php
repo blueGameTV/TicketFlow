@@ -73,7 +73,7 @@ require __DIR__ . '/../templates/shared/header.php';
 <?php if ($success): ?><div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
 <?php if ($errors): ?><div class="alert error"><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 
-<div class="v110-grid v120-service-alerts-grid">
+<div class="tf-grid v120-service-alerts-grid">
     <section class="panel v120-service-alert-create">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-bullhorn"></i></span><div><h2>Créer une alerte</h2><p>La banderole apparaît automatiquement pour les utilisateurs connectés.</p></div></div></div>
         <form method="post" class="form-grid">
@@ -81,8 +81,8 @@ require __DIR__ . '/../templates/shared/header.php';
             <input type="hidden" name="action" value="create">
             <div class="field"><label>Application / service *</label><input name="service_name" maxlength="120" required placeholder="Microsoft Outlook, VPN, ERP…"></div>
             <div class="field"><label>Niveau *</label><select name="severity" required><option value="info">Information</option><option value="degraded">Dégradation</option><option value="major">Incident majeur</option><option value="critical">Incident critique</option><option value="maintenance">Maintenance</option></select></div>
-            <div class="field span-2"><label>Titre * <span class="v110-form-help">80 caractères maximum</span></label><input name="title" maxlength="80" required placeholder="Indisponibilité en cours"></div>
-            <div class="field span-2"><label>Message * <span class="v110-form-help">2000 caractères maximum</span></label><textarea name="message" maxlength="2000" rows="6" required placeholder="L’équipe Support IT analyse actuellement le problème…"></textarea></div>
+            <div class="field span-2"><label>Titre * <span class="tf-form-help">80 caractères maximum</span></label><input name="title" maxlength="80" required placeholder="Indisponibilité en cours"></div>
+            <div class="field span-2"><label>Message * <span class="tf-form-help">2000 caractères maximum</span></label><textarea name="message" maxlength="2000" rows="6" required placeholder="L’équipe Support IT analyse actuellement le problème…"></textarea></div>
             <div class="field"><label>Début</label><input type="datetime-local" name="starts_at" value="<?= date('Y-m-d\TH:i') ?>"></div>
             <div class="field"><label>Fin prévue</label><input type="datetime-local" name="ends_at"></div>
             <div class="field span-2"><label>État initial</label><select name="status"><option value="active">En cours</option><option value="monitoring">Surveillance</option></select></div>
@@ -92,19 +92,19 @@ require __DIR__ . '/../templates/shared/header.php';
 
     <section class="panel v120-service-alert-active">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-wave-square"></i></span><div><h2>Alertes actives</h2><p><?= count($serviceAlertService->active()) ?> alerte(s) actuellement visible(s).</p></div></div></div>
-        <div class="v110-list">
+        <div class="tf-list">
             <?php $activeCount = 0; foreach ($alerts as $alert): if (!in_array($alert['status'], ['active','monitoring'], true)) continue; $activeCount++; ?>
-                <article class="v110-list-item">
-                    <div class="v110-list-item-head"><div><span class="v110-pill <?= htmlspecialchars((string)$alert['severity']) ?>"><?= htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span><h3><?= htmlspecialchars((string)$alert['title']) ?></h3></div><strong><?= htmlspecialchars((string)$alert['service_name']) ?></strong></div>
+                <article class="tf-list-item">
+                    <div class="tf-list-item-head"><div><span class="tf-pill <?= htmlspecialchars((string)$alert['severity']) ?>"><?= htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span><h3><?= htmlspecialchars((string)$alert['title']) ?></h3></div><strong><?= htmlspecialchars((string)$alert['service_name']) ?></strong></div>
                     <p><?= nl2br(htmlspecialchars((string)$alert['message'])) ?></p>
-                    <div class="v110-meta"><span><i class="fa-regular fa-clock"></i> <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['starts_at']))) ?></span><span>Créée par <?= htmlspecialchars($alert['creator_firstname'] . ' ' . $alert['creator_lastname']) ?></span></div>
-                    <div class="v110-actions"><form method="post"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>"><input type="hidden" name="action" value="resolve"><input type="hidden" name="id" value="<?= (int)$alert['id'] ?>"><button class="btn secondary" type="submit"><i class="fa-solid fa-check"></i> Marquer résolue</button></form><?php if (($user['role'] ?? '') === 'Administrateur'): ?><form method="post" onsubmit="return confirm('Supprimer définitivement cette alerte ?')"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$alert['id'] ?>"><button class="btn secondary v110-danger" type="submit"><i class="fa-solid fa-trash"></i> Supprimer</button></form><?php endif; ?></div>
+                    <div class="tf-meta"><span><i class="fa-regular fa-clock"></i> <?= htmlspecialchars(date('d/m/Y H:i', strtotime((string)$alert['starts_at']))) ?></span><span>Créée par <?= htmlspecialchars($alert['creator_firstname'] . ' ' . $alert['creator_lastname']) ?></span></div>
+                    <div class="tf-actions"><form method="post"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>"><input type="hidden" name="action" value="resolve"><input type="hidden" name="id" value="<?= (int)$alert['id'] ?>"><button class="btn secondary" type="submit"><i class="fa-solid fa-check"></i> Marquer résolue</button></form><?php if (($user['role'] ?? '') === 'Administrateur'): ?><form method="post" onsubmit="return confirm('Supprimer définitivement cette alerte ?')"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$alert['id'] ?>"><button class="btn secondary tf-danger" type="submit"><i class="fa-solid fa-trash"></i> Supprimer</button></form><?php endif; ?></div>
                 </article>
-            <?php endforeach; if ($activeCount === 0): ?><div class="v110-empty">Aucune alerte active.</div><?php endif; ?>
+            <?php endforeach; if ($activeCount === 0): ?><div class="tf-empty">Aucune alerte active.</div><?php endif; ?>
         </div>
     </section>
 
-    <section class="panel v110-span-2 v120-alert-history-panel v12061-alert-history-panel">
+    <section class="panel tf-span-2 v120-alert-history-panel v12061-alert-history-panel">
         <div class="v12061-history-header">
             <div class="v12061-history-heading">
                 <span class="panel-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
@@ -132,7 +132,7 @@ require __DIR__ . '/../templates/shared/header.php';
                     <div class="v12061-history-content">
                         <div class="v12061-history-title-row">
                             <div class="v12061-history-title">
-                                <span class="v110-pill <?= $alert['status'] === 'resolved' ? 'resolved' : htmlspecialchars((string)$alert['severity']) ?>"><?= $alert['status'] === 'resolved' ? 'Résolue' : htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span>
+                                <span class="tf-pill <?= $alert['status'] === 'resolved' ? 'resolved' : htmlspecialchars((string)$alert['severity']) ?>"><?= $alert['status'] === 'resolved' ? 'Résolue' : htmlspecialchars($serviceAlertService->severityLabel((string)$alert['severity'])) ?></span>
                                 <h3><?= htmlspecialchars((string)$alert['title']) ?></h3>
                             </div>
                             <span class="v12061-history-service"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars((string)$alert['service_name']) ?></span>

@@ -370,21 +370,21 @@ $typeIcons = [
     <?php if ($user['role'] === 'Administrateur'): ?><a class="<?= $scope === 'all' ? 'active' : '' ?>" href="it-tickets.php?scope=all"><i class="fa-solid fa-layer-group"></i> <?= htmlspecialchars(t('queue.all')) ?></a><?php endif; ?>
     <a class="<?= $scope === 'archive' ? 'active' : '' ?>" href="it-tickets.php?scope=archive"><i class="fa-solid fa-box-archive"></i> <?= htmlspecialchars(t('queue.archives')) ?></a>
 </div>
-<section class="panel queue-filter-panel queue-filter-panel-v015">
+<section class="panel queue-filter-panel queue-filter-panel">
     <div class="panel-heading-inline queue-filter-heading">
         <div><h2><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('queue.filters')) ?></h2><p><?= htmlspecialchars(t('queue.filters_help')) ?></p></div>
         <button class="btn secondary small" type="button" data-advanced-filter-toggle><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('queue.advanced')) ?></button>
     </div>
-    <form class="ticket-filter-form-v015" method="get">
+    <form class="ticket-filter-form" method="get">
         <input type="hidden" name="scope" value="<?= htmlspecialchars($scope) ?>">
-        <div class="ticket-filter-main-v015">
+        <div class="ticket-filter-main">
             <label class="search-field"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="<?= htmlspecialchars(t('queue.search_placeholder')) ?>"></label>
             <select name="status"><option value=""><?= htmlspecialchars(t('queue.all_statuses')) ?></option><?php foreach ($statuses as $item): ?><option value="<?= htmlspecialchars($item['code']) ?>" <?= $status === $item['code'] ? 'selected' : '' ?>><?= htmlspecialchars(t('status.'.$item['code'])) ?></option><?php endforeach; ?></select>
             <select name="priority"><option value=""><?= htmlspecialchars(t('queue.all_priorities')) ?></option><?php foreach ($priorities as $item): ?><option value="<?= (int)$item['id'] ?>" <?= (string)$item['id'] === $priority ? 'selected' : '' ?>><?= htmlspecialchars(t('priority.'.strtolower($item['name']))) ?></option><?php endforeach; ?></select>
             <button class="btn primary" type="submit"><i class="fa-solid fa-filter"></i> <?= htmlspecialchars(t('common.filter')) ?></button>
             <a class="btn ghost" href="it-tickets.php?scope=<?= urlencode($scope) ?>"><i class="fa-solid fa-rotate-left"></i> <?= htmlspecialchars(t('common.reset')) ?></a>
         </div>
-        <div class="advanced-filter-grid-v015" data-advanced-filter-panel <?= ($typeId || $categoryId || $groupId || $managerId || $assignedIt !== '' || $dateFrom !== '' || $dateTo !== '' || $sla !== '') ? '' : 'hidden' ?>>
+        <div class="advanced-filter-grid" data-advanced-filter-panel <?= ($typeId || $categoryId || $groupId || $managerId || $assignedIt !== '' || $dateFrom !== '' || $dateTo !== '' || $sla !== '') ? '' : 'hidden' ?>>
             <div class="field"><label><?= htmlspecialchars(t('queue.type')) ?></label><select name="type_id"><option value="0"><?= htmlspecialchars(t('queue.all_types')) ?></option><?php foreach ($types as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $typeId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['code'].' — '.$item['name']) ?></option><?php endforeach; ?></select></div>
             <div class="field"><label><?= htmlspecialchars(t('queue.category')) ?></label><select name="category_id"><option value="0"><?= htmlspecialchars(t('queue.all_categories')) ?></option><?php foreach ($categories as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $categoryId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>
             <div class="field"><label><?= htmlspecialchars(t('queue.requester_group')) ?></label><select name="group_id"><option value="0"><?= htmlspecialchars(t('queue.all_groups')) ?></option><?php foreach ($groups as $item): ?><option value="<?= (int)$item['id'] ?>" <?= $groupId === (int)$item['id'] ? 'selected' : '' ?>><?= htmlspecialchars($item['name']) ?></option><?php endforeach; ?></select></div>

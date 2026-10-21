@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Réinitialiser le mot de passe - <?= htmlspecialchars($appName) ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=0.15.2.1"><link rel="stylesheet" href="assets/css/v013.css?v=0.15.2.1">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev.6-rework"><link rel="stylesheet" href="assets/css/v013.css?v=0.15.2.1">
 </head>
 <body class="auth-page auth-page-v013">
 <main class="auth-layout-v013 auth-layout-single"><section class="auth-panel-v013"><div class="auth-card-v013">

@@ -7,7 +7,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $auth->requireRole('Administrateur');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
-$pageTitle = 'Importer des utilisateurs';
+$pageTitle = t('user_import.title');
 
 $templateHeaders = ['prenom','nom','identifiant','email','role','groupe','manager','date_arrivee','actif','mot_de_passe','forcer_changement_mot_de_passe'];
 $templateRow = ['Jean','Dupont','jdupont','jean.dupont@example.fr','Collaborateur','Commerce','manager.commerce','01/10/2026','oui','','oui'];
@@ -79,10 +79,10 @@ require __DIR__ . '/../templates/shared/header.php';
 <section class="page-heading page-heading-enhanced v120-import-heading">
     <div>
         <span class="badge"><i class="fa-solid fa-file-import"></i> Administration</span>
-        <h1>Importer des utilisateurs</h1>
-        <p>Créez plusieurs comptes depuis un fichier CSV ou Excel, avec rattachement aux groupes et contrôle du Manager.</p>
+        <h1><?= htmlspecialchars(t('user_import.title')) ?></h1>
+        <p><?= htmlspecialchars(t('user_import.subtitle')) ?></p>
     </div>
-    <a class="btn secondary" href="admin-users.php"><i class="fa-solid fa-arrow-left"></i> Retour aux utilisateurs</a>
+    <a class="btn secondary" href="admin-users.php"><i class="fa-solid fa-arrow-left"></i> <?= htmlspecialchars(t('user_import.back')) ?></a>
 </section>
 
 <?php if ($errors): ?>
@@ -105,7 +105,7 @@ require __DIR__ . '/../templates/shared/header.php';
 
 <section class="v120-import-grid">
     <article class="panel v120-import-upload">
-        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span><div><h2>1. Charger le fichier</h2><p>Formats pris en charge : CSV et XLSX · 500 utilisateurs maximum · 5 Mo maximum.</p></div></div>
+        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span><div><h2><?= htmlspecialchars(t('user_import.upload_title')) ?></h2><p><?= htmlspecialchars(t('user_import.upload_help')) ?></p></div></div>
         <form method="post" enctype="multipart/form-data" class="v120-import-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
             <input type="hidden" name="action" value="preview">
@@ -114,19 +114,19 @@ require __DIR__ . '/../templates/shared/header.php';
         </form>
     </article>
     <article class="panel v120-import-template">
-        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-file-arrow-down"></i></span><div><h2>2. Modèles TicketFlow</h2><p>Les deux modèles contiennent les mêmes colonnes et un exemple de ligne.</p></div></div>
+        <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-file-arrow-down"></i></span><div><h2><?= htmlspecialchars(t('user_import.templates')) ?></h2><p><?= htmlspecialchars(t('user_import.templates_help')) ?></p></div></div>
         <div class="v120-template-actions"><a class="btn secondary" href="admin-user-import.php?template=csv"><i class="fa-solid fa-file-csv"></i> Modèle CSV</a><a class="btn secondary" href="admin-user-import.php?template=xlsx"><i class="fa-solid fa-file-excel"></i> Modèle Excel</a></div>
-        <div class="v120-import-columns"><strong>Colonnes obligatoires</strong><span>prenom · nom · identifiant · email · role</span><strong>Colonnes facultatives</strong><span>groupe · manager · date_arrivee · actif · mot_de_passe · forcer_changement_mot_de_passe</span></div>
+        <div class="v120-import-columns"><strong><?= htmlspecialchars(t('user_import.required_cols')) ?></strong><span>prenom · nom · identifiant · email · role</span><strong><?= htmlspecialchars(t('user_import.optional_cols')) ?></strong><span>groupe · manager · date_arrivee · actif · mot_de_passe · forcer_changement_mot_de_passe</span></div>
     </article>
 </section>
 
 <section class="panel v120-import-rules">
-    <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-circle-info"></i></span><div><h2>Règles de rattachement</h2><p>TicketFlow vérifie les données avant de créer le moindre compte.</p></div></div>
+    <div class="form-section-heading"><span class="form-section-icon"><i class="fa-solid fa-circle-info"></i></span><div><h2><?= htmlspecialchars(t('user_import.rules')) ?></h2><p><?= htmlspecialchars(t('user_import.rules_help')) ?></p></div></div>
     <div class="v120-rule-grid">
-        <div><i class="fa-solid fa-users"></i><strong>Groupe</strong><span>Le nom doit correspondre à un groupe actif déjà présent dans TicketFlow.</span></div>
-        <div><i class="fa-solid fa-user-tie"></i><strong>Manager</strong><span>Facultatif. S’il est renseigné, il doit correspondre au Manager du groupe. Sinon TicketFlow récupère automatiquement le Manager du groupe.</span></div>
-        <div><i class="fa-solid fa-key"></i><strong>Mot de passe</strong><span>Facultatif. S’il est vide, TicketFlow génère automatiquement un mot de passe initial sécurisé.</span></div>
-        <div><i class="fa-solid fa-shield-halved"></i><strong>Sécurité</strong><span>Le changement du mot de passe est forcé par défaut à la première connexion.</span></div>
+        <div><i class="fa-solid fa-users"></i><strong><?= htmlspecialchars(t('user_import.rule_group')) ?></strong><span><?= htmlspecialchars(t('user_import.rule_group_help')) ?></span></div>
+        <div><i class="fa-solid fa-user-tie"></i><strong><?= htmlspecialchars(t('user_import.rule_manager')) ?></strong><span><?= htmlspecialchars(t('user_import.rule_manager_help')) ?></span></div>
+        <div><i class="fa-solid fa-key"></i><strong><?= htmlspecialchars(t('user_import.rule_password')) ?></strong><span><?= htmlspecialchars(t('user_import.rule_password_help')) ?></span></div>
+        <div><i class="fa-solid fa-shield-halved"></i><strong><?= htmlspecialchars(t('user_import.rule_security')) ?></strong><span><?= htmlspecialchars(t('user_import.rule_security_help')) ?></span></div>
     </div>
 </section>
 

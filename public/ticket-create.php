@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/bootstrap.php';
 
+use App\Support\ErrorCatalog;
+
 $auth->requireRole('Collaborateur', 'Manager');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
@@ -66,19 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (RuntimeException $e) {
             $errors[] = $e->getMessage();
         } catch (Throwable $e) {
-            $logDir = __DIR__ . '/../storage/logs';
-            if (!is_dir($logDir)) {
-                @mkdir($logDir, 0770, true);
-            }
-            @error_log(
-                '[' . date('c') . '] Création ticket : ' . $e->getMessage() . PHP_EOL,
-                3,
-                $logDir . '/ticket-errors.log'
-            );
-            $environment = (string) ($config['app']['environment'] ?? 'production');
-            $errors[] = $environment === 'development'
-                ? 'Erreur technique lors de la création : ' . $e->getMessage()
-                : 'Impossible de créer le ticket pour le moment.';
+            $reference = ErrorCatalog::log('TE-201', $e, ['requester_id' => (int)$user['id']]);
+            $errors[] = ErrorCatalog::publicText('TE-201', $reference);
         }
     }
 }

@@ -67,7 +67,7 @@ require __DIR__ . '/../templates/shared/header.php';
         </form>
     </article>
 
-    <article class="panel export-card v110-span-2">
+    <article class="panel export-card tf-span-2">
         <div class="export-card-head"><div><span class="export-icon"><i class="fa-solid fa-chart-gantt"></i></span><h2><?= htmlspecialchars(t('exports.operations')) ?></h2></div><span class="file-badge"><?= htmlspecialchars(t('exports.new_xlsx')) ?></span></div>
         <p><?= htmlspecialchars(t('exports.operations_help')) ?></p>
         <form method="post" action="export-operations.php" class="form-grid export-form">

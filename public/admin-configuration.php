@@ -7,7 +7,7 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $auth->requireRole('Administrateur');
 $user = $auth->user();
 $appName = $config['app']['name'] ?? 'TicketFlow';
-$pageTitle = t('nav.configuration');
+$pageTitle = t('config.email_title');
 $errors = [];
 $success = $_SESSION['flash_success'] ?? null;
 unset($_SESSION['flash_success']);
@@ -94,11 +94,11 @@ $mail = $config['mail'] ?? ['transport' => 'disabled'];
 $mailStats = $mailQueueService->stats();
 require __DIR__ . '/../templates/shared/header.php';
 ?>
-<section class="page-heading page-heading-enhanced configuration-heading-v014">
+<section class="page-heading page-heading-enhanced email-config-heading">
     <div>
         <span class="badge"><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('common.administration')) ?></span>
-        <h1><?= htmlspecialchars(t('config.title')) ?> <span class="v1206-beta-badge v1206-beta-badge-title">BETA</span></h1>
-        <p><?= htmlspecialchars(t('config.subtitle')) ?></p>
+        <h1><?= htmlspecialchars(t('config.email_title')) ?> <span class="email-config-beta">BETA</span></h1>
+        <p><?= htmlspecialchars(t('config.email_subtitle')) ?></p>
     </div>
     <div class="queue-summary"><i class="fa-solid fa-envelope-circle-check"></i><div><strong><?= htmlspecialchars(strtoupper((string) ($mail['transport'] ?? 'disabled'))) ?></strong><span><?= htmlspecialchars(t('config.mail_transport')) ?></span></div></div>
 </section>
@@ -106,8 +106,8 @@ require __DIR__ . '/../templates/shared/header.php';
 <?php if ($success): ?><div class="alert success"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
 <?php if ($errors): ?><div class="alert error"><strong><?= htmlspecialchars(t('config.error_title')) ?></strong><ul><?php foreach ($errors as $error): ?><li><?= htmlspecialchars($error) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 
-<div class="configuration-grid-v014">
-    <section class="panel configuration-card-v014 span-2-v014">
+<div class="email-config-grid">
+    <section class="panel email-config-card span-2">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-building"></i></span><div><h2><?= htmlspecialchars(t('config.app_automation')) ?></h2><p><?= htmlspecialchars(t('config.app_automation_help')) ?></p></div></div></div>
         <form method="post" class="configuration-form-v014">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf->token()) ?>">
@@ -118,7 +118,7 @@ require __DIR__ . '/../templates/shared/header.php';
                 <div class="field"><label for="manager_reminder_hours"><?= htmlspecialchars(t('config.manager_reminder')) ?></label><div class="input-with-unit-v014"><input id="manager_reminder_hours" name="manager_reminder_hours" type="number" min="1" max="720" value="<?= (int) $settings['manager_reminder_hours'] ?>"><span><?= htmlspecialchars(t('config.hours')) ?></span></div></div>
                 <div class="field"><label for="resolution_reminder_hours"><?= htmlspecialchars(t('config.user_reminder')) ?></label><div class="input-with-unit-v014"><input id="resolution_reminder_hours" name="resolution_reminder_hours" type="number" min="1" max="720" value="<?= (int) $settings['resolution_reminder_hours'] ?>"><span><?= htmlspecialchars(t('config.hours')) ?></span></div></div>
                 <div class="field"><label for="auto_close_hours"><?= htmlspecialchars(t('config.auto_close_after')) ?></label><div class="input-with-unit-v014"><input id="auto_close_hours" name="auto_close_hours" type="number" min="24" max="2160" value="<?= (int) $settings['auto_close_hours'] ?>"><span><?= htmlspecialchars(t('config.hours')) ?></span></div></div>
-                <div class="field"><label for="daily_digest_hour"><?= htmlspecialchars(t('config.daily_digest_hour')) ?></label><div class="input-with-unit-v014"><input id="daily_digest_hour" name="daily_digest_hour" type="number" min="0" max="23" value="<?= (int) $settings['daily_digest_hour'] ?>"><span>h</span></div></div><div class="field"><label for="default_language"><?= htmlspecialchars(t('admin.default_language')) ?></label><select id="default_language" name="default_language"><option value="fr" <?= ($settings['default_language']??'fr')==='fr'?'selected':'' ?>><?= htmlspecialchars(t('settings.language.fr')) ?></option><option value="en" <?= ($settings['default_language']??'fr')==='en'?'selected':'' ?>><?= htmlspecialchars(t('settings.language.en')) ?> (Beta)</option></select><small class="theme-help-v120"><?= htmlspecialchars(t('admin.default_language.help')) ?></small></div>
+                <div class="field"><label for="daily_digest_hour"><?= htmlspecialchars(t('config.daily_digest_hour')) ?></label><div class="input-with-unit-v014"><input id="daily_digest_hour" name="daily_digest_hour" type="number" min="0" max="23" value="<?= (int) $settings['daily_digest_hour'] ?>"><span>h</span></div></div><div class="field"><label for="default_language"><?= htmlspecialchars(t('admin.default_language')) ?></label><select id="default_language" name="default_language"><option value="fr" <?= ($settings['default_language']??'fr')==='fr'?'selected':'' ?>><?= htmlspecialchars(t('settings.language.fr')) ?></option><option value="en" <?= ($settings['default_language']??'fr')==='en'?'selected':'' ?>><?= htmlspecialchars(t('settings.language.en')) ?></option></select><small class="theme-help-v120"><?= htmlspecialchars(t('admin.default_language.help')) ?></small></div>
             </div>
             <div class="configuration-switches-v014">
                 <label class="switch-row"><input type="checkbox" name="email_notifications_enabled" value="1" <?= !empty($settings['email_notifications_enabled']) ? 'checked' : '' ?>><span class="switch-copy"><strong><?= htmlspecialchars(t('config.email_notifications')) ?></strong><small><?= htmlspecialchars(t('config.email_notifications_help')) ?></small></span></label>
@@ -129,9 +129,9 @@ require __DIR__ . '/../templates/shared/header.php';
         </form>
     </section>
 
-    <section class="panel configuration-card-v014">
+    <section class="panel email-config-card">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-server"></i></span><div><h2><?= htmlspecialchars(t('config.mail_transport_title')) ?></h2><p><?= htmlspecialchars(t('config.mail_transport_help')) ?></p></div></div></div>
-        <div class="configuration-facts-v014">
+        <div class="email-config-facts">
             <div><span><?= htmlspecialchars(t('config.transport')) ?></span><strong><?= htmlspecialchars((string) ($mail['transport'] ?? 'disabled')) ?></strong></div>
             <div><span><?= htmlspecialchars(t('config.server')) ?></span><strong><?= htmlspecialchars((string) ($mail['host'] ?? '—')) ?>:<?= (int) ($mail['port'] ?? 0) ?></strong></div>
             <div><span><?= htmlspecialchars(t('config.encryption')) ?></span><strong><?= htmlspecialchars((string) ($mail['encryption'] ?? 'none')) ?></strong></div>
@@ -145,9 +145,9 @@ require __DIR__ . '/../templates/shared/header.php';
         </form>
     </section>
 
-    <section class="panel configuration-card-v014">
+    <section class="panel email-config-card">
         <div class="panel-title-row"><div><span class="panel-icon"><i class="fa-solid fa-envelope-open-text"></i></span><div><h2><?= htmlspecialchars(t('config.mail_queue')) ?></h2><p><?= htmlspecialchars(t('config.mail_queue_help')) ?></p></div></div></div>
-        <div class="mail-stats-v014">
+        <div class="email-config-stats">
             <div><span class="mail-stat-dot queued"></span><strong><?= (int) $mailStats['queued'] ?></strong><small><?= htmlspecialchars(t('config.pending')) ?></small></div>
             <div><span class="mail-stat-dot sent"></span><strong><?= (int) $mailStats['sent'] ?></strong><small><?= htmlspecialchars(t('config.sent')) ?></small></div>
             <div><span class="mail-stat-dot failed"></span><strong><?= (int) $mailStats['failed'] ?></strong><small><?= htmlspecialchars(t('config.failed')) ?></small></div>
