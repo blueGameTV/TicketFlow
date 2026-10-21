@@ -40,6 +40,8 @@ Les Collaborateurs et Managers sont redirigés vers la page de maintenance lorsq
 
 Si une fin estimée est définie, TicketFlow désactive automatiquement le mode maintenance lorsque l'heure est atteinte.
 
+En v1.3.0, la page d'administration présente plus clairement la maintenance active et permet notamment son arrêt explicite. La gestion des maintenances planifiées reste disponible.
+
 ## Maintenance planifiée
 
 Une maintenance future peut être programmée avec :
