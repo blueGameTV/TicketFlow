@@ -68,7 +68,7 @@ if [[ "$BRANCH" == "v1.3.0" ]]; then
   [[ -s "$MIGRATION_FILE" ]] || fail "Fichier de migration v1.3.0 absent ou vide : $MIGRATION_FILE"
   mysql --protocol=socket -uroot "$DB_NAME" < "$MIGRATION_FILE" \
     || fail "Impossible d'appliquer la migration v1.3.0."
-  TABLE_PRESENT="$(mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='\${DB_NAME}' AND table_name='password_recovery_requests'")"
+  TABLE_PRESENT="$(mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='password_recovery_requests'")"
   [[ "$TABLE_PRESENT" == "1" ]] || fail "Table password_recovery_requests absente après migration."
   ok "Migration v1.3.0 appliquée."
 fi
