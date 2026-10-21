@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.2.0" width="100%">
+  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.3.0" width="100%">
 </p>
 
 <p align="center">
@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.2.0-3156d9">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-3156d9">
   <img alt="PHP" src="https://img.shields.io/badge/PHP-8.1%2B-777BB4">
   <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
   <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
