@@ -231,7 +231,7 @@ Chaque utilisateur peut choisir :
 Langues disponibles :
 
 - **Français**
-- **English (Beta)**
+- **English**
 
 Ces préférences sont enregistrées dans le compte utilisateur.
 
