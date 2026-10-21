@@ -3,10 +3,11 @@ set -Eeuo pipefail
 
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
+BRANCH="${TICKETFLOW_BRANCH:-v1.3.0}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
-INSTALLER_BUILD="1.2.0-r1"
+INSTALLER_BUILD="1.3.0-r2"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -24,16 +25,23 @@ apt-get install -y apache2 mariadb-server git curl openssl \
 systemctl enable --now apache2 mariadb
 ok "Apache, MariaDB et PHP sont prêts."
 
-say "Récupération de TicketFlow"
+say "Récupération de TicketFlow (branche $BRANCH)"
+# L'installation initiale ne doit jamais écraser une instance existante.
 if [[ -d "$APP_DIR/.git" ]]; then
-  git -C "$APP_DIR" pull --ff-only
+  fail "$APP_DIR contient déjà TicketFlow. Utilisez update.sh (ou sauvegardez et réinstallez sur une VM vierge)."
 elif [[ -e "$APP_DIR" && -n "$(ls -A "$APP_DIR" 2>/dev/null || true)" ]]; then
-  fail "$APP_DIR existe déjà et n'est pas un dépôt Git vide. Déplacez/supprimez ce dossier puis relancez l'installation."
-else
-  rm -rf "$APP_DIR"
-  git clone "$REPO_URL" "$APP_DIR"
+  fail "$APP_DIR existe déjà et n'est pas vide. Installation arrêtée sans supprimer son contenu."
 fi
-ok "Code installé dans $APP_DIR."
+
+# La branche téléchargée pour install.sh doit aussi être celle du dépôt installé.
+git ls-remote --exit-code --heads "$REPO_URL" "refs/heads/$BRANCH" >/dev/null \
+  || fail "Branche $BRANCH introuvable dans $REPO_URL."
+mkdir -p "$(dirname "$APP_DIR")"
+git clone --branch "$BRANCH" --single-branch "$REPO_URL" "$APP_DIR"
+INSTALLED_BRANCH="$(git -C "$APP_DIR" branch --show-current)"
+[[ "$INSTALLED_BRANCH" == "$BRANCH" ]] || fail "Mauvaise branche clonée : $INSTALLED_BRANCH (attendu : $BRANCH)."
+[[ -f "$APP_DIR/VERSION" ]] || fail "VERSION manquant après clonage."
+ok "Code installé depuis $BRANCH dans $APP_DIR (version $(cat "$APP_DIR/VERSION"))."
 
 DB_PASSWORD="$(openssl rand -hex 24)"
 SETUP_TOKEN="$(openssl rand -hex 24)"
@@ -52,6 +60,17 @@ SQL
 
 if ! mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='roles'" | grep -qx '1'; then
   mysql --protocol=socket -uroot "$DB_NAME" < "$APP_DIR/database/schema.sql"
+fi
+# Le schéma de base ne contient pas encore la table de récupération v1.3.0.
+# La migration est idempotente (CREATE TABLE IF NOT EXISTS).
+MIGRATION_FILE="$APP_DIR/database/migrations/v130_dev6_password_recovery.sql"
+if [[ "$BRANCH" == "v1.3.0" ]]; then
+  [[ -s "$MIGRATION_FILE" ]] || fail "Fichier de migration v1.3.0 absent ou vide : $MIGRATION_FILE"
+  mysql --protocol=socket -uroot "$DB_NAME" < "$MIGRATION_FILE" \
+    || fail "Impossible d'appliquer la migration v1.3.0."
+  TABLE_PRESENT="$(mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='password_recovery_requests'")"
+  [[ "$TABLE_PRESENT" == "1" ]] || fail "Table password_recovery_requests absente après migration."
+  ok "Migration v1.3.0 appliquée."
 fi
 ok "Base de données initialisée."
 

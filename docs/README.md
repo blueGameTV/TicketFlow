@@ -1,6 +1,6 @@
 # Documentation TicketFlow
 
-Cette documentation correspond à **TicketFlow v1.2.0 Stable**.
+Cette documentation couvre les fonctionnalités présentes dans la branche **TicketFlow v1.3.0**. La publication stable reste soumise aux vérifications indiquées dans les notes de version.
 
 ## Installation et exploitation
 
@@ -12,6 +12,7 @@ Cette documentation correspond à **TicketFlow v1.2.0 Stable**.
 ## Utilisateurs, sécurité et workflow
 
 - [Authentification](authentication.md) — connexion, sessions, mots de passe et premier Administrateur.
+- [Récupération de mot de passe v1.3.0](password-recovery.md) — e-mail et récupération assistée par Support IT.
 - [Rôles et permissions](roles-permissions.md) — Administrateur, Support IT, Manager et Collaborateur.
 - [Workflow des tickets](ticket-workflow.md) — statuts, résolution et validation Manager à deux niveaux.
 - [Notifications](notifications.md) — centre de notifications et événements couverts.
@@ -29,6 +30,8 @@ Cette documentation correspond à **TicketFlow v1.2.0 Stable**.
 - [Préparer une release GitHub](github-release.md)
 
 ## Notes de version
+
+- [v1.3.0 — évolutions et vérifications avant publication](release-notes-v130.md)
 
 - [v1.2.0 Stable](release-notes-v120.md)
 - [v1.1.0 Stable](release-notes-v110.md)

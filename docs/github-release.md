@@ -33,13 +33,15 @@ Mettez à jour au minimum :
 - le README si nécessaire ;
 - les notes de version sous `docs/`.
 
+Vérifications spécifiques à v1.3.0 : cohérence de `VERSION`, migration `password_recovery_requests`, installation vierge et mise à niveau depuis v1.2.0.
+
 ## 3. Tag
 
-Exemple pour v1.2.0 :
+Exemple pour v1.3.0 (après validation) :
 
 ```bash
-git tag -a v1.2.0 -m "TicketFlow v1.2.0"
-git push origin v1.2.0
+git tag -a v1.3.0 -m "TicketFlow v1.3.0"
+git push origin v1.3.0
 ```
 
 ## 4. Release GitHub

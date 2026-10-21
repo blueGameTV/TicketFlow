@@ -4,7 +4,7 @@ set -Eeuo pipefail
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 BACKUP_ROOT="${TICKETFLOW_BACKUP_DIR:-/var/backups/ticketflow}"
 BRANCH="${TICKETFLOW_BRANCH:-main}"
-UPDATER_BUILD="1.2.0-r1"
+UPDATER_BUILD="1.3.0-r1"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -116,6 +116,34 @@ fi
 if [[ "$(needs_migration '1.2.0')" == "1" ]]; then
   say "Migration base de données vers v1.2.0"
   php "$APP_DIR/scripts/upgrade_v120.php"
+fi
+
+# Migration v1.3.0 : demandes de récupération de mot de passe avec code Support IT.
+# CREATE TABLE IF NOT EXISTS permet de relancer cette migration sans effacer les demandes.
+if [[ "$(needs_migration '1.3.0')" == "1" ]]; then
+  say "Migration base de données vers v1.3.0 (récupération de mot de passe)"
+  MIGRATION_FILE="$APP_DIR/database/migrations/v130_dev6_password_recovery.sql"
+  [[ -f "$MIGRATION_FILE" ]] || fail "Migration v1.3.0 introuvable : $MIGRATION_FILE"
+  php -r '
+$config = require $argv[1];
+$db = $config["database"] ?? [];
+$dsn = sprintf(
+    "mysql:host=%s;port=%d;dbname=%s;charset=%s",
+    (string)($db["host"] ?? "127.0.0.1"),
+    (int)($db["port"] ?? 3306),
+    (string)($db["name"] ?? "ticketflow"),
+    (string)($db["charset"] ?? "utf8mb4")
+);
+$pdo = new PDO($dsn, (string)($db["user"] ?? ""), (string)($db["password"] ?? ""), [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+]);
+$sql = file_get_contents($argv[2]);
+if ($sql === false || trim($sql) === "") {
+    throw new RuntimeException("Fichier de migration v1.3.0 vide ou illisible.");
+}
+$pdo->exec($sql);
+' "$APP_DIR/config/config.php" "$MIGRATION_FILE" || fail "Échec migration SQL v1.3.0. Consultez la sauvegarde : $BACKUP_DIR"
+  ok "Migration v1.3.0 appliquée."
 fi
 
 say "Permissions"

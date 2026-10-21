@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.0 — Évolutions présentes sur la branche (publication à valider)
+
+- Nouvelle interface de connexion et améliorations des thèmes.
+- Consolidation des feuilles de style dans `public/assets/css/app.css`.
+- Récupération de mot de passe par e-mail ou demande de code via Support IT pour Collaborateurs et Managers.
+- Interface de traitement des demandes de récupération, code de six chiffres à validité limitée et journalisation.
+- Ajout du catalogue de codes d'erreur et enrichissement de la maintenance.
+- Traductions FR/EN et ajustements de plusieurs pages de ticket et d'administration.
+
+**Prérequis non finalisés à la date de cette documentation :** `VERSION` vaut encore `1.2.0`, et la migration `database/migrations/v130_dev6_password_recovery.sql` n'est pas explicitement traitée dans `update.sh`. Voir [notes v1.3.0](docs/release-notes-v130.md).
+
+---
+
 Historique des versions stables et des principales versions de développement de TicketFlow.
 
 Ce fichier conserve uniquement :

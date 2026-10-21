@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Support\TechnicalException;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -29,7 +30,7 @@ final class Database
                 PDO::ATTR_EMULATE_PREPARES => false,
             ]);
         } catch (PDOException $e) {
-            throw new RuntimeException('Connexion à la base de données impossible.', 0, $e);
+            throw new TechnicalException('TE-002', 'Connexion à la base de données impossible.', $e);
         }
     }
 

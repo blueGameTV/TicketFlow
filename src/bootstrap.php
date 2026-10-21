@@ -6,6 +6,8 @@ use App\Database\Database;
 use App\Security\Auth;
 use App\Security\SecurityHeaders;
 use App\Support\Runtime;
+use App\Support\ErrorCatalog;
+use App\Support\TechnicalException;
 use App\Support\Translator;
 use App\Security\Csrf;
 use App\Services\TicketService;
@@ -30,6 +32,8 @@ require_once __DIR__ . '/Security/Csrf.php';
 require_once __DIR__ . '/Security/Auth.php';
 require_once __DIR__ . '/Security/SecurityHeaders.php';
 require_once __DIR__ . '/Support/Runtime.php';
+require_once __DIR__ . '/Support/ErrorCatalog.php';
+require_once __DIR__ . '/Support/TechnicalException.php';
 require_once __DIR__ . '/Support/Translator.php';
 require_once __DIR__ . '/Services/TicketService.php';
 require_once __DIR__ . '/Services/AttachmentService.php';
@@ -105,6 +109,23 @@ $userImportService = new UserImportService($pdo, $auditService);
 
 $defaultLanguage = $appSettingService->get('default_language', 'fr');
 $currentLanguage = in_array($defaultLanguage, ['fr','en'], true) ? $defaultLanguage : 'fr';
+
+// v1.3.0-dev.8: public language preference for login / unauthenticated pages.
+if (!$auth->check()) {
+    $requestedPublicLanguage = (string)($_GET['lang'] ?? $_COOKIE['ticketflow_language'] ?? '');
+    if (in_array($requestedPublicLanguage, ['fr','en'], true)) {
+        $currentLanguage = $requestedPublicLanguage;
+        if (isset($_GET['lang'])) {
+            setcookie('ticketflow_language', $currentLanguage, [
+                'expires' => time() + 31536000,
+                'path' => '/',
+                'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                'httponly' => false,
+                'samesite' => 'Lax',
+            ]);
+        }
+    }
+}
 if ($auth->check()) {
     try {
         $langStmt = $pdo->prepare('SELECT language FROM user_preferences WHERE user_id = :uid');
@@ -112,6 +133,11 @@ if ($auth->check()) {
         $savedLanguage = (string)($langStmt->fetchColumn() ?: '');
         if (in_array($savedLanguage, ['fr','en'], true)) $currentLanguage = $savedLanguage;
     } catch (Throwable) {}
+}
+// TicketFlow v1.3.0-dev.5 explicit language safeguard
+$requestLanguage = (string)($_GET['lang'] ?? $_POST['lang'] ?? '');
+if (in_array($requestLanguage, ['fr','en'], true)) {
+    $currentLanguage = $requestLanguage;
 }
 $translator = new Translator($currentLanguage, __DIR__ . '/../lang');
 if (!function_exists('t')) {

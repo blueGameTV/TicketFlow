@@ -38,7 +38,21 @@ final class ReleaseNoteService
 
     public function releases(): array
     {
+        // Le journal public affiche uniquement les versions stables.
         return [
+            [
+                'version' => '1.3.0',
+                'date' => 'Stable',
+                'title' => 'TicketFlow v1.3.0 — Interface, sécurité et assistance',
+                'items' => [
+                    'Nouvelle interface de connexion, adaptée aux thèmes clair et sombre.',
+                    'Harmonisation des styles et amélioration des pages, formulaires et menus.',
+                    'Récupération de mot de passe par e-mail ou avec un code validé par le Support IT.',
+                    'Catalogue des codes d’erreur techniques accessible aux Administrateurs et au Support IT.',
+                    'Amélioration de la gestion et de l’affichage des maintenances.',
+                    'Améliorations des traductions françaises et anglaises.',
+                ],
+            ],
             [
                 'version' => '1.2.0',
                 'date' => 'Stable',
@@ -49,7 +63,7 @@ final class ReleaseNoteService
                     'Validation Manager à deux niveaux : N+1 puis Manager sélectionné.',
                     'Import utilisateurs CSV / Excel avec prévisualisation et contrôles.',
                     'Changement forcé du mot de passe et assistant d’installation modernisés.',
-                    'Calendriers, conversations, pièces jointes et alertes de service améliorés.'
+                    'Calendriers, conversations, pièces jointes et alertes de service améliorés.',
                 ],
             ],
             [
@@ -57,12 +71,11 @@ final class ReleaseNoteService
                 'date' => 'Stable',
                 'title' => 'Alertes, maintenance et nouveautés',
                 'items' => [
-                    'Alertes de service globales en temps réel avec détail au clic.',
-                    'Page À propos et journal des nouveautés par utilisateur.',
-                    'Mode maintenance TicketFlow avec fin automatique et contrôle des rôles.',
-                    'Maintenances planifiées avec bannière d’information.',
-                    'Nouvelle extraction Excel des alertes et maintenances.',
-                    'Composants de formulaires et menus déroulants harmonisés.'
+                    'Alertes de service et suivi des incidents.',
+                    'Mode maintenance immédiat et maintenances planifiées.',
+                    'Historique des nouveautés et suivi de lecture par utilisateur.',
+                    'Export des alertes et maintenances.',
+                    'Améliorations de la navigation et des formulaires.',
                 ],
             ],
             [
@@ -73,7 +86,7 @@ final class ReleaseNoteService
                     'Workflows Administrateur, IT, Manager et Collaborateur.',
                     'Recherche globale, filtres avancés, vues enregistrées et actions multiples.',
                     'SLA, notifications, exports, statistiques, audit, e-mails et automatisations.',
-                    'Installation automatique Debian/Ubuntu.'
+                    'Installation automatique Debian/Ubuntu.',
                 ],
             ],
         ];
