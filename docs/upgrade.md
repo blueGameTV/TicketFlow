@@ -1,5 +1,9 @@
 # Mise à jour de TicketFlow
 
+> **Attention v1.3.0 :** le script `update.sh` de la branche examinée traite explicitement les migrations jusqu'à v1.2.0, mais pas la nouvelle table `password_recovery_requests`. De plus, `VERSION` indique encore `1.2.0`. Ne pas utiliser ces instructions comme preuve d'une mise à niveau v1.3.0 entièrement prise en charge tant que les scripts et les tests n'ont pas été finalisés.
+
+Pour les nouveautés et les prérequis, voir [Notes de version v1.3.0](release-notes-v130.md).
+
 ## Commande officielle
 
 Pour une installation existante en **v1.0.0**, **v1.1.0** ou une préversion v1.2 :
@@ -40,7 +44,7 @@ VERSION
 git-commit.txt
 ```
 
-## Chemins de migration
+## Chemins de migration (documentés pour v1.2.0)
 
 ### v1.0.0 → v1.2.0
 
