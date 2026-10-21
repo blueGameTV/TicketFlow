@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>TicketFlow v1.2.0 — Stable</strong><br>
+  <strong>TicketFlow v1.3.0 — Stable</strong><br>
   Une plateforme simple pour créer, suivre et gérer les demandes informatiques d'une entreprise.
 </p>
 
