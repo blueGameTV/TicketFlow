@@ -6,7 +6,8 @@ Ce document explique simplement quelles versions utiliser, comment protéger une
 
 | Version | Recommandation |
 | --- | --- |
-| **1.3.0** | ✅ Dernière version stable recommandée |
+| **1.3.1** | ✅ Dernière version stable recommandée |
+| 1.3.0 | 🟡 Version stable précédente — mise à jour vers 1.3.1 recommandée |
 | 1.2.x | ⚠️ Ancienne version stable : migration vers 1.3.0 recommandée |
 | 1.1.x | ⚠️ Ancienne version : migration vers 1.3.0 recommandée |
 | 1.0.x | ⚠️ Ancienne version : migration vers 1.3.0 fortement recommandée |

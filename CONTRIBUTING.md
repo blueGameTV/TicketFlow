@@ -31,7 +31,7 @@ Dans votre message, essayez d'indiquer :
 Exemple :
 
 ```text
-Version : TicketFlow v1.2.0
+Version : TicketFlow v1.3.1
 Rôle : Collaborateur
 Page : Création d'un ticket
 
@@ -125,7 +125,7 @@ Pour les nouveaux fichiers PHP :
 declare(strict_types=1);
 ```
 
-TicketFlow doit rester compatible avec **PHP 8.1 ou plus récent**.
+TicketFlow doit rester compatible avec **PHP 8.4 ou plus récent**.
 
 Pour les mots de passe, utilisez les fonctions prévues par PHP :
 
