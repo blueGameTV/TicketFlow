@@ -6,9 +6,10 @@ Ce document explique simplement quelles versions utiliser, comment protéger une
 
 | Version | Recommandation |
 | --- | --- |
-| **1.2.x** | ✅ Version actuellement recommandée |
-| 1.1.x | ⚠️ Fonctionne encore, mais mise à jour vers 1.2.x recommandée |
-| 1.0.x | ⚠️ Ancienne version, mise à jour vers 1.2.x fortement recommandée |
+| **1.3.0** | ✅ Dernière version stable recommandée |
+| 1.2.x | ⚠️ Ancienne version stable : migration vers 1.3.0 recommandée |
+| 1.1.x | ⚠️ Ancienne version : migration vers 1.3.0 recommandée |
+| 1.0.x | ⚠️ Ancienne version : migration vers 1.3.0 fortement recommandée |
 | 0.x / versions de test | ❌ À ne pas utiliser en production |
 
 Si votre installation utilise une ancienne version, vous pouvez normalement la mettre à jour avec :
@@ -17,7 +18,7 @@ Si votre installation utilise une ancienne version, vous pouvez normalement la m
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
 ```
 
-La mise à jour crée une sauvegarde avant modification.
+Le script `update.sh` de v1.3.0 inclut la migration liée à la récupération assistée du mot de passe et effectue une sauvegarde avant modification. Faites d'abord un essai sur une instance de test et conservez une sauvegarde restaurable.
 
 # J'ai trouvé une faille de sécurité
 
@@ -29,7 +30,7 @@ Pourquoi ?
 
 Parce qu'une personne malveillante pourrait lire l'Issue et utiliser la faille avant qu'elle soit corrigée.
 
-Utilisez de préférence le système privé de signalement de vulnérabilités de GitHub s'il est disponible pour le dépôt.
+Utilisez de préférence le [signalement privé des vulnérabilités sur GitHub](https://github.com/blueGameTV/TicketFlow/security/advisories/new), si cette option est activée pour le dépôt. Sinon, contactez le mainteneur par un canal privé ; ne divulguez pas les détails exploitables dans une Issue publique.
 
 Dans votre signalement, indiquez si possible :
 
@@ -155,7 +156,10 @@ TicketFlow utilise plusieurs mécanismes de sécurité, notamment :
 - journal d'audit ;
 - en-têtes HTTP de sécurité ;
 - changement forcé du mot de passe ;
-- assistant d'installation protégé par un jeton puis verrouillé.
+- assistant d'installation protégé par un jeton puis verrouillé ;
+- récupération assistée de mot de passe avec code à usage limité, contrôles d'autorisation et journalisation des demandes.
+
+La présence de ces mécanismes ne constitue pas une garantie d'absence de vulnérabilités. La version v1.4.0 prévoit un renforcement supplémentaire de la configuration serveur et de l'installation.
 
 Ces protections ne remplacent pas une bonne configuration du serveur.
 
