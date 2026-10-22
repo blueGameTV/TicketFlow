@@ -7,7 +7,7 @@ BRANCH="${TICKETFLOW_BRANCH:-v1.3.0}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
-INSTALLER_BUILD="1.3.0-r2"
+INSTALLER_BUILD="1.3.0-stable"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
