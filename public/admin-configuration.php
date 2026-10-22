@@ -97,7 +97,7 @@ require __DIR__ . '/../templates/shared/header.php';
 <section class="page-heading page-heading-enhanced email-config-heading">
     <div>
         <span class="badge"><i class="fa-solid fa-sliders"></i> <?= htmlspecialchars(t('common.administration')) ?></span>
-        <h1><?= htmlspecialchars(t('config.email_title')) ?> <span class="email-config-beta">BETA</span></h1>
+        <h1 class="email-config-title-v131"><span><?= htmlspecialchars(t('config.email_title')) ?></span><span class="email-config-beta">BETA</span></h1>
         <p><?= htmlspecialchars(t('config.email_subtitle')) ?></p>
     </div>
     <div class="queue-summary"><i class="fa-solid fa-envelope-circle-check"></i><div><strong><?= htmlspecialchars(strtoupper((string) ($mail['transport'] ?? 'disabled'))) ?></strong><span><?= htmlspecialchars(t('config.mail_transport')) ?></span></div></div>

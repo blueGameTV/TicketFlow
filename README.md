@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.3.0" width="100%">
+  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.3.1" width="100%">
 </p>
 
 <p align="center">
-  <strong>TicketFlow v1.3.0 — Préparation de publication</strong><br>
+  <strong>TicketFlow v1.3.1 — Version stable</strong><br>
   Une plateforme simple pour créer, suivre et gérer les demandes informatiques d'une entreprise.
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.3.0-3156d9">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.3.1-3156d9">
   <img alt="PHP" src="https://img.shields.io/badge/PHP-8.4%2B-777BB4">
   <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
   <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
@@ -65,6 +65,20 @@ TicketFlow permet notamment de :
 - utiliser un thème clair, sombre ou automatique ;
 - utiliser TicketFlow en Français ou en English (Beta).
 
+## Nouveautés de la version stable v1.3.0
+
+**Experience Update** apporte notamment :
+
+- **Nouvelle page de connexion** et finitions visuelles pour les thèmes clair et sombre ;
+- **Récupération de mot de passe par e-mail** ou par **code temporaire à six chiffres** après validation d'une demande par l'Administrateur ou le Support IT (pour les Collaborateurs et Managers) ;
+- **Nouvelle interface de suivi des demandes de récupération**, avec contrôles d'autorisation et traçabilité ;
+- **Catalogue de codes d'erreur techniques** consultable par l'Administrateur et le Support IT ;
+- **Interface de maintenance améliorée**, avec meilleure présentation et gestion des interventions actives ;
+- **Harmonisation du design** des menus, formulaires, tickets et pages d'administration, notamment sur les écrans étroits ;
+- **Améliorations des traductions** françaises et anglaises (anglais toujours en bêta).
+
+Consultez les [notes de version v1.3.0](docs/release-notes-v130.md) pour davantage de détails.
+
 # Installation rapide
 
 ## 1. Préparer le serveur
@@ -117,11 +131,13 @@ Utilisez simplement :
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
 ```
 
-Le script de mise à jour de la branche `main` prend en charge les parcours historiques ci-dessous jusqu'à v1.2.0. **La migration v1.3.0 n'est pas encore confirmée comme intégrée au script :**
+Le script `update.sh` de v1.3.0 inclut la migration de la table utilisée pour la récupération assistée du mot de passe. Il conserve également les migrations historiques :
 
 - v1.0.0 ;
 - v1.1.0 ;
-- anciennes versions de développement v1.2.
+- v1.2.0.
+
+Pour cibler explicitement la branche stable `v1.3.0` pendant une mise à jour, utilisez `TICKETFLOW_BRANCH=v1.3.0` avec le script téléchargé. Testez d'abord cette opération sur une machine de recette et consultez les [instructions de mise à jour](docs/upgrade.md).
 
 Avant la mise à jour, TicketFlow crée automatiquement une sauvegarde.
 
@@ -298,9 +314,9 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md).
 
 # Version actuelle
 
-**Code de TicketFlow v1.3.0 — validation de la publication stable en cours.**
+**TicketFlow v1.3.0 — version stable publiée.**
 
-> Avant déploiement en production, consulter les [notes v1.3.0](docs/release-notes-v130.md) : `VERSION` et l'intégration de la nouvelle migration SQL aux scripts d'installation/mise à jour nécessitent vérification.
+Le fichier `VERSION` indique `1.3.0` et les scripts `install.sh` et `update.sh` intègrent la migration v1.3.0. Avant toute intervention sur une instance de production, effectuez une sauvegarde et vérifiez le résultat sur une machine de test.
 
 ---
 

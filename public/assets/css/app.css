@@ -9020,3 +9020,67 @@ html[data-theme="dark"] .tf-login17-password-toggle:hover{
   }
 }
 /* === TicketFlow v1.3.0-dev.8 fix20 END === */
+
+/* === TicketFlow v1.3.1 — Settings polish and email BETA alignment === */
+.email-config-heading .email-config-title-v131 {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+  column-gap:12px;
+  row-gap:6px;
+}
+.email-config-heading .email-config-title-v131 .email-config-beta {
+  margin:0;
+  flex:0 0 auto;
+  vertical-align:middle;
+  font-family:inherit;
+}
+.settings-profile-card-v0135 {
+  grid-template-columns:minmax(250px,1fr) minmax(0,1.45fr);
+  gap:22px;
+}
+.settings-account-facts-v0135 {
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.settings-account-facts-v0135>div {
+  padding:15px 16px;
+  min-height:74px;
+  align-content:center;
+}
+.settings-grid-v0135 {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-areas:"photo interface" "security interface" "notifications notifications";
+  gap:16px;
+  align-items:stretch;
+}
+.settings-grid-v0135>.settings-card-v0135:first-child{grid-area:photo}
+.settings-grid-v0135>.settings-interface-card-v1206{grid-area:interface}
+.settings-grid-v0135>.settings-notification-card-v1206{grid-area:notifications}
+.settings-grid-v0135>.settings-security-card-v0135{grid-area:security;grid-column:auto}
+.settings-grid-v0135>.settings-card-v0135 {
+  margin:0;
+  border-radius:16px;
+}
+.settings-grid-v0135 .panel-title-row{margin-bottom:18px}
+.settings-grid-v0135 .panel-title-row h2{line-height:1.25}
+.settings-grid-v0135 .settings-form-v0135{gap:14px}
+.settings-grid-v0135>.settings-card-v0135:first-child .settings-form-v0135 .btn{width:100%;justify-content:center}
+.settings-grid-v0135>.settings-security-card-v0135 .settings-links-v0135{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.settings-grid-v0135>.settings-security-card-v0135 .settings-links-v0135 a{min-width:0}
+@media(max-width:1100px){
+  .settings-grid-v0135 {
+    grid-template-columns:1fr;
+    grid-template-areas:"photo" "interface" "notifications" "security";
+  }
+  .settings-grid-v0135>.settings-security-card-v0135 .settings-links-v0135{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .settings-profile-card-v0135{grid-template-columns:1fr;gap:18px}
+  .settings-account-facts-v0135{grid-template-columns:1fr!important}
+  .settings-grid-v0135>.settings-card-v0135{padding:18px}
+}

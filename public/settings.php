@@ -135,7 +135,6 @@ require __DIR__ . '/../templates/shared/header.php';
         <div class="settings-account-facts-v0135">
             <div><span><?= htmlspecialchars(t('settings.role')) ?></span><strong><?= htmlspecialchars(t('role.'.($profile['role_name'] ?? ''))) ?></strong></div>
             <div><span><?= htmlspecialchars(t('settings.group')) ?></span><strong><?= htmlspecialchars((string)($profile['group_name'] ?: t('common.unassigned'))) ?></strong></div>
-            <div><span><?= htmlspecialchars(t('settings.account_status')) ?></span><strong><span class="status-pill <?= $profile['active'] ? 'active' : 'inactive' ?>"><?= htmlspecialchars($profile['active'] ? t('common.active') : t('common.inactive')) ?></span></strong></div>
             <div><span><?= htmlspecialchars(t('settings.last_login')) ?></span><strong><?= $profile['last_login_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($profile['last_login_at']))) : htmlspecialchars(t('common.never')) ?></strong></div>
         </div>
     </section>

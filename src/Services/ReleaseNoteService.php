@@ -41,6 +41,18 @@ final class ReleaseNoteService
         // Le journal public affiche uniquement les versions stables.
         return [
             [
+                'version' => '1.3.1',
+                'date' => 'Stable',
+                'title' => 'TicketFlow v1.3.1 — Corrections de l’interface',
+                'items' => [
+                    'Correction de l’alignement du badge BETA dans la configuration e-mail.',
+                    'Suppression de l’indicateur « Compte actif » dans les paramètres.',
+                    'Réorganisation et harmonisation des cartes de la page Paramètres.',
+                    'Amélioration des espacements et de l’affichage sur les petits écrans.',
+                    'Aucune migration de base de données nécessaire.',
+                ],
+            ],
+            [
                 'version' => '1.3.0',
                 'date' => 'Stable',
                 'title' => 'TicketFlow v1.3.0 — Interface, sécurité et assistance',

@@ -1,5 +1,51 @@
 # Changelog
 
+
+## v1.3.1 — Stable
+
+**TicketFlow v1.3.1 — UI Fix Update**
+
+Cette mise à jour corrective améliore l'interface utilisateur de TicketFlow et corrige plusieurs problèmes visuels présents dans la version 1.3.0.
+
+### Corrections
+
+#### Configuration e-mail
+- Correction de l'alignement du badge **BETA** à côté du titre « Configuration e-mail ».
+- Amélioration de l'espacement et du positionnement du badge.
+- Adaptation de l'affichage aux différentes tailles d'écran.
+
+#### Paramètres
+- Suppression de l'indicateur **Compte actif** dans les informations du profil.
+- Réorganisation des informations du compte pour une meilleure lisibilité.
+- Amélioration de la disposition des différentes sections.
+- Réduction des espaces vides entre les panneaux.
+- Harmonisation des bordures, espacements et dimensions des cartes.
+- Amélioration de la présentation des sections **Photo de profil**, **Interface** et **Sécurité**.
+- Ajustements de l'affichage sur les petits écrans.
+
+### Compatibilité
+
+- Aucune modification de la base de données.
+- Aucune migration SQL nécessaire.
+- Aucun changement des rôles ou des permissions.
+- Conservation des paramètres et données utilisateur.
+- Compatibilité avec les installations TicketFlow v1.3.0.
+
+### Informations
+
+**Type :** Mise à jour corrective (Patch Release)
+
+**Version précédente :** v1.3.0
+
+**Version :** v1.3.1
+
+**Statut :** Stable
+
+Cette version se concentre sur les corrections visuelles et l'amélioration de l'expérience utilisateur. Les renforcements de sécurité majeurs sont prévus pour **TicketFlow v1.4.0 — Security Update**.
+
+---
+
+
 ## v1.3.0 — Évolutions présentes sur la branche (publication à valider)
 
 - Nouvelle interface de connexion et améliorations des thèmes.

@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
-BRANCH="${TICKETFLOW_BRANCH:-v1.3.0}"
+BRANCH="${TICKETFLOW_BRANCH:-v1.3.1}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
@@ -61,16 +61,16 @@ SQL
 if ! mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='roles'" | grep -qx '1'; then
   mysql --protocol=socket -uroot "$DB_NAME" < "$APP_DIR/database/schema.sql"
 fi
-# Le schéma de base ne contient pas encore la table de récupération v1.3.0.
+# Le schéma de base ne contient pas encore la table de récupération v1.3.1
 # La migration est idempotente (CREATE TABLE IF NOT EXISTS).
 MIGRATION_FILE="$APP_DIR/database/migrations/v130_dev6_password_recovery.sql"
-if [[ "$BRANCH" == "v1.3.0" ]]; then
-  [[ -s "$MIGRATION_FILE" ]] || fail "Fichier de migration v1.3.0 absent ou vide : $MIGRATION_FILE"
+if [[ "$BRANCH" == "v1.3.1" ]]; then
+  [[ -s "$MIGRATION_FILE" ]] || fail "Fichier de migration v1.3.1 absent ou vide : $MIGRATION_FILE"
   mysql --protocol=socket -uroot "$DB_NAME" < "$MIGRATION_FILE" \
-    || fail "Impossible d'appliquer la migration v1.3.0."
+    || fail "Impossible d'appliquer la migration v1.3.1."
   TABLE_PRESENT="$(mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='password_recovery_requests'")"
   [[ "$TABLE_PRESENT" == "1" ]] || fail "Table password_recovery_requests absente après migration."
-  ok "Migration v1.3.0 appliquée."
+  ok "Migration v1.3.1 appliquée."
 fi
 ok "Base de données initialisée."
 

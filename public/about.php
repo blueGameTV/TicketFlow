@@ -19,6 +19,12 @@ $version = $releaseNoteService->currentVersion();
 $releases = $releaseNoteService->releases();
 if ($translator->locale() === 'en') {
     $releaseTranslations = [
+        'TicketFlow v1.3.1 — Corrections de l’interface' => 'TicketFlow v1.3.1 — Interface fixes',
+        'Correction de l’alignement du badge BETA dans la configuration e-mail.' => 'Fixed BETA badge alignment in email configuration.',
+        'Suppression de l’indicateur « Compte actif » dans les paramètres.' => 'Removed the Active account indicator from settings.',
+        'Réorganisation et harmonisation des cartes de la page Paramètres.' => 'Reorganized and unified the cards on the Settings page.',
+        'Amélioration des espacements et de l’affichage sur les petits écrans.' => 'Improved spacing and layout on smaller screens.',
+        'Aucune migration de base de données nécessaire.' => 'No database migration required.',
         'TicketFlow v1.3.0 — Interface, sécurité et assistance' => 'TicketFlow v1.3.0 — Interface, security and support',
         'Nouvelle interface de connexion, adaptée aux thèmes clair et sombre.' => 'New login interface adapted to light and dark themes.',
         'Harmonisation des styles et amélioration des pages, formulaires et menus.' => 'Unified styles and improved pages, forms and menus.',
@@ -103,8 +109,8 @@ require __DIR__ . '/../templates/shared/header.php';
 <section class="tf-about-facts">
     <article><i class="fa-solid fa-user-gear"></i><div><span><?= htmlspecialchars(t('about.creator')) ?></span><strong>blueGameTV</strong></div></article>
     <article><i class="fa-solid fa-code"></i><div><span><?= htmlspecialchars(t('about.technologies')) ?></span><strong>PHP · MariaDB · Apache · JavaScript</strong></div></article>
-    <article><i class="fa-solid fa-shield-halved"></i><div><span><?= htmlspecialchars(t('about.previous_version')) ?></span><strong>v1.2.0</strong></div></article>
-    <article><i class="fa-solid fa-circle-check"></i><div><span><?= htmlspecialchars(t('about.current_status')) ?></span><strong>Stable v1.3.0</strong></div></article>
+    <article><i class="fa-solid fa-shield-halved"></i><div><span><?= htmlspecialchars(t('about.previous_version')) ?></span><strong>v1.3.0</strong></div></article>
+    <article><i class="fa-solid fa-circle-check"></i><div><span><?= htmlspecialchars(t('about.current_status')) ?></span><strong>Stable v<?= htmlspecialchars($version) ?></strong></div></article>
 </section>
 
 <section class="panel tf-about-journal" id="nouveautes">
