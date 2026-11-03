@@ -4,7 +4,7 @@ set -Eeuo pipefail
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 BACKUP_ROOT="${TICKETFLOW_BACKUP_DIR:-/var/backups/ticketflow}"
 BRANCH="${TICKETFLOW_BRANCH:-main}"
-UPDATER_BUILD="1.3.1"
+UPDATER_BUILD="1.3.2"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
