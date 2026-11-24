@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.3.1" width="100%">
+  <img src="docs/image/ticketflow-banner.svg" alt="TicketFlow v1.3.2" width="100%">
 </p>
 
 <p align="center">
-  <strong>TicketFlow v1.3.1 — Version stable</strong><br>
+  <strong>TicketFlow v1.3.2 — Version stable</strong><br>
   Une plateforme simple pour créer, suivre et gérer les demandes informatiques d'une entreprise.
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-1.3.1-3156d9">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.3.2-3156d9">
   <img alt="PHP" src="https://img.shields.io/badge/PHP-8.4%2B-777BB4">
   <img alt="Apache" src="https://img.shields.io/badge/Apache-2.4%2B-D22128">
   <img alt="MariaDB" src="https://img.shields.io/badge/MariaDB-compatible-003545">
@@ -64,6 +64,18 @@ TicketFlow permet notamment de :
 - programmer une maintenance ;
 - utiliser un thème clair, sombre ou automatique ;
 - utiliser TicketFlow en Français ou en English (Beta).
+
+## Nouveautés de la version stable v1.3.2
+
+**Bug Fixes & UI Update** améliore l'interface et sa compatibilité avec les différentes tailles d'écran.
+
+- Corrections du positionnement de la sidebar et du contenu du dashboard.
+- Ajustements responsive pour les écrans 1920 × 1080 et 2560 × 1290.
+- Ajustements des interfaces de connexion (`login.php`) et d'installation (`setup.php`).
+- Suppression du fond indésirable de `tf-recovery-layout`.
+- Amélioration de l'espacement des messages d'erreur dans `forgot-password.php`.
+
+Consultez le [journal des modifications](CHANGELOG.md) pour plus d'informations.
 
 ## Nouveautés de la version stable v1.3.0
 
@@ -131,13 +143,13 @@ Utilisez simplement :
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
 ```
 
-Le script `update.sh` de v1.3.0 inclut la migration de la table utilisée pour la récupération assistée du mot de passe. Il conserve également les migrations historiques :
+Le script `update.sh` inclut la migration de la table utilisée pour la récupération assistée du mot de passe. Il conserve également les migrations historiques :
 
 - v1.0.0 ;
 - v1.1.0 ;
 - v1.2.0.
 
-Pour cibler explicitement la branche stable `v1.3.0` pendant une mise à jour, utilisez `TICKETFLOW_BRANCH=v1.3.0` avec le script téléchargé. Testez d'abord cette opération sur une machine de recette et consultez les [instructions de mise à jour](docs/upgrade.md).
+La branche `main` est la référence stable v1.3.2 pour les mises à jour. Sauvegardez vos données avant l'opération et consultez les [instructions de mise à jour](docs/upgrade.md). Testez d'abord cette opération sur une machine de recette et consultez les [instructions de mise à jour](docs/upgrade.md).
 
 Avant la mise à jour, TicketFlow crée automatiquement une sauvegarde.
 
@@ -314,9 +326,9 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md).
 
 # Version actuelle
 
-**TicketFlow v1.3.0 — version stable publiée.**
+**TicketFlow v1.3.2 — version stable publiée.**
 
-Le fichier `VERSION` indique `1.3.0` et les scripts `install.sh` et `update.sh` intègrent la migration v1.3.0. Avant toute intervention sur une instance de production, effectuez une sauvegarde et vérifiez le résultat sur une machine de test.
+Le fichier `VERSION` indique `1.3.2` et les scripts `install.sh` et `update.sh` conservent la prise en charge des migrations précédentes. Avant toute intervention sur une instance de production, effectuez une sauvegarde et vérifiez le résultat sur une machine de test.
 
 ---
 
