@@ -9084,3 +9084,39 @@ html[data-theme="dark"] .tf-login17-password-toggle:hover{
   .settings-account-facts-v0135{grid-template-columns:1fr!important}
   .settings-grid-v0135>.settings-card-v0135{padding:18px}
 }
+
+/* TicketFlow V1.3.2 — Responsive desktop layout corrective patch
+ * On desktop, navigation remains fixed; page content must be positioned after it.
+ * Do not apply desktop offsets to the mobile overlay sidebar.
+ */
+@media (min-width: 901px) {
+  body.app-body .app-shell > .app-main {
+    display: block;
+    position: relative;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    margin-left: var(--tf-sidebar) !important;
+    transform: none;
+    box-sizing: border-box;
+  }
+  body.app-body.sidebar-compact .app-shell > .app-main {
+    margin-left: var(--tf-sidebar-compact) !important;
+  }
+  body.app-body .app-shell > .app-main > .dashboard-container.app-content {
+    position: relative;
+    width: min(100%, var(--tf-v130-page-max, 1680px));
+    max-width: 100%;
+    margin: 0 auto !important;
+    transform: none;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 900px) {
+  body.app-body .app-shell > .app-main,
+  body.app-body.sidebar-compact .app-shell > .app-main {
+    margin-left: 0 !important;
+    width: 100%;
+    min-width: 0;
+  }
+}

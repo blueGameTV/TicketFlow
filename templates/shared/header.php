@@ -42,7 +42,7 @@ if ($translator->locale() === 'en' && empty($GLOBALS['ticketflow_i18n_buffer_sta
     <title><?= htmlspecialchars($pageTitle ?? 'Dashboard') ?> - <?= htmlspecialchars($appName) ?></title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/app.css?v=1.3.0-dev.8-fix20">
+    <link rel="stylesheet" href="assets/css/app.css?v=1.3.2-responsive-1">
 
 </head>
 <body class="app-body<?= !empty($user['must_change_password']) ? ' tf-forced-password-lock' : '' ?> role-<?= htmlspecialchars(strtolower(str_replace(['é','è','ê','à','ù','ç',' '], ['e','e','e','a','u','c','-'], $role))) ?> sidebar-<?= htmlspecialchars((string) $uiPreferences['sidebar_mode']) ?>">
@@ -209,7 +209,6 @@ t('nav.help')) ?></span>
             </div>
                 <?php if (in_array($role, ['Administrateur','IT'], true)): ?><a class="icon-button tf-service-alert-button<?= $headerActiveServiceAlertCount > 0 ? ' has-active-alerts' : '' ?>" href="admin-service-alerts.php" aria-label="<?= htmlspecialchars(t('common.service_alerts')) ?>" title="<?= htmlspecialchars(t('common.service_alerts')) ?>"><i class="fa-solid fa-triangle-exclamation"></i><?php if ($headerActiveServiceAlertCount > 0): ?><span class="tf-service-alert-count"><?= $headerActiveServiceAlertCount > 99 ? '99+' : (int)$headerActiveServiceAlertCount ?></span><?php endif; ?></a><?php endif; ?>
                 <a class="icon-button notification-button" href="notifications.php" aria-label="Notifications"><i class="fa-regular fa-bell"></i><?php if ($headerUnreadNotifications > 0): ?><span id="live-notification-count" class="notification-count"><?= $headerUnreadNotifications > 99 ? '99+' : (int)$headerUnreadNotifications ?></span><?php else: ?><span id="live-notification-count" class="notification-count is-hidden">0</span><?php endif; ?></a>
-            </div>
         </header>
 
         <div id="global-service-banners" class="tf-global-banners" aria-live="polite">
