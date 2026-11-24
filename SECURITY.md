@@ -6,11 +6,12 @@ Ce document explique simplement quelles versions utiliser, comment protéger une
 
 | Version | Recommandation |
 | --- | --- |
-| **1.3.1** | ✅ Dernière version stable recommandée |
+| **1.3.2** | ✅ Dernière version stable recommandée |
+| 1.3.1 | 🟡 Version stable précédente : migration vers 1.3.2 recommandée |
 | 1.3.0 | 🟡 Version stable précédente — mise à jour vers 1.3.1 recommandée |
-| 1.2.x | ⚠️ Ancienne version stable : migration vers 1.3.0 recommandée |
-| 1.1.x | ⚠️ Ancienne version : migration vers 1.3.0 recommandée |
-| 1.0.x | ⚠️ Ancienne version : migration vers 1.3.0 fortement recommandée |
+| 1.2.x | ⚠️ Ancienne version stable : migration vers 1.3.2 recommandée |
+| 1.1.x | ⚠️ Ancienne version : migration vers 1.3.2 recommandée |
+| 1.0.x | ⚠️ Ancienne version : migration vers 1.3.2 fortement recommandée |
 | 0.x / versions de test | ❌ À ne pas utiliser en production |
 
 Si votre installation utilise une ancienne version, vous pouvez normalement la mettre à jour avec :
@@ -19,7 +20,7 @@ Si votre installation utilise une ancienne version, vous pouvez normalement la m
 curl -fsSL https://raw.githubusercontent.com/blueGameTV/TicketFlow/main/update.sh | sudo bash
 ```
 
-Le script `update.sh` de v1.3.0 inclut la migration liée à la récupération assistée du mot de passe et effectue une sauvegarde avant modification. Faites d'abord un essai sur une instance de test et conservez une sauvegarde restaurable.
+Le script `update.sh` inclut la migration liée à la récupération assistée du mot de passe et effectue une sauvegarde avant modification. Faites d'abord un essai sur une instance de test et conservez une sauvegarde restaurable.
 
 # J'ai trouvé une faille de sécurité
 
