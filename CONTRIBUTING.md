@@ -31,7 +31,7 @@ Dans votre message, essayez d'indiquer :
 Exemple :
 
 ```text
-Version : TicketFlow v1.3.1
+Version : TicketFlow v1.3.2
 Rôle : Collaborateur
 Page : Création d'un ticket
 
@@ -57,7 +57,7 @@ Une bonne proposition décrit surtout **le besoin**, pas uniquement la solution 
 
 # Je veux modifier le code
 
-La branche `main` contient la version stable actuelle.
+La branche `main` contient la version stable actuelle, **v1.3.2**. Les contributions doivent être proposées via des branches dédiées et des Pull Requests.
 
 Évitez de modifier directement `main`.
 
@@ -152,6 +152,8 @@ Une migration doit autant que possible :
 ## Interface
 
 Essayez de conserver le style actuel de TicketFlow.
+
+Pour les corrections d'interface, vérifiez l'absence de chevauchement entre la sidebar et le contenu du dashboard, notamment à 1920 × 1080 et 2560 × 1290.
 
 Pensez notamment à vérifier :
 
