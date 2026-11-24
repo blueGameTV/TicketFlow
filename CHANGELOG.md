@@ -1,5 +1,34 @@
 # Changelog
 
+## v1.3.2 — Stable
+
+**TicketFlow v1.3.2 — Bug Fixes & UI Update**
+
+Mise à jour corrective faisant suite à la v1.3.1, destinée à améliorer l'interface, la compatibilité avec les différentes résolutions d'écran et l'ergonomie des pages d'authentification.
+
+### Interface et responsive
+- Corrections du positionnement de la barre latérale et du contenu des pages.
+- Ajustements de compatibilité pour les écrans 1920 × 1080 et 2560 × 1290.
+- Correction de la structure du header et des règles CSS liées au responsive.
+
+### Connexion et installation
+- Ajustements du design de `login.php`.
+- Ajustements du design de `setup.php`.
+
+### Récupération de mot de passe
+- Suppression de l'arrière-plan indésirable du conteneur `tf-recovery-layout`.
+- Amélioration de l'espacement des messages d'erreur dans `forgot-password.php`.
+
+### Compatibilité
+- Mise à jour corrective basée sur v1.3.1.
+- Aucune nouvelle migration de base de données propre à la v1.3.2.
+- Conservation des données et de la configuration lors d'une mise à jour via `update.sh`.
+
+**Version :** v1.3.2 — **Statut :** Stable — **Type :** Patch Release.
+
+---
+
+
 
 ## v1.3.1 — Stable
 
