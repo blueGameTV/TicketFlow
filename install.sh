@@ -3,11 +3,11 @@ set -Eeuo pipefail
 
 APP_DIR="${TICKETFLOW_DIR:-/var/www/ticketflow}"
 REPO_URL="${TICKETFLOW_REPO:-https://github.com/blueGameTV/TicketFlow.git}"
-BRANCH="${TICKETFLOW_BRANCH:-v1.3.1}"
+BRANCH="${TICKETFLOW_BRANCH:-main}"
 DB_NAME="ticketflow"
 DB_USER="ticketflow_user"
 APACHE_SITE="ticketflow.conf"
-INSTALLER_BUILD="1.3.1"
+INSTALLER_BUILD="1.3.2"
 
 say() { printf '\n\033[1;34m[TicketFlow]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -61,16 +61,16 @@ SQL
 if ! mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='roles'" | grep -qx '1'; then
   mysql --protocol=socket -uroot "$DB_NAME" < "$APP_DIR/database/schema.sql"
 fi
-# Le schéma de base ne contient pas encore la table de récupération v1.3.1
+# Le schéma initial ne contient pas encore la table de récupération ajoutée en v1.3.0
 # La migration est idempotente (CREATE TABLE IF NOT EXISTS).
 MIGRATION_FILE="$APP_DIR/database/migrations/v130_dev6_password_recovery.sql"
-if [[ "$BRANCH" == "v1.3.1" ]]; then
+if [[ -s "$MIGRATION_FILE" ]]; then
   [[ -s "$MIGRATION_FILE" ]] || fail "Fichier de migration v1.3.1 absent ou vide : $MIGRATION_FILE"
   mysql --protocol=socket -uroot "$DB_NAME" < "$MIGRATION_FILE" \
     || fail "Impossible d'appliquer la migration v1.3.1."
   TABLE_PRESENT="$(mysql -N -B --protocol=socket -uroot -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${DB_NAME}' AND table_name='password_recovery_requests'")"
   [[ "$TABLE_PRESENT" == "1" ]] || fail "Table password_recovery_requests absente après migration."
-  ok "Migration v1.3.1 appliquée."
+  ok "Migration de récupération appliquée."
 fi
 ok "Base de données initialisée."
 
