@@ -8,7 +8,7 @@ Ce document explique simplement quelles versions utiliser, comment protéger une
 | --- | --- |
 | **1.3.2** | ✅ Dernière version stable recommandée |
 | 1.3.1 | 🟡 Version stable précédente : migration vers 1.3.2 recommandée |
-| 1.3.0 | 🟡 Version stable précédente — mise à jour vers 1.3.1 recommandée |
+| 1.3.0 | ⚠️ Ancienne version stable — mise à jour vers 1.3.2 recommandée |
 | 1.2.x | ⚠️ Ancienne version stable : migration vers 1.3.2 recommandée |
 | 1.1.x | ⚠️ Ancienne version : migration vers 1.3.2 recommandée |
 | 1.0.x | ⚠️ Ancienne version : migration vers 1.3.2 fortement recommandée |
